@@ -4,7 +4,7 @@ from sys import exit
 import chardet
 import numpy as np
 import pandas as pd
-from mne import EpochsArray, pick_channels, set_bipolar_reference
+from mne import pick_channels, set_bipolar_reference
 from mne.channels import (combine_channels, make_standard_montage,
                           read_custom_montage)
 from mne.preprocessing import ICA
@@ -158,30 +158,6 @@ def get_bad_ixs(epochs, reject_peak_to_peak=None, reject_flat=None):
     bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
 
     return bad_ixs
-
-
-def bad_epochs_to_nan(epochs, reject_peak_to_peak=None, reject_flat=None):
-
-    # Convert thresholds to volts in dicts
-    if reject_peak_to_peak is not None:
-        reject_peak_to_peak = {'eeg': reject_peak_to_peak * 1e-6}
-    if reject_flat is not None:
-        reject_flat = {'eeg': reject_flat * 1e-6}
-
-    # Get indices of epochs that are to be rejected
-    epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak, reject_flat)
-    drop_log = [elem for elem in epochs_rej.drop_log if elem != ('IGNORED',)]
-    drop_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
-
-    # Create new epochs object with rejected epochs set to NaN
-    data = epochs.get_data()
-    data[drop_ixs] = np.nan
-    epochs_clean = EpochsArray(
-        data, info=epochs.info, events=epochs.events, tmin=epochs.tmin,
-        event_id=epochs.event_id, baseline=epochs.baseline,
-        metadata=epochs.metadata, verbose=False)
-
-    return epochs_clean
 
 
 def compute_single_trials(epochs, components_df, bad_ixs=None):
