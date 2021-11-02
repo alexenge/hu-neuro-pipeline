@@ -58,18 +58,19 @@ def apply_montage(raw, montage):
         print(f'Loading standard montage {montage}')
         digmontage = make_standard_montage(montage)
 
-    # Make sure that EOG channels are of the correct type
-    for channel_name in ['HEOG', 'VEOG']:
+    # Make sure that EOG channels are of the eog type
+    eog_channels = set(['HEOG', 'VEOG', 'IO1', 'IO2', 'Afp9', 'Afp10'])
+    for channel_name in eog_channels:
         if channel_name in raw.ch_names:
             raw.set_channel_types({channel_name: 'eog'})
 
-    # Remove channels from the data that are not in the montage
-    raw_channels = set(raw.ch_names)
+    # Get EEG channels that are not in the montage
+    raw_channels = set(raw.copy().pick_types(eeg=True).ch_names)
     montage_channels = set(digmontage.ch_names)
-    eog_channels = set(['HEOG', 'VEOG'])
-    drop_channels = list(raw_channels - montage_channels - eog_channels)
-    print(f'Removing channels that are not in the montage {drop_channels}')
-    raw.drop_channels(drop_channels)
+    drop_channels = list(raw_channels - montage_channels)
+    if drop_channels != []:
+        print(f'Removing channels that are not in the montage {drop_channels}')
+        raw.drop_channels(drop_channels)
 
     # Apply montage
     raw.set_montage(digmontage)
@@ -85,7 +86,8 @@ def correct_ica(raw, n_components=15, random_seed=1234, method='fastica'):
     ica.fit(raw_filt_ica)
 
     # Remove bad components from the raw data
-    eog_indices, _ = ica.find_bads_eog(raw, verbose=False)
+    eog_indices, _ = ica.find_bads_eog(
+        raw, ch_name=['HEOG', 'VEOG'], verbose=False)
     ica.exclude = eog_indices
     raw = ica.apply(raw)
 
