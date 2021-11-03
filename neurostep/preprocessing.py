@@ -161,6 +161,11 @@ def preprocess(
         if to_df is True or to_df == 'both':
             scalings = {'eeg': 1e6, 'misc': 1e6}
             epochs_df = epochs.to_data_frame(scalings=scalings)
+            metadata_df = epochs.metadata
+            n_samples = len(epochs.times)
+            metadata_df = metadata_df.loc[metadata_df.index.repeat(n_samples)]
+            metadata_df = metadata_df.reset_index(drop=True)
+            epochs_df = pd.concat([metadata_df, epochs_df], axis=1)
             fname = f'{epochs_dir}/{participant_id}_epo.csv'
             epochs_df.to_csv(
                 fname, na_rep='NA', float_format='%.4f', index=False)
