@@ -39,6 +39,9 @@ def preprocess(
     to_df=True,
 ):
 
+    # Backup input arguments for later re-use
+    inputs = locals()
+
     # Get participant ID from filename
     participant_id = path.basename(vhdr_file).split('.')[0]
 
@@ -101,13 +104,9 @@ def preprocess(
 
     # Start over, repairing any (automatically deteced) bad channels
     if bad_channels == 'auto' and auto_channels != []:
-        epochs = preprocess(
-            vhdr_file, log_file, downsample_sfreq, auto_channels,
-            veog_channels, heog_channels, montage, ocular_correction,
-            highpass_freq, lowpass_freq, epochs_tmin, epochs_tmax, baseline,
-            triggers, skip_log_rows, reject_peak_to_peak, reject_flat,
-            components_df, condition_cols, clean_dir, epochs_dir, trials_dir,
-            evokeds_dir, export_dir, to_df)
+        new_inputs = inputs.copy()
+        new_inputs['bad_channels'] = auto_channels
+        epochs = preprocess(**new_inputs)
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
