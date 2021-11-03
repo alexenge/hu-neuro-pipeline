@@ -1,12 +1,13 @@
 from os import makedirs, path
 
 import pandas as pd
-from mne import Epochs, events_from_annotations, write_evokeds
+from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 
 from helpers import (add_heog_veog, apply_montage, compute_evokeds,
                      compute_single_trials, correct_besa, correct_ica,
                      get_bad_ixs, read_log)
+from savers import save_clean, save_epochs, save_evokeds
 
 # aha example
 aha_dict = dict(
@@ -126,9 +127,7 @@ def preprocess(
 
     # Save cleaned continuous data
     if clean_dir is not None:
-        makedirs(clean_dir, exist_ok=True)
-        fname = f'{clean_dir}/{participant_id}_cleaned_eeg.fif'
-        raw.save(fname)
+        save_clean(raw, clean_dir, participant_id)
 
     # Determine events and the corresponding (selection of) triggers
     events, event_id = events_from_annotations(
@@ -155,23 +154,9 @@ def preprocess(
     # Add single trial mean ERP amplitudes to metadata
     compute_single_trials(epochs, components_df, bad_ixs)
 
-    # Save epochs as data frame or MNE object
+    # Save epochs as data frame and/or MNE object
     if epochs_dir is not None:
-        makedirs(epochs_dir, exist_ok=True)
-        if to_df is True or to_df == 'both':
-            scalings = {'eeg': 1e6, 'misc': 1e6}
-            epochs_df = epochs.to_data_frame(scalings=scalings)
-            metadata_df = epochs.metadata
-            n_samples = len(epochs.times)
-            metadata_df = metadata_df.loc[metadata_df.index.repeat(n_samples)]
-            metadata_df = metadata_df.reset_index(drop=True)
-            epochs_df = pd.concat([metadata_df, epochs_df], axis=1)
-            fname = f'{epochs_dir}/{participant_id}_epo.csv'
-            epochs_df.to_csv(
-                fname, na_rep='NA', float_format='%.4f', index=False)
-        if to_df is False or to_df == 'both':
-            fname = f'{epochs_dir}/{participant_id}_epo.fif'
-            epochs.save(fname)
+        save_epochs(epochs, epochs_dir, participant_id, to_df)
 
     # Save single trial behavioral and ERP data
     if trials_dir is not None:
@@ -184,20 +169,12 @@ def preprocess(
     if not isinstance(condition_cols, dict):
         condition_cols = {'': condition_cols}
 
-    # Compute one set of evokeds for each (combination of) condition(s)
+    # Compute + save one set of evokeds for each (combination of) condition(s)
     for suffix, cols in condition_cols.items():
         evokeds, evokeds_df = compute_evokeds(epochs, cols, bad_ixs)
         if evokeds_dir is not None:
-            makedirs(evokeds_dir, exist_ok=True)
-            suffix = f'_{suffix}' if suffix != '' else suffix
-            if to_df is True or to_df == 'both':
-                fname = f'{evokeds_dir}/{participant_id}{suffix}_ave.csv'
-                evokeds_df.to_csv(
-                    fname, na_rep='NA', float_format='%.4f', index=False)
-            if to_df is False or to_df == 'both':
-                fname = f'{evokeds_dir}/{participant_id}_ave.fif'
-                write_evokeds(fname, evokeds)
-
+            save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id,
+                         suffix, to_df)
     return epochs
 
 
