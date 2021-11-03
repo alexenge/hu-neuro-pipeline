@@ -33,7 +33,7 @@ aha_dict = dict(
                                     ['PO3', 'PO4', 'POz', 'O1', 'O2', 'Oz'],
                                     ['P7', 'P8', 'PO7', 'PO8', 'PO9', 'PO10'],
                                     ['C1', 'C2', 'Cz', 'CP1', 'CP2', 'CPz']]}),
-    average_by=['Wdh', 'Bed'],
+    condition_cols=['Wdh', 'Bed'],
     clean_dir=None,
     epochs_dir='/Users/alexander/Research/aha/data/test/epochs',
     trials_dir='/Users/alexander/Research/aha/data/test/trials',
@@ -56,7 +56,9 @@ manypipelines_dict = dict(
          'tmin': [0.15],
          'tmax': [0.2],
          'roi': [['P7', 'P8', 'PO7', 'PO8', 'PO9', 'PO10']]}),
-    average_by=None, clean_dir=None, epochs_dir=None,
+    condition_cols={'h1': 'scene_category', 'h2': 'old', 'h3': 'behavior',
+                    'h4': 'subsequent_memory'},
+    clean_dir=None, epochs_dir=None,
     trials_dir='/Users/alexander/Research/manypipelines/Results/EEG/trials',
     evokeds_dir='/Users/alexander/Research/manypipelines/Results/EEG/evokeds',
     to_df=True,)
@@ -82,7 +84,7 @@ def preprocess(
     reject_flat=1,
     components_df=pd.DataFrame({
         'name': [], 'tmin': [], 'tmax': [], 'roi': []}),
-    average_by=None,
+    condition_cols=None,
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -173,21 +175,26 @@ def preprocess(
         epochs.metadata.to_csv(
             fname, na_rep='NA', float_format='%.4f', index=False)
 
-    # Compute evokeds and save
-    evokeds, evokeds_df = compute_evokeds(epochs, average_by, bad_ixs)
-    if evokeds_dir is not None:
-        makedirs(evokeds_dir, exist_ok=True)
-        if to_df is True or to_df == 'both':
-            fname = f'{evokeds_dir}/{participant_id}_ave.csv'
-            evokeds_df.to_csv(
-                fname, na_rep='NA', float_format='%.4f', index=False)
-        if to_df is False or to_df == 'both':
-            fname = f'{evokeds_dir}/{participant_id}_ave.fif'
-            write_evokeds(fname, evokeds)
+    # For computing evokeds, make sure columns to average by are in a dict
+    if not isinstance(condition_cols, dict):
+        condition_cols = {'': condition_cols}
+
+    # Compute one set of evokeds for each (combination of) condition(s)
+    for suffix, cols in condition_cols.items():
+        evokeds, evokeds_df = compute_evokeds(epochs, cols, bad_ixs)
+        if evokeds_dir is not None:
+            makedirs(evokeds_dir, exist_ok=True)
+            suffix = f'_{suffix}' if suffix != '' else suffix
+            if to_df is True or to_df == 'both':
+                fname = f'{evokeds_dir}/{participant_id}{suffix}_ave.csv'
+                evokeds_df.to_csv(
+                    fname, na_rep='NA', float_format='%.4f', index=False)
+            if to_df is False or to_df == 'both':
+                fname = f'{evokeds_dir}/{participant_id}_ave.fif'
+                write_evokeds(fname, evokeds)
+
+    return epochs
 
 
 # Test run
-# preprocess(**aha_dict)
-preprocess(**manypipelines_dict)
-# TODO: Automatically remove EOG/mastoid channels
-# TODO: Add option to supply dict to average_by (with suffix as keys)
+epochs = preprocess(**manypipelines_dict)

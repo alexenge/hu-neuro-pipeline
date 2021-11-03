@@ -199,7 +199,7 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(epochs, average_by=None, bad_ixs=None):
+def compute_evokeds(epochs, condition_cols=None, bad_ixs=None):
 
     # Drop bad epochs before averaging
     if bad_ixs is not None:
@@ -214,14 +214,14 @@ def compute_evokeds(epochs, average_by=None, bad_ixs=None):
     all_evokeds_dfs = []
 
     # Either average by columns in the metadata / log file
-    if average_by is not None:
+    if condition_cols is not None:
 
-        # Make sure average_by is a list
-        if isinstance(average_by, str):
-            average_by = [average_by]
+        # Make sure condition_cols is a list
+        if isinstance(condition_cols, str):
+            condition_cols = [condition_cols]
 
         # Get unique combinations of conditions
-        conditions = epochs_good.metadata[average_by].drop_duplicates()
+        conditions = epochs_good.metadata[condition_cols].drop_duplicates()
 
         # Compute evoked averages for each condition
         for _, condition in conditions.iterrows():
