@@ -9,64 +9,6 @@ from helpers import (add_heog_veog, apply_montage, compute_evokeds,
                      get_bads, read_log)
 from savers import save_clean, save_epochs, save_evokeds
 
-# aha example
-aha_dict = dict(
-    vhdr_file='/Users/alexander/Research/aha/data/raw/eeg/exp1/Vp0002.vhdr',
-    log_file='/Users/alexander/Research/aha/data/raw/rt/exp1/VP_02_Tag1.txt',
-    downsample_sfreq=250,
-    veog_channels='auto',
-    heog_channels='auto',
-    bad_channels=None,
-    montage='easycap-M1',
-    ocular_correction='/Users/alexander/Research/aha/data/raw/eeg/exp1/cali/Vp0002_cali.matrix',
-    highpass_freq=0.1,
-    lowpass_freq=30,
-    epochs_tmin=-0.5,
-    epochs_tmax=1.5,
-    baseline=(-0.2, 0),
-    triggers={'match': 221, 'mismatch': 222},
-    skip_log_rows={'bek_unbek': 'bekannt'},
-    reject_peak_to_peak=200,
-    reject_flat=1,
-    components_df=pd.DataFrame({'name': ['P1', 'N1', 'N400'],
-                                'tmin': [0.1, 0.15, 0.4],
-                                'tmax': [0.15, 0.2, 0.7],
-                                'roi': [
-                                    ['PO3', 'PO4', 'POz', 'O1', 'O2', 'Oz'],
-                                    ['P7', 'P8', 'PO7', 'PO8', 'PO9', 'PO10'],
-                                    ['C1', 'C2', 'Cz', 'CP1', 'CP2', 'CPz']]}),
-    condition_cols=['Wdh', 'Bed'],
-    clean_dir=None,
-    epochs_dir='/Users/alexander/Research/aha/data/test/epochs',
-    trials_dir='/Users/alexander/Research/aha/data/test/trials',
-    evokeds_dir='/Users/alexander/Research/aha/data/test/evokeds',
-    to_df='both',
-)
-locals().update(aha_dict)
-
-# ManyPipelines example
-manypipelines_dict = dict(
-    vhdr_file='/Users/alexander/Research/manypipelines/Results/EEG/raw/EMP01.vhdr',
-    log_file='/Users/alexander/Research/manypipelines/Results/Behavior/EMP01_events.csv',
-    downsample_sfreq=256, bad_channels='auto',
-    veog_channels=None, heog_channels=None,
-    montage='/Users/alexander/Research/manypipelines/Results/EEG/channel_locations/chanlocs_besa.txt',
-    ocular_correction='fastica', highpass_freq=0.1, lowpass_freq=30,
-    epochs_tmin=-0.5, epochs_tmax=1.5, baseline=(-0.2, 0),
-    triggers=None, skip_log_rows=None, reject_peak_to_peak=200, reject_flat=1,
-    components_df=pd.DataFrame(
-        {'name': ['N1'],
-         'tmin': [0.15],
-         'tmax': [0.2],
-         'roi': [['P7', 'P8', 'PO7', 'PO8', 'PO9', 'PO10']]}),
-    condition_cols={'h1': 'scene_category', 'h2': 'old', 'h3': 'behavior',
-                    'h4': 'subsequent_memory'},
-    clean_dir=None, epochs_dir=None,
-    trials_dir='/Users/alexander/Research/manypipelines/Results/EEG/trials',
-    evokeds_dir='/Users/alexander/Research/manypipelines/Results/EEG/evokeds',
-    to_df=True,)
-locals().update(manypipelines_dict)
-
 
 def preprocess(
     vhdr_file=None,
@@ -193,7 +135,3 @@ def preprocess(
                          suffix, to_df)
 
     return epochs
-
-
-# Test run
-epochs = preprocess(**manypipelines_dict)
