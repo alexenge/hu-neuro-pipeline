@@ -6,7 +6,7 @@ from mne.io import read_raw_brainvision
 
 from helpers import (add_heog_veog, apply_montage, compute_evokeds,
                      compute_single_trials, correct_besa, correct_ica,
-                     get_bad_ixs, read_log)
+                     get_bads, read_log)
 from savers import save_clean, save_epochs, save_evokeds
 
 # aha example
@@ -16,6 +16,7 @@ aha_dict = dict(
     downsample_sfreq=250,
     veog_channels='auto',
     heog_channels='auto',
+    bad_channels=None,
     montage='easycap-M1',
     ocular_correction='/Users/alexander/Research/aha/data/raw/eeg/exp1/cali/Vp0002_cali.matrix',
     highpass_freq=0.1,
@@ -47,7 +48,8 @@ locals().update(aha_dict)
 manypipelines_dict = dict(
     vhdr_file='/Users/alexander/Research/manypipelines/Results/EEG/raw/EMP01.vhdr',
     log_file='/Users/alexander/Research/manypipelines/Results/Behavior/EMP01_events.csv',
-    downsample_sfreq=256, veog_channels=None, heog_channels=None,
+    downsample_sfreq=256, bad_channels='auto',
+    veog_channels=None, heog_channels=None,
     montage='/Users/alexander/Research/manypipelines/Results/EEG/channel_locations/chanlocs_besa.txt',
     ocular_correction='fastica', highpass_freq=0.1, lowpass_freq=30,
     epochs_tmin=-0.5, epochs_tmax=1.5, baseline=(-0.2, 0),
@@ -70,6 +72,7 @@ def preprocess(
     vhdr_file=None,
     log_file=None,
     downsample_sfreq=None,
+    bad_channels='auto',
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
@@ -112,6 +115,11 @@ def preprocess(
     # Apply custom or standard montage
     apply_montage(raw, montage)
 
+    # Interpolate any bad channels
+    if bad_channels is not None and bad_channels != 'auto':
+        raw.info['bads'] = raw.info['bads'] + bad_channels
+        _ = raw.interpolate_bads()
+
     # Re-reference to common average
     _ = raw.set_eeg_reference('average')
 
@@ -145,11 +153,19 @@ def preprocess(
     # Read behavioral log file
     epochs.metadata = read_log(log_file, skip_log_rows)
 
-    # # Reject bad epochs despite based on peak to peak and flat amplitude
-    # epochs = _bad_epochs_to_nan(epochs, reject_peak_to_peak, reject_flat)
+    # Get indices of bad epochs and channels
+    bad_ixs, auto_channels = get_bads(epochs, reject_peak_to_peak, reject_flat)
 
-    # Get indices of bad epochs
-    bad_ixs = get_bad_ixs(epochs, reject_peak_to_peak, reject_flat)
+    # Start over, repairing any (automatically deteced) bad channels
+    if bad_channels == 'auto' and auto_channels != []:
+        epochs = preprocess(
+            vhdr_file, log_file, downsample_sfreq, auto_channels,
+            veog_channels, heog_channels, montage, ocular_correction,
+            highpass_freq, lowpass_freq, epochs_tmin, epochs_tmax, baseline,
+            triggers, skip_log_rows, reject_peak_to_peak, reject_flat,
+            components_df, condition_cols, clean_dir, epochs_dir, trials_dir,
+            evokeds_dir, to_df)
+        return epochs
 
     # Add single trial mean ERP amplitudes to metadata
     compute_single_trials(epochs, components_df, bad_ixs)
@@ -175,6 +191,7 @@ def preprocess(
         if evokeds_dir is not None:
             save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id,
                          suffix, to_df)
+
     return epochs
 
 

@@ -1,3 +1,4 @@
+from collections import Counter
 from os import path
 from sys import exit
 
@@ -146,7 +147,8 @@ def read_log(log_file, skip_log_rows=None):
     return log
 
 
-def get_bad_ixs(epochs, reject_peak_to_peak=None, reject_flat=None):
+def get_bads(
+        epochs, reject_peak_to_peak=None, reject_flat=None, percent_bad=0.05):
 
     # Convert thresholds to volts in dicts
     if reject_peak_to_peak is not None:
@@ -157,9 +159,21 @@ def get_bad_ixs(epochs, reject_peak_to_peak=None, reject_flat=None):
     # Reject on a copy of the data
     epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak, reject_flat)
     drop_log = [elem for elem in epochs_rej.drop_log if elem != ('IGNORED',)]
-    bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
+    bad_tuples = [(ix, elem) for ix, elem in enumerate(drop_log) if elem != ()]
 
-    return bad_ixs
+    # Get bad epochs from tuples
+    bad_ixs = [bad_tuple[0] for bad_tuple in bad_tuples]
+
+    # Get channels that are responsible for the bad epochs
+    bad_channels = [bad_tuple[1] for bad_tuple in bad_tuples]
+    bad_channels = list(sum(bad_channels, ()))  # Makes it a flat list
+
+    # See which channels are responsible for at least X percent of epochs
+    counts = Counter(bad_channels)
+    bad_channels = [ch for ch, count in counts.items()
+                    if count > len(epochs) * percent_bad]
+
+    return (bad_ixs, bad_channels)
 
 
 def compute_single_trials(epochs, components_df, bad_ixs=None):
