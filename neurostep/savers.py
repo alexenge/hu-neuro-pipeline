@@ -59,3 +59,23 @@ def save_evokeds(
     if to_df is False or to_df == 'both':
         fname = f'{evokeds_dir}/{participant_id}_ave.fif'
         write_evokeds(fname, evokeds)
+
+
+def save_montage(epochs, export_dir):
+
+    # Create output directory
+    makedirs(export_dir, exist_ok=True)
+
+    # Get locations of EEG channels
+    chs = epochs.copy().pick_types(eeg=True).info['chs']
+    coords = [ch['loc'][0:3] for ch in chs]
+    coords_df = pd.DataFrame(columns=['x', 'y', 'z'], data=coords)
+
+    # Add channel names
+    ch_names = [ch['ch_name'] for ch in chs]
+    coords_df.insert(loc=0, column='ch_name', value=ch_names)
+
+    # Save
+    fname = f'{export_dir}/channel_locations.csv'
+    coords_df.to_csv(
+        fname, na_rep='NA', float_format='%.4f', index=False)

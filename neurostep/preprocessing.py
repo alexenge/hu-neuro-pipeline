@@ -7,7 +7,7 @@ from mne.io import read_raw_brainvision
 from helpers import (add_heog_veog, apply_montage, compute_evokeds,
                      compute_single_trials, correct_besa, correct_ica,
                      get_bads, read_log)
-from savers import save_clean, save_epochs, save_evokeds
+from savers import save_clean, save_epochs, save_evokeds, save_montage
 
 
 def preprocess(
@@ -35,6 +35,7 @@ def preprocess(
     epochs_dir=None,
     trials_dir=None,
     evokeds_dir=None,
+    export_dir=None,
     to_df=True,
 ):
 
@@ -106,7 +107,7 @@ def preprocess(
             highpass_freq, lowpass_freq, epochs_tmin, epochs_tmax, baseline,
             triggers, skip_log_rows, reject_peak_to_peak, reject_flat,
             components_df, condition_cols, clean_dir, epochs_dir, trials_dir,
-            evokeds_dir, to_df)
+            evokeds_dir, export_dir, to_df)
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
@@ -133,5 +134,9 @@ def preprocess(
         if evokeds_dir is not None:
             save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id,
                          suffix, to_df)
+
+    # Save channel locations
+    if export_dir is not None:
+        save_montage(epochs, export_dir)
 
     return epochs
