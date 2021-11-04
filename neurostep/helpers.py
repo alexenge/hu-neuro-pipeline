@@ -5,7 +5,7 @@ from sys import exit
 import chardet
 import numpy as np
 import pandas as pd
-from mne import pick_channels, set_bipolar_reference
+from mne import combine_evoked, pick_channels, set_bipolar_reference
 from mne.channels import (combine_channels, make_standard_montage,
                           read_custom_montage)
 from mne.preprocessing import ICA
@@ -184,6 +184,8 @@ def compute_single_trials(epochs, components_df, bad_ixs=None):
             epochs, component['name'], component['tmin'],
             component['tmax'], component['roi'], bad_ixs)
 
+    return epochs.metadata
+
 
 def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 
@@ -213,7 +215,8 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(epochs, condition_cols=None, bad_ixs=None):
+def compute_evokeds(
+        epochs, condition_cols=None, bad_ixs=None, participant_id=None):
 
     # Drop bad epochs before averaging
     if bad_ixs is not None:
@@ -279,4 +282,40 @@ def compute_evokeds(epochs, condition_cols=None, bad_ixs=None):
     # Combine DataFrames
     all_evokeds_df = pd.concat(all_evokeds_dfs)
 
+    # Optionally add participant ID
+    if participant_id is not None:
+        all_evokeds_df.insert(
+            loc=0, column='participant_id', value=participant_id)
+
     return all_evokeds, all_evokeds_df
+
+
+def compute_grands(evokeds_per_participant):
+
+    # Average across participants for each condition
+    evokeds_per_condition = list(map(list, zip(*evokeds_per_participant)))
+    grands = [combine_evoked(x, weights='nave') for x in evokeds_per_condition]
+
+    # Add meaningful comments
+    comments = [x[0].comment for x in evokeds_per_condition]
+    for grand, comment in zip(grands, comments):
+        grand.comment = comment
+
+    return grands
+
+
+def compute_grands_df(evokeds_dfs):
+
+    # Combine DataFrames for all participants
+    evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
+
+    # Average by condition columns (between participant_id and time)
+    time_col_ix = evokeds_df.columns.get_loc('time')
+    participant_id_ix = 1
+    group_cols = list(evokeds_df.columns[participant_id_ix:(time_col_ix + 1)])
+    grands_df = evokeds_df.groupby(group_cols).mean()
+
+    # Convert conditions from index back to columns
+    grands_df = grands_df.reset_index()
+
+    return grands_df

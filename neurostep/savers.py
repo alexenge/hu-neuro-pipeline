@@ -4,18 +4,41 @@ import pandas as pd
 from mne import write_evokeds
 
 
-def save_clean(raw, clean_dir, participant_id):
+def save_clean(raw, clean_dir, participant_id=None):
+
+    # Re-format participant ID for filename
+    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    suffix = 'cleaned_eeg'
 
     # Create output folder and save
     makedirs(clean_dir, exist_ok=True)
-    fname = f'{clean_dir}/{participant_id}_cleaned_eeg.fif'
+    fname = f'{clean_dir}/{participant_id_}{suffix}.fif'
     raw.save(fname)
 
 
-def save_epochs(epochs, epochs_dir, participant_id, to_df=True):
+def save_df(df, output_dir, participant_id=None, suffix=None):
+
+    # Create output folder
+    makedirs(output_dir, exist_ok=True)
+
+    # Re-format participant ID and suffix for filename
+    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    suffix = '' if suffix is None else suffix
+
+    # Save DataFrame
+    fname = f'{output_dir}/{participant_id_}{suffix}.csv'
+    df.to_csv(
+        fname, na_rep='NA', float_format='%.4f', index=False)
+
+
+def save_epochs(epochs, epochs_dir, participant_id=None, to_df=True):
 
     # Create output folder
     makedirs(epochs_dir, exist_ok=True)
+
+    # Re-format participant ID for filename
+    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    suffix = 'epo'
 
     # Convert to DataFrame
     if to_df is True or to_df == 'both':
@@ -30,34 +53,31 @@ def save_epochs(epochs, epochs_dir, participant_id, to_df=True):
         epochs_df = pd.concat([metadata_df, epochs_df], axis=1)
 
         # Save DataFrame
-        fname = f'{epochs_dir}/{participant_id}_epo.csv'
-        epochs_df.to_csv(
-            fname, na_rep='NA', float_format='%.4f', index=False)
+        save_df(epochs_df, epochs_dir, participant_id, suffix)
 
     # Save as MNE object
     if to_df is False or to_df == 'both':
-        fname = f'{epochs_dir}/{participant_id}_epo.fif'
+        fname = f'{epochs_dir}/{participant_id_}{suffix}.fif'
         epochs.save(fname)
 
 
-def save_evokeds(
-        evokeds, evokeds_df, evokeds_dir, participant_id, suffix, to_df=True):
+def save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id=None,
+                 suffix=None, to_df=True):
 
     # Create output directory
     makedirs(evokeds_dir, exist_ok=True)
 
-    # Prepare suffix with underscore for file name
-    suffix = f'_{suffix}' if suffix != '' else suffix
+    # Re-format participant ID and suffix for filename
+    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    suffix = 'ave' if suffix is None else f'{suffix}_ave'
 
     # Save evokeds as DataFrame
     if to_df is True or to_df == 'both':
-        fname = f'{evokeds_dir}/{participant_id}{suffix}_ave.csv'
-        evokeds_df.to_csv(
-            fname, na_rep='NA', float_format='%.4f', index=False)
+        save_df(evokeds_df, evokeds_dir, participant_id, suffix)
 
     # Save evokeds as MNE object
     if to_df is False or to_df == 'both':
-        fname = f'{evokeds_dir}/{participant_id}_ave.fif'
+        fname = f'{evokeds_dir}/{participant_id_}{suffix}.fif'
         write_evokeds(fname, evokeds)
 
 
@@ -76,6 +96,4 @@ def save_montage(epochs, export_dir):
     coords_df.insert(loc=0, column='ch_name', value=ch_names)
 
     # Save
-    fname = f'{export_dir}/channel_locations.csv'
-    coords_df.to_csv(
-        fname, na_rep='NA', float_format='%.4f', index=False)
+    save_df(coords_df, export_dir, suffix='channel_locations')
