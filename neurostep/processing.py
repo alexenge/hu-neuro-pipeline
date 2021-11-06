@@ -13,7 +13,7 @@ from helpers import (add_heog_veog, apply_montage, compute_evokeds,
 from savers import save_clean, save_df, save_epochs, save_evokeds, save_montage
 
 
-def preprocess_single(
+def process_single(
     vhdr_file=None,
     log_file=None,
     ocular_correction='fastica',
@@ -110,7 +110,7 @@ def preprocess_single(
     if bad_channels == 'auto' and auto_channels != []:
         new_inputs = inputs.copy()
         new_inputs['bad_channels'] = auto_channels
-        epochs = preprocess_single(**new_inputs)
+        epochs = process_single(**new_inputs)
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
@@ -141,7 +141,7 @@ def preprocess_single(
     return trials, evokeds_dict, evokeds_df_dict
 
 
-def preprocess(
+def process(
     vhdr_files=None,
     log_files=None,
     ocular_correction='fastica',
@@ -170,7 +170,7 @@ def preprocess(
     to_df=True,
     n_procs='auto'
 ):
-    """Preprocesses EEG data for all participants of an experiment in parallel.
+    """Processes EEG data for all participants of an experiment in parallel.
 
     For each participant, reads raw data, performs downsampling (optional),
     laods electrode locations, interpolates bad channels (optional), re-
@@ -312,7 +312,7 @@ def preprocess(
         shared_kwargs.pop(kwarg)
 
     # Create partial function with shared arguments
-    preprocess_partial = partial(preprocess_single, **shared_kwargs)
+    process_partial = partial(process_single, **shared_kwargs)
 
     # Get file paths if directories were provided
     if isinstance(vhdr_files, str):
@@ -339,11 +339,11 @@ def preprocess(
     ocular_correction = ocular_correction[0:2]
     participant_args = zip(vhdr_files, log_files, ocular_correction)
 
-    # Do preprocessing in parallel
+    # Do processing in parallel
     if n_procs == 'auto':
         n_procs = min(cpu_count() - 1, len(vhdr_files))
     pool = Pool(n_procs)
-    res = pool.starmap(preprocess_partial, participant_args)
+    res = pool.starmap(process_partial, participant_args)
     pool.close()
     pool.join()
 
