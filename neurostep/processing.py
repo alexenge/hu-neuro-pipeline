@@ -7,10 +7,11 @@ import pandas as pd
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 
-from helpers import (add_heog_veog, apply_montage, compute_evokeds,
-                     compute_grands, compute_grands_df, compute_single_trials,
-                     correct_besa, correct_ica, get_bads, read_log)
-from savers import save_clean, save_df, save_epochs, save_evokeds, save_montage
+from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
+                      compute_grands, compute_grands_df, compute_single_trials,
+                      correct_besa, correct_ica, get_bads, read_log)
+from .savers import (save_clean, save_df, save_epochs, save_evokeds,
+                     save_montage)
 
 
 def process_single(
@@ -177,9 +178,13 @@ def process(
     references to common average, does ocular correction (ICA or MSEC/BESA,
     optional), does filtering (optional), does segmenting into epochs, rejects
     bad epochs, and computes single trial mean ERP amplitudes for components of
-    interest as well as condition averages (evokeds). At the group level,
+    interest as well as condition averages (evokeds).
+
+    At the group level,
     combines all single trial behavioral data and mean amplitudes and combines
     evokeds into grand averages (e.g., for plotting).
+
+    For details about the EEG processing pipeline, see Frömer et al. (2018)[1].
 
     Parameters
     ----------
@@ -212,8 +217,8 @@ def process(
         common HEOG electrodes ('F9'/'Afp9', 'F10'/'Afp10').
     montage : str | Path, default 'easycap-M1'
         Montage for looking up channel locations. Can either be the name of a
-        standard montage (see [1]) or the path to a custom electrode location
-        file (see [2]).
+        standard montage (see [2]) or the path to a custom electrode location
+        file (see [3]).
     highpass_freq : float | None, default 0.1
         Pass-band edge (in Hz) for the highpass filter. If None, don't use
         highpass filter.
@@ -301,8 +306,9 @@ def process(
 
     Notes
     -----
-    [1] https://mne.tools/stable/generated/mne.channels.make_standard_montage.html
-    [2] https://mne.tools/stable/generated/mne.channels.read_custom_montage.html
+    [1] https://doi.org/10.3389/fnins.2018.00048
+    [2] https://mne.tools/stable/generated/mne.channels.make_standard_montage.html
+    [3] https://mne.tools/stable/generated/mne.channels.read_custom_montage.html
     """
 
     # Create dict of non participant-specific inputs
