@@ -4,10 +4,10 @@ import pandas as pd
 from mne import write_evokeds
 
 
-def save_clean(raw, clean_dir, participant_id=None):
+def save_clean(raw, clean_dir, participant_id=''):
 
     # Re-format participant ID for filename
-    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
     suffix = 'cleaned_eeg'
 
     # Create output folder and save
@@ -16,14 +16,14 @@ def save_clean(raw, clean_dir, participant_id=None):
     raw.save(fname)
 
 
-def save_df(df, output_dir, participant_id=None, suffix=None):
+def save_df(df, output_dir, participant_id='', suffix=''):
 
     # Create output folder
     makedirs(output_dir, exist_ok=True)
 
     # Re-format participant ID and suffix for filename
-    participant_id_ = '' if participant_id is None else f'{participant_id}_'
-    suffix = '' if suffix is None else suffix
+    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
+    suffix = '' if suffix == '' else suffix
 
     # Save DataFrame
     fname = f'{output_dir}/{participant_id_}{suffix}.csv'
@@ -31,13 +31,13 @@ def save_df(df, output_dir, participant_id=None, suffix=None):
         fname, na_rep='NA', float_format='%.4f', index=False)
 
 
-def save_epochs(epochs, epochs_dir, participant_id=None, to_df=True):
+def save_epochs(epochs, epochs_dir, participant_id='', to_df=True):
 
     # Create output folder
     makedirs(epochs_dir, exist_ok=True)
 
     # Re-format participant ID for filename
-    participant_id_ = '' if participant_id is None else f'{participant_id}_'
+    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
     suffix = 'epo'
 
     # Convert to DataFrame
@@ -46,7 +46,9 @@ def save_epochs(epochs, epochs_dir, participant_id=None, to_df=True):
         epochs_df = epochs.to_data_frame(scalings=scalings)
 
         # Add metadata from log file
-        metadata_df = epochs.metadata
+        metadata_df = epochs.metadata.copy()
+        metadata_df = metadata_df.drop([col for col in metadata_df.columns
+                                        if col in epochs_df.columns], axis=1)
         n_samples = len(epochs.times)
         metadata_df = metadata_df.loc[metadata_df.index.repeat(n_samples)]
         metadata_df = metadata_df.reset_index(drop=True)
@@ -58,18 +60,29 @@ def save_epochs(epochs, epochs_dir, participant_id=None, to_df=True):
     # Save as MNE object
     if to_df is False or to_df == 'both':
         fname = f'{epochs_dir}/{participant_id_}{suffix}.fif'
-        epochs.save(fname)
+        epochs.save(fname, overwrite=True)
 
 
-def save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id=None,
-                 suffix=None, to_df=True):
+def save_evokeds_dict(
+        evokeds_dict, evokeds_dir, participant_id='', to_df=True):
+
+    # Save each set of evokeds and/or evokeds_df in the dict
+    for suffix, evokeds_tuple in evokeds_dict.items():
+        evokeds = evokeds_tuple[0]
+        evokeds_df = evokeds_tuple[1]
+        save_evokeds(
+            evokeds, evokeds_df, evokeds_dir, participant_id, suffix, to_df)
+
+
+def save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id='',
+                 suffix='', to_df=True):
 
     # Create output directory
     makedirs(evokeds_dir, exist_ok=True)
 
     # Re-format participant ID and suffix for filename
-    participant_id_ = '' if participant_id is None else f'{participant_id}_'
-    suffix = 'ave' if suffix is None else f'{suffix}_ave'
+    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
+    suffix = 'ave' if suffix == '' else f'{suffix}_ave'
 
     # Save evokeds as DataFrame
     if to_df is True or to_df == 'both':
@@ -78,7 +91,7 @@ def save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id=None,
     # Save evokeds as MNE object
     if to_df is False or to_df == 'both':
         fname = f'{evokeds_dir}/{participant_id_}{suffix}.fif'
-        write_evokeds(fname, evokeds)
+        write_evokeds(fname, evokeds, verbose=False)
 
 
 def save_montage(epochs, export_dir):

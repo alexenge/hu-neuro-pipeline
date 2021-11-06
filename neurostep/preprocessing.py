@@ -101,6 +101,7 @@ def preprocess_single(
 
     # Read behavioral log file
     epochs.metadata = read_log(log_file, skip_log_rows)
+    epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # Get indices of bad epochs and channels
     bad_ixs, auto_channels = get_bads(epochs, reject_peak_to_peak, reject_flat)
@@ -109,7 +110,7 @@ def preprocess_single(
     if bad_channels == 'auto' and auto_channels != []:
         new_inputs = inputs.copy()
         new_inputs['bad_channels'] = auto_channels
-        epochs = preprocess(**new_inputs)
+        epochs = preprocess_single(**new_inputs)
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
@@ -127,25 +128,17 @@ def preprocess_single(
     if export_dir is not None:
         save_montage(epochs, export_dir)
 
-    # For computing evokeds, make sure columns to average by are in a dict
-    if not isinstance(condition_cols, dict):
-        condition_cols = {None: condition_cols}  # None is the suffix
+    # Compute evokeds
+    evokeds_dict, evokeds_df_dict = compute_evokeds(
+        epochs, condition_cols, bad_ixs, participant_id)
 
-    # Compute one set of evokeds for each (combination of) condition(s)
-    all_evokeds = []
-    all_evokeds_df = []
-    for suffix, cols in condition_cols.items():
-        evokeds, evokeds_df = compute_evokeds(
-            epochs, cols, bad_ixs, participant_id)
-        all_evokeds.append(evokeds)
-        all_evokeds_df.append(evokeds_df)
+    # Save evoekds as data frame and/or MNE object
+    if evokeds_dir is not None:
+        for key in evokeds_dict:
+            save_evokeds(evokeds_dict[key], evokeds_df_dict[key], evokeds_dir,
+                         participant_id, suffix=key, to_df=to_df)
 
-        # Save evokeds for the current (combination of) condition(s)
-        if evokeds_dir is not None:
-            save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id,
-                         suffix, to_df)
-
-    return trials, all_evokeds, all_evokeds_df
+    return trials, evokeds_dict, evokeds_df_dict
 
 
 def preprocess(
@@ -180,6 +173,7 @@ def preprocess(
 
     # Create dict of non participant-specific inputs
     shared_kwargs = locals().copy()
+    # shared_kwargs = aha_dict.copy()
     for kwarg in ['vhdr_files', 'log_files', 'ocular_correction', 'n_procs']:
         shared_kwargs.pop(kwarg)
 
@@ -206,10 +200,10 @@ def preprocess(
     vhdr_files.sort()
     log_files.sort()
     ocular_correction.sort()
-    participant_args = zip(
-        vhdr_files[0: 2],
-        log_files[0: 2],
-        ocular_correction[0: 2])
+    vhdr_files = vhdr_files[0:2]
+    log_files = log_files[0:2]
+    ocular_correction = ocular_correction[0:2]
+    participant_args = zip(vhdr_files, log_files, ocular_correction)
 
     # Do preprocessing in parallel
     if n_procs == 'auto':
@@ -220,27 +214,38 @@ def preprocess(
     pool.join()
 
     # Sort outputs into seperate lists
-    trials, all_evokeds, all_evokeds_dfs = list(map(list, zip(*res)))
+    trials, evokeds_dicts, evokeds_df_dicts = list(map(list, zip(*res)))
 
     # Combine and save trials
     trials = pd.concat(trials, ignore_index=True)
     if export_dir is not None:
         save_df(trials, export_dir, participant_id='all', suffix='trials')
 
-    # Iterate over different sets of evokeds
-    for suffix, evokeds, evokeds_dfs in zip(
-            condition_cols, all_evokeds, all_evokeds_dfs):
+    # Process each set of evokeds
+    evokeds_dict = {}
+    evokeds_df_dict = {}
+    for key in evokeds_df_dicts[0]:
 
-        # Combine evokeds without averaging and save
+        # Extract the relevant evokeds from all participants
+        evokeds = [d[key] for d in evokeds_dicts]
+        evokeds_dfs = [d[key] for d in evokeds_df_dicts]
+
+        # Concatenate DataFrames from all participants and save
         evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
-        if to_df:
-            save_df(
-                evokeds_df, export_dir, participant_id='all', suffix=suffix)
+        if export_dir is not None:
+            suffix = 'ave' if key == '' else f'{key}_ave'
+            save_df(evokeds_df, export_dir, participant_id='all',
+                    suffix=suffix)
 
-        # Compute grand averages across participants and save
+        # Compute grand averages and save
         grands = compute_grands(evokeds)
-        grands_df = compute_grands_df(evokeds_dfs)
-        save_evokeds(grands, grands_df, export_dir, participant_id='grands',
-                     suffix=suffix, to_df=to_df)
+        grands_df = compute_grands_df(evokeds_df)
+        if export_dir is not None:
+            save_evokeds(grands, grands_df, export_dir, participant_id='grand',
+                         suffix=key, to_df=to_df)
 
-    return trials
+        # Append to dicts
+        evokeds_dict[key] = evokeds
+        evokeds_df_dict[key] = evokeds_df
+
+    return trials, evokeds_dict, evokeds_df_dict

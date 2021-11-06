@@ -216,78 +216,84 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 
 
 def compute_evokeds(
-        epochs, condition_cols=None, bad_ixs=None, participant_id=None):
+        epochs, condition_cols=None, bad_ixs=[], participant_id=None):
 
-    # Drop bad epochs before averaging
-    if bad_ixs is not None:
-        if isinstance(bad_ixs, int):
-            bad_ixs = [bad_ixs]
+    # Prepare emtpy dicts for storing each set of evokeds and its key
+    evokeds_dict = {}
+    evokeds_df_dict = {}
+
+    # If no condition_cols were provided, use the events from the epochs
+    if condition_cols is None:
         epochs_good = epochs.copy().drop(bad_ixs, verbose=False)
+        evokeds = epochs_good.average(by_event_type=True)
+        evokeds_dict[''] = evokeds
+        evokeds_df_dict[''] = create_evokeds_df(
+            evokeds, participant_id=participant_id)
+
+    # Otherwise use condition_cols
     else:
-        epochs_good = epochs
 
-    # Prepare empty lists
-    all_evokeds = []
-    all_evokeds_dfs = []
+        # Make sure cols are stored in a dict (i.e., {key: cols})
+        if not isinstance(condition_cols, dict):
+            condition_cols = {'': condition_cols}  # None is the key
 
-    # Either average by columns in the metadata / log file
-    if condition_cols is not None:
+        # Compute one set of evokeds for each set of condition columns
+        for key, cols in condition_cols.items():
+            epochs_update = update_events(epochs, cols)
+            epochs_update.drop(bad_ixs, verbose=False)
+            evokeds = epochs_update.average(by_event_type=True)
+            evokeds_dict[key] = evokeds
+            evokeds_df_dict[key] = create_evokeds_df(
+                evokeds, cols, epochs.metadata, participant_id)
 
-        # Make sure condition_cols is a list
-        if isinstance(condition_cols, str):
-            condition_cols = [condition_cols]
+    return evokeds_dict, evokeds_df_dict
 
-        # Get unique combinations of conditions
-        conditions = epochs_good.metadata[condition_cols].drop_duplicates()
 
-        # Compute evoked averages for each condition
-        for _, condition in conditions.iterrows():
+def update_events(epochs, cols):
 
-            # Construct query for the current condition
-            query = [f'{key} == \'{value}\''
-                     for key, value in condition.iteritems()]
-            query = ' & '.join(query)
+    # Generate event codes for the relevant columns
+    cols_df = pd.DataFrame(epochs.metadata[cols])
+    cols_df = cols_df.astype('str')
+    ids = cols_df.agg('/'.join, axis=1)
+    codes = ids.astype('category').cat.codes
 
-            # Average the relevant epochs
-            evokeds = epochs_good[query].average(picks=['eeg', 'misc'])
-            comment = '/'.join([str(value) for value in condition])
-            evokeds.comment = comment
-            all_evokeds.append(evokeds)
+    # Create copy of the data with the new event codes
+    epochs_update = epochs.copy()
+    epochs_update.events[:, 2] = codes
+    epochs_update.event_id = dict(zip(ids, codes))
 
-            # Create DataFrame
-            scalings = {'eeg': 1e6, 'misc': 1e6}
-            evokeds_df = evokeds.to_data_frame(scalings=scalings)
+    return epochs_update
 
-            # Add additional columns for the condition
-            condition_df = condition.to_frame().transpose()
-            nrows = len(evokeds_df)
-            condition_df = pd.concat([condition_df] * nrows, ignore_index=True)
-            evokeds_df = pd.concat([condition_df, evokeds_df], axis=1)
-            all_evokeds_dfs.append(evokeds_df)
 
-    # Or average by events / triggers
+def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
+
+    # Convert all evokeds to a single DataFrame
+    scalings = {'eeg': 1e6, 'misc': 1e6}
+    evokeds_dfs = [evoked.to_data_frame(scalings=scalings)
+                   for evoked in evokeds]
+    evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
+
+    # Optionally add columns from the metadata
+    n_samples = len(evokeds[0].times)
+    if cols is not None:
+        assert trials is not None, 'Must provide trials (metadata) with cols'
+        cols_df = pd.DataFrame(trials[cols])
+        cols_df = cols_df.drop_duplicates()
+        cols_df = cols_df.loc[cols_df.index.repeat(n_samples)]
+        cols_df = cols_df.reset_index(drop=True)
+        evokeds_df = pd.concat([cols_df, evokeds_df], axis=1)
+
+    # Otherwise add comments from evokeds (assumed to contain event IDs)
     else:
-        for id in epochs_good.event_id:
+        comments = [evoked.comment for evoked in evokeds]
+        comments = np.repeat(comments, n_samples)
+        evokeds_df.insert(loc=0, column='event_id', value=comments)
 
-            # Average the relevant epochs
-            evokeds = epochs_good[id].average(picks=['eeg', 'misc'])
-            all_evokeds.append(evokeds)
-
-            # Create DataFrame
-            scalings = {'eeg': 1e6, 'misc': 1e6}
-            evokeds_df = evokeds.to_data_frame(scalings=scalings)
-            evokeds_df.insert(loc=0, column='event_id', value=id)
-            all_evokeds_dfs.append(evokeds_df)
-
-    # Combine DataFrames
-    all_evokeds_df = pd.concat(all_evokeds_dfs)
-
-    # Optionally add participant ID
+    # Optionally add participant_id
     if participant_id is not None:
-        all_evokeds_df.insert(
-            loc=0, column='participant_id', value=participant_id)
+        evokeds_df.insert(loc=0, column='participant_id', value=participant_id)
 
-    return all_evokeds, all_evokeds_df
+    return evokeds_df
 
 
 def compute_grands(evokeds_per_participant):
@@ -304,10 +310,7 @@ def compute_grands(evokeds_per_participant):
     return grands
 
 
-def compute_grands_df(evokeds_dfs):
-
-    # Combine DataFrames for all participants
-    evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
+def compute_grands_df(evokeds_df):
 
     # Average by condition columns (between participant_id and time)
     time_col_ix = evokeds_df.columns.get_loc('time')
