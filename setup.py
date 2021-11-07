@@ -22,9 +22,9 @@ setuptools.setup(
     ],
     packages=['mne_step'],
     install_requires=[
-        'chardet>=4.0.0',
+        'chardet',
         'mne>=0.24.0',
-        'pandas>=1.3.0',
+        'pandas>=1.0.0',
     ],
     python_requires='>=3.8',
 )
