@@ -1,3 +1,8 @@
+# General
 .DS_Store
 __pycache__/
 /scratch/
+
+# Packaging
+*.egg-info/
+/dist/
