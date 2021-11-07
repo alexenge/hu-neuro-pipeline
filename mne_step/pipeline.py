@@ -14,7 +14,7 @@ from .savers import (save_clean, save_df, save_epochs, save_evokeds,
                      save_montage)
 
 
-def process_single(
+def pipeline_single(
     vhdr_file=None,
     log_file=None,
     ocular_correction='fastica',
@@ -111,7 +111,7 @@ def process_single(
     if bad_channels == 'auto' and auto_channels != []:
         new_inputs = inputs.copy()
         new_inputs['bad_channels'] = auto_channels
-        epochs = process_single(**new_inputs)
+        epochs = pipeline_single(**new_inputs)
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
@@ -142,7 +142,7 @@ def process_single(
     return trials, evokeds_dict, evokeds_df_dict
 
 
-def process(
+def pipeline(
     vhdr_files=None,
     log_files=None,
     ocular_correction='fastica',
@@ -318,7 +318,7 @@ def process(
         shared_kwargs.pop(kwarg)
 
     # Create partial function with shared arguments
-    process_partial = partial(process_single, **shared_kwargs)
+    pipeline_partial = partial(pipeline_single, **shared_kwargs)
 
     # Get file paths if directories were provided
     if isinstance(vhdr_files, str):
@@ -349,7 +349,7 @@ def process(
     if n_procs == 'auto':
         n_procs = min(cpu_count() - 1, len(vhdr_files))
     pool = Pool(n_procs)
-    res = pool.starmap(process_partial, participant_args)
+    res = pool.starmap(pipeline_partial, participant_args)
     pool.close()
     pool.join()
 
