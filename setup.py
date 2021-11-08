@@ -23,8 +23,9 @@ setuptools.setup(
     packages=['step_mne'],
     install_requires=[
         'chardet',
+        'joblib',
         'mne>=0.24.0',
-        'pandas>=1.0.0',
+        'pandas',
     ],
     python_requires='>=3.8',
 )
