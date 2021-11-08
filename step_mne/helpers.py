@@ -223,10 +223,13 @@ def compute_evokeds(
     evokeds_dict = {}
     evokeds_df_dict = {}
 
+    # Always use EEG and misc (component) channels for averaging
+    picks = ['eeg', 'misc']
+
     # If no condition_cols were provided, use the events from the epochs
     if condition_cols is None:
         epochs_good = epochs.copy().drop(bad_ixs, verbose=False)
-        evokeds = epochs_good.average(by_event_type=True)
+        evokeds = epochs_good.average(picks, by_event_type=True)
         evokeds_dict[''] = evokeds
         evokeds_df_dict[''] = create_evokeds_df(
             evokeds, participant_id=participant_id)
@@ -242,7 +245,7 @@ def compute_evokeds(
         for key, cols in condition_cols.items():
             epochs_update = update_events(epochs, cols)
             epochs_update.drop(bad_ixs, verbose=False)
-            evokeds = epochs_update.average(by_event_type=True)
+            evokeds = epochs_update.average(picks, by_event_type=True)
             evokeds_dict[key] = evokeds
             evokeds_df_dict[key] = create_evokeds_df(
                 evokeds, cols, epochs.metadata, participant_id)
