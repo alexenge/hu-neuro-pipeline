@@ -176,9 +176,10 @@ def get_bads(
     return (bad_ixs, bad_channels)
 
 
-def compute_single_trials(epochs, components_df, bad_ixs=None):
+def compute_single_trials(epochs, components, bad_ixs=None):
 
     # Compute single trial mean ERP amplitudes for each component
+    components_df = pd.DataFrame(components)
     for _, component in components_df.iterrows():
         compute_component(
             epochs, component['name'], component['tmin'],

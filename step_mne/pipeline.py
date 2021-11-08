@@ -32,8 +32,7 @@ def pipeline_single(
     skip_log_rows=None,
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
-    components_df=pd.DataFrame({
-        'name': [], 'tmin': [], 'tmax': [], 'roi': []}),
+    components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
     clean_dir=None,
     epochs_dir=None,
@@ -117,7 +116,7 @@ def pipeline_single(
         return epochs
 
     # Add single trial mean ERP amplitudes to metadata
-    trials = compute_single_trials(epochs, components_df, bad_ixs)
+    trials = compute_single_trials(epochs, components, bad_ixs)
 
     # Save epochs as data frame and/or MNE object
     if epochs_dir is not None:
@@ -162,8 +161,7 @@ def pipeline(
     skip_log_rows=None,
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
-    components_df=pd.DataFrame({
-        'name': [], 'tmin': [], 'tmax': [], 'roi': []}),
+    components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
     clean_dir=None,
     epochs_dir=None,
@@ -249,12 +247,13 @@ def pipeline(
         Peak-to-peak amplitude (in microvolts) for rejecting bad epochs.
     reject_flat : float | None, default 1.0
         Amplitude (in microvolts) for rejecting bad epochs as flat.
-    components_df : pandas.DataFrame | None, default None
-        Definition of ERP components for single trial analysis. Must have one
-        row per component and the following columns: 'name' (str), `tmin`
-        (float), `tmax` (float), `roi` (list of str), where `tmin` and `tmax`
-        are the time window of interest (in s) and `roi` is a list of channel
-        names for the spatial region of interest.
+    components : dict | None, default None
+        Definition of ERP components for single trial analysis. Must have the
+        following key (value) pairs: 'name' (list of str), `tmin` (list of
+        float), `tmax` (list of float), `roi` (list of list of str), where
+        `tmin` and `tmax` are the time window of interest (in s) and `roi` is
+        a list of channel names for the spatial region of interest. All of the
+        four lists must have the same number of elements.
     condition_cols : str | list of str | dict | None, default None
         Columns in the log file to compute condition averages (evokeds) for.
         Can be one more column names, in which one average is computed for each

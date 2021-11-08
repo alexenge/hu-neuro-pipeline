@@ -39,13 +39,14 @@ res <- step_mne$pipeline(
     vhdr_files = "Results/EEG/raw",
     log_files = "Results/RT",
     ocular_correction = "Results/EEG/cali",
-    triggers = c(
+    triggers = list(
         "related/negative" = 201,
         "related/neutral" = 202,
         "unrelated/negative" = 211,
         "unrelated/neutral" = 212
     ),
-    components_df = list(
+    skip_log_rows = list("SatzBed" = "filler"),
+    components = list(
         "name" = c("N400", "P600"),
         "tmin" = c(300, 500),
         "tmax" = c(500, 900),
@@ -62,12 +63,13 @@ res <- step_mne$pipeline(
 #### 4. Use the results
 
 The `pipeline()` functions returns as its first output a data frame that contains the single trial behavioral and ERP component data.
-This can be used, e.g., to fit a linear mixed model to predict reaction times or mean ERP amplitudes for the components in `components_df`:
+This can be used, e.g., to fit a linear mixed model to predict reaction times or mean ERP amplitudes for the components in `components`:
 
 ```r
 library(lme4)
-trials <- res[[1]]  # First output is the trials data frame
-mod <- lmer(N400 ~ semantics * context + (semantics * context|participant_id))
+form <- N400 ~ semantics * context + (semantics * context|participant_id)
+trials <- res[[1]]  # First output is the single trial data frame
+mod <- lmer(form, trials)
 summary(mod)
 ```
 
@@ -76,9 +78,11 @@ They are outputted in MNE (`.fif`) and text (`.csv`) format.
 Only the latter can be read by R and is useful, e.g., the grand average and its confidence interval across participants as a time course:
 
 ```r
+library(dplyr)
+library(ggplot2)
 evokeds <- res[[3]]  # Third output is the evokeds data frame
-evokeds %>%
-    ggplot(aes(x = time, y = N400)) +
+evokeds[[1]] %>%
+    ggplot(aes(x = time, y = N400, color = Semantics, linetype = Context)) +
     stat_summary("line")
 ```
 
