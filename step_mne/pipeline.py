@@ -90,7 +90,9 @@ def pipeline_single(
     # Determine events and the corresponding (selection of) triggers
     events, event_id = events_from_annotations(
         raw, regexp='Stimulus', verbose=False)
-    event_id = triggers if triggers is not None else event_id
+    if triggers is not None:
+        triggers = {key: int(value) for key, value in triggers.items()}
+        event_id = triggers
 
     # Epoching including baseline correction
     epochs = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax, baseline,
