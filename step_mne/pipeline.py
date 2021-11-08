@@ -1,9 +1,9 @@
 from functools import partial
 from glob import glob
-from multiprocessing import Pool, cpu_count
 from os import path
 
 import pandas as pd
+from joblib import Parallel, delayed
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 
@@ -169,7 +169,7 @@ def pipeline(
     evokeds_dir=None,
     export_dir=None,
     to_df=True,
-    n_procs='auto'
+    n_jobs='auto'
 ):
     """Processes EEG data for all participants of an experiment in parallel.
 
@@ -285,7 +285,7 @@ def pipeline(
         Convert all MNE objects (epochs, evokeds, grand averages) to data
         frames and save them in `.csv` instead of `.fif` format. If `both`,
         save in both `.csv` and `.fif` format.
-    n_procs : int | 'auto', default 'auto'
+    n_jobs : int | 'auto', default 'auto'
         Number of CPU cores to use for processing participants in parallel. If
         'auto', use all available cores on the machine minus one.
 
@@ -314,7 +314,7 @@ def pipeline(
     # Create dict of non participant-specific inputs
     shared_kwargs = locals().copy()
     # shared_kwargs = aha_dict.copy()
-    for kwarg in ['vhdr_files', 'log_files', 'ocular_correction', 'n_procs']:
+    for kwarg in ['vhdr_files', 'log_files', 'ocular_correction', 'n_jobs']:
         shared_kwargs.pop(kwarg)
 
     # Create partial function with shared arguments
@@ -346,12 +346,9 @@ def pipeline(
     participant_args = zip(vhdr_files, log_files, ocular_correction)
 
     # Do processing in parallel
-    if n_procs == 'auto':
-        n_procs = min(cpu_count() - 1, len(vhdr_files))
-    pool = Pool(n_procs)
-    res = pool.starmap(pipeline_partial, participant_args)
-    pool.close()
-    pool.join()
+    n_jobs = -2 if n_jobs == 'auto' else n_jobs
+    res = Parallel(n_jobs)(
+        delayed(pipeline_partial)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
     trials, evokeds_dicts, evokeds_df_dicts = list(map(list, zip(*res)))
