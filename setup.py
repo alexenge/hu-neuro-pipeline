@@ -26,6 +26,7 @@ setuptools.setup(
         'joblib',
         'mne>=0.24.0',
         'pandas',
+        'scikit-learn'
     ],
     python_requires='>=3.8',
 )
