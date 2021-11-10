@@ -309,7 +309,6 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
         cols_df = cols_df.loc[cols_df.index.repeat(n_samples)]
         cols_df = cols_df.reset_index(drop=True)
         evokeds_df = pd.concat([cols_df, evokeds_df], axis=1)
-        evokeds_df[cols] = evokeds_df[cols].astype('str')
 
     # Otherwise add comments from evokeds (assumed to contain event IDs)
     else:
