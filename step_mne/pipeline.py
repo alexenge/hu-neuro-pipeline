@@ -7,9 +7,10 @@ from joblib import Parallel, delayed
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 
-from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
-                      compute_grands, compute_grands_df, compute_single_trials,
-                      correct_besa, correct_ica, get_bads, read_log)
+from .helpers import (add_heog_veog, apply_montage, check_participant_input,
+                      compute_evokeds, compute_grands, compute_grands_df,
+                      compute_single_trials, correct_besa, correct_ica,
+                      get_bads, read_log)
 from .savers import (save_clean, save_df, save_epochs, save_evokeds,
                      save_montage)
 
@@ -18,8 +19,10 @@ def pipeline_single(
     vhdr_file=None,
     log_file=None,
     ocular_correction='fastica',
-    downsample_sfreq=None,
     bad_channels='auto',
+    skip_log_rows=None,
+    skip_log_conditions=None,
+    downsample_sfreq=None,
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
@@ -29,7 +32,6 @@ def pipeline_single(
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
     triggers=None,
-    skip_log_rows=None,
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
@@ -66,6 +68,8 @@ def pipeline_single(
 
     # Interpolate any bad channels
     if bad_channels is not None and bad_channels != 'auto':
+        if isinstance(bad_channels, str):
+            bad_channels = [bad_channels]
         raw.info['bads'] = raw.info['bads'] + bad_channels
         _ = raw.interpolate_bads()
 
@@ -102,7 +106,7 @@ def pipeline_single(
     print(epochs)
 
     # Read behavioral log file
-    epochs.metadata = read_log(log_file, skip_log_rows)
+    epochs.metadata = read_log(log_file, skip_log_rows, skip_log_conditions)
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # Get indices of bad epochs and channels
@@ -145,8 +149,10 @@ def pipeline(
     vhdr_files=None,
     log_files=None,
     ocular_correction='fastica',
-    downsample_sfreq=None,
     bad_channels='auto',
+    skip_log_rows=None,
+    skip_log_conditions=None,
+    downsample_sfreq=None,
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
@@ -156,7 +162,6 @@ def pipeline(
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
     triggers=None,
-    skip_log_rows=None,
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
@@ -200,11 +205,23 @@ def pipeline(
     downsample_sfreq : float | None, default None
         Downsampling frequency in Hz. Downsampling (e.g., from 500.0 Hz to
         250.0 Hz) saves computation time and disk space.
-    bad_channels : list of list of str | 'auto' | None, default 'auto'
-        Bad channels for each participant that should be replaced via
-        interpolation. If 'auto', interpolate channels that exceed the
-        rejection threshold (see `reject_peak_to_peak` and `reject_flat`)
-        in more than 5% of all epochs.
+    bad_channels : list of list | list of str | 'auto' | None, default 'auto'
+        Bad channels that should be replaced via interpolation. If 'auto',
+        interpolates channels if they meet the rejection threshold (see
+        `reject_peak_to_peak` and `reject_flat`) in more than 5% of all epochs.
+        If list of lists, must contain one list of bad channel labels per
+        participants. If list of str, interpolates the same channels for all
+        participants. If None, doesn't interpolate any channels.
+    skip_log_rows : list of list | list of int | None, default None
+        Rows to remove from the log file based on their indices. This is useful
+        if the EEG was paused or interrupted at some point. If list of list,
+        must contain one list of row indices (starting at 0) per participant.
+        If list of int, removes the same row indices for all participants.
+    skip_log_conditions : dict | None, default None
+        Rows to remove from the log file based on their condition. This is
+        useful to remove filler stimuli for which there are no EEG triggers.
+        Dict keys are the column names in the log file, values (str or list of
+        str) are the condition(s) that should be removed remove.
     veog_channels : list of str | 'auto' | None, default 'auto'
         Names of two vertical EOG channels (above and below the eye) for
         creating a virtual, bipolar VEOG channel. If 'auto', try different
@@ -234,13 +251,6 @@ def pipeline(
         their corresponding labels (keys, str) for creating epochs. If None,
         use all triggers. This will not work if there are more triggers than
         trials in the log file.
-    skip_log_rows : list of list of int | dict | None, default None
-        List of row indices from the log file file to skip for each
-        participant. Useful if the EEG was accidently paused or started late
-        for any participants. Can also be a dict {str: str or list of str, ...}
-        where keys are column names (in the log file) and values are one or
-        more conditions in these column. Useful if some conditions don't have
-        triggers (e.g., because they are filler trials).
     reject_peak_to_peak : float | None, default 200.0
         Peak-to-peak amplitude (in microvolts) for rejecting bad epochs.
     reject_flat : float | None, default 1.0
@@ -311,8 +321,10 @@ def pipeline(
     # Create dict of non participant-specific inputs
     shared_kwargs = locals().copy()
     # shared_kwargs = aha_dict.copy()
-    for kwarg in ['vhdr_files', 'log_files', 'ocular_correction', 'n_jobs']:
-        shared_kwargs.pop(kwarg)
+    nonshared_keys = ['vhdr_files', 'log_files', 'ocular_correction',
+                      'bad_channels', 'skip_log_rows', 'n_jobs']
+    for key in nonshared_keys:
+        shared_kwargs.pop(key)
 
     # Create partial function with shared arguments
     pipeline_partial = partial(pipeline_single, **shared_kwargs)
@@ -321,10 +333,12 @@ def pipeline(
     if isinstance(vhdr_files, str):
         if path.isdir(vhdr_files):
             vhdr_files = glob(f'{vhdr_files}/*.vhdr')
+            vhdr_files.sort()
     if isinstance(log_files, str):
         if path.isdir(log_files):
             log_files = glob(f'{log_files}/*.csv') + \
                 glob(f'{log_files}/*.txt') + glob(f'{log_files}/*.tsv')
+            log_files.sort()
 
     # Prepare ocular correction method
     if isinstance(ocular_correction, str):
@@ -332,15 +346,21 @@ def pipeline(
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
             ocular_correction = glob(f'{ocular_correction}/*.matrix')
+            ocular_correction.sort()
+
+    # Construct lists of bad_channels and skip_log_rows per participant
+    participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
+    bad_channels = check_participant_input(bad_channels, participant_ids)
+    skip_log_rows = check_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
-    vhdr_files.sort()
-    log_files.sort()
-    ocular_correction.sort()
     vhdr_files = vhdr_files[0:2]
     log_files = log_files[0:2]
     ocular_correction = ocular_correction[0:2]
-    participant_args = zip(vhdr_files, log_files, ocular_correction)
+    bad_channels = bad_channels[0:2]
+    skip_log_rows = skip_log_rows[0:2]
+    participant_args = zip(vhdr_files, log_files, ocular_correction,
+                           bad_channels, skip_log_rows)
 
     # Do processing in parallel
     n_jobs = -2 if n_jobs == 'auto' else n_jobs

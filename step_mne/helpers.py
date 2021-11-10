@@ -121,7 +121,7 @@ def correct_besa(raw, besa_file):
     raw[eeg_channels] = eeg_data
 
 
-def read_log(log_file, skip_log_rows=None):
+def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
 
     # Detect file encoding
     with open(log_file, 'rb') as f:
@@ -135,15 +135,19 @@ def read_log(log_file, skip_log_rows=None):
     else:
         log = pd.read_csv(log_file, delimiter='\t', encoding=encoding)
 
-    # Remove rows that are not present in the EEG data
-    if isinstance(skip_log_rows, list):
+    # Remove rows via indices (e.g., if the EEG was paused accidently)
+    if skip_log_rows is not None:
         log = log.drop(skip_log_rows)
-    elif isinstance(skip_log_rows, dict):
-        for column, values in skip_log_rows.items():
+
+    # Remove rows via conditions (e.g., for filler stimuli without triggers)
+    if skip_log_conditions is not None:
+        assert isinstance(skip_log_conditions, dict), \
+            '"skip_log_conditions" must be a dict ({column: [conditions]})'
+        for col, values in skip_log_conditions.items():
             if not isinstance(values, list):
-                log = log[log[column] != values]
+                log = log[log[col] != values]
             else:
-                log = log[~log[column].isin(values)]
+                log = log[~log[col].isin(values)]
 
     return log
 
@@ -349,3 +353,34 @@ def compute_grands_df(evokeds_df):
     grands_df = grands_df.reset_index()
 
     return grands_df
+
+
+def check_participant_input(input, participant_ids):
+
+    # If it's a dict, convert to list
+    if isinstance(input, dict):
+        participant_dict = {id: None for id in participant_ids}
+        for id, values in input.items():
+            assert id in participant_ids, \
+                f'Participant ID {id} is not in vhdr_files'
+            participant_dict[id] = values
+        return participant_dict.values()
+
+    # If it's a list of list, it must have the same length as participant_ids
+    elif is_nested_list(input):
+        assert len(input) == len(participant_ids), \
+            'Input lists must have the same length'
+        return input
+
+    # Otherwise all participants get the same values
+    else:
+        return [input] * len(participant_ids)
+
+
+def is_nested_list(input):
+
+    # Check if there is any list in the list
+    if isinstance(input, list):
+        return any(isinstance(elem, list) for elem in input)
+    else:
+        return False
