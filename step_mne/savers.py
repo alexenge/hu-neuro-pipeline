@@ -63,26 +63,15 @@ def save_epochs(epochs, epochs_dir, participant_id='', to_df=True):
         epochs.save(fname, overwrite=True)
 
 
-def save_evokeds_dict(
-        evokeds_dict, evokeds_dir, participant_id='', to_df=True):
+def save_evokeds(
+        evokeds, evokeds_df, evokeds_dir, participant_id='', to_df=True):
 
-    # Save each set of evokeds and/or evokeds_df in the dict
-    for suffix, evokeds_tuple in evokeds_dict.items():
-        evokeds = evokeds_tuple[0]
-        evokeds_df = evokeds_tuple[1]
-        save_evokeds(
-            evokeds, evokeds_df, evokeds_dir, participant_id, suffix, to_df)
-
-
-def save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id='',
-                 suffix='', to_df=True):
+    # Re-format participant ID for filename
+    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
+    suffix = 'ave'
 
     # Create output directory
     makedirs(evokeds_dir, exist_ok=True)
-
-    # Re-format participant ID and suffix for filename
-    participant_id_ = '' if participant_id == '' else f'{participant_id}_'
-    suffix = 'ave' if suffix == '' else f'{suffix}_ave'
 
     # Save evokeds as DataFrame
     if to_df is True or to_df == 'both':

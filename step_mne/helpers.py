@@ -1,4 +1,5 @@
 from collections import Counter
+from itertools import chain, combinations
 from os import path
 from sys import exit
 
@@ -219,38 +220,59 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 def compute_evokeds(
         epochs, condition_cols=None, bad_ixs=[], participant_id=None):
 
-    # Prepare emtpy dicts for storing each set of evokeds and its key
-    evokeds_dict = {}
-    evokeds_df_dict = {}
+    # Prepare emtpy list for storing
+    all_evokeds = []
+    all_evokeds_dfs = []
 
     # Always use EEG and misc (component) channels for averaging
     picks = ['eeg', 'misc']
 
     # If no condition_cols were provided, use the events from the epochs
     if condition_cols is None:
+
+        # Compute evokeds
         epochs_good = epochs.copy().drop(bad_ixs, verbose=False)
         evokeds = epochs_good.average(picks, by_event_type=True)
-        evokeds_dict[''] = evokeds
-        evokeds_df_dict[''] = create_evokeds_df(
-            evokeds, participant_id=participant_id)
+        all_evokeds.append(evokeds)
+
+        # Convert to DataFrame
+        evokeds_df = create_evokeds_df(evokeds, participant_id=participant_id)
+        all_evokeds_dfs.append(evokeds_df)
 
     # Otherwise use condition_cols
     else:
 
-        # Make sure cols are stored in a dict (i.e., {key: cols})
-        if not isinstance(condition_cols, dict):
-            condition_cols = {'': condition_cols}  # None is the key
+        # Create the powerset (all possible main effects and interactions)
+        c = condition_cols if isinstance(condition_cols, list) \
+            else [condition_cols]
+        powerset = chain.from_iterable(
+            combinations(c, r) for r in range(1, len(c) + 1))
 
-        # Compute one set of evokeds for each set of condition columns
-        for key, cols in condition_cols.items():
+        # Iterate over the possible main effects and interactions
+        for cols in powerset:
+            cols = list(cols)
+
+            # Compute evokeds
             epochs_update = update_events(epochs, cols)
             epochs_update.drop(bad_ixs, verbose=False)
             evokeds = epochs_update.average(picks, by_event_type=True)
-            evokeds_dict[key] = evokeds
-            evokeds_df_dict[key] = create_evokeds_df(
-                evokeds, cols, epochs.metadata, participant_id)
+            all_evokeds = all_evokeds + evokeds
 
-    return evokeds_dict, evokeds_df_dict
+            # Convert to DataFrame
+            trials = epochs.metadata
+            evokeds_df = create_evokeds_df(
+                evokeds, cols, trials, participant_id)
+
+            # Append info about averaging
+            value = ' * '.join(cols)
+            evokeds_df.insert(loc=1, column='average_by', value=value)
+            all_evokeds_dfs.append(evokeds_df)
+
+    # Combine DataFrames
+    all_evokeds_dfs.reverse()
+    all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
+
+    return all_evokeds, all_evokeds_df
 
 
 def update_events(epochs, cols):
@@ -282,6 +304,7 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
     if cols is not None:
         assert trials is not None, 'Must provide trials (metadata) with cols'
         cols_df = pd.DataFrame(trials[cols])
+        cols_df = cols_df.astype('str')
         cols_df = cols_df.drop_duplicates()
         cols_df = cols_df.loc[cols_df.index.repeat(n_samples)]
         cols_df = cols_df.reset_index(drop=True)
@@ -320,7 +343,7 @@ def compute_grands_df(evokeds_df):
     time_col_ix = evokeds_df.columns.get_loc('time')
     participant_id_ix = 1
     group_cols = list(evokeds_df.columns[participant_id_ix:(time_col_ix + 1)])
-    grands_df = evokeds_df.groupby(group_cols).mean()
+    grands_df = evokeds_df.groupby(group_cols, dropna=False).mean()
 
     # Convert conditions from index back to columns
     grands_df = grands_df.reset_index()

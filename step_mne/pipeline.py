@@ -131,16 +131,14 @@ def pipeline_single(
         save_montage(epochs, export_dir)
 
     # Compute evokeds
-    evokeds_dict, evokeds_df_dict = compute_evokeds(
+    evokeds, evokeds_df = compute_evokeds(
         epochs, condition_cols, bad_ixs, participant_id)
 
-    # Save evoekds as data frame and/or MNE object
+    # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
-        for key in evokeds_dict:
-            save_evokeds(evokeds_dict[key], evokeds_df_dict[key], evokeds_dir,
-                         participant_id, suffix=key, to_df=to_df)
+        save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
-    return trials, evokeds_dict, evokeds_df_dict
+    return trials, evokeds, evokeds_df
 
 
 def pipeline(
@@ -254,15 +252,13 @@ def pipeline(
         `tmin` and `tmax` are the time window of interest (in s) and `roi` is
         a list of channel names for the spatial region of interest. All of the
         four lists must have the same number of elements.
-    condition_cols : str | list of str | dict | None, default None
-        Columns in the log file to compute condition averages (evokeds) for.
-        Can be one more column names, in which one average is computed for each
-        condition (one column) or each combination of conditions (multiple
-        columns). Can also be a dict if multiple such sets of averages is
-        needed (e.g., separately for main effects and interactions). In this
-        case, keys (str) are labels for distinguishing output file names and
-        values are the same as before (one or more column names). If None,
-        create one average for each EEG trigger (see `triggers`).
+    condition_cols : str | list of str | None, default None
+        Columns in the log file to compute condition averages (evokeds) for. If
+        given a single column name, computes averages for each condition in
+        this column. If given multiple column names, computes averages for each
+        condition in each column (i.e., main effects) as well as for each
+        combination of conditions across columns (i.e., interaction effects).
+        If None, creates one average for each EEG trigger (see `triggers`).
     clean_dir : str | Path | None, default None
         Output directory to save the cleaned (ocular corrected, filtered)
         continuous EEG data (always in `.fif` format) for each participant.
@@ -352,38 +348,22 @@ def pipeline(
         delayed(pipeline_partial)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    trials, evokeds_dicts, evokeds_df_dicts = list(map(list, zip(*res)))
+    trials, evokeds, evokeds_dfs = list(map(list, zip(*res)))
 
-    # Combine and save trials
+    # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
     if export_dir is not None:
         save_df(trials, export_dir, participant_id='all', suffix='trials')
 
-    # Process each set of evokeds
-    evokeds_dict = {}
-    evokeds_df_dict = {}
-    for key in evokeds_df_dicts[0]:
+    # Combine evokeds_dfs and save
+    evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
+    if export_dir is not None:
+        save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
 
-        # Extract the relevant evokeds from all participants
-        evokeds = [d[key] for d in evokeds_dicts]
-        evokeds_dfs = [d[key] for d in evokeds_df_dicts]
+    # Compute grand averages and saves
+    grands = compute_grands(evokeds)
+    grands_df = compute_grands_df(evokeds_df)
+    save_evokeds(
+        grands, grands_df, export_dir, participant_id='grand', to_df=to_df)
 
-        # Concatenate DataFrames from all participants and save
-        evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
-        if export_dir is not None:
-            suffix = 'ave' if key == '' else f'{key}_ave'
-            save_df(evokeds_df, export_dir, participant_id='all',
-                    suffix=suffix)
-
-        # Compute grand averages and save
-        grands = compute_grands(evokeds)
-        grands_df = compute_grands_df(evokeds_df)
-        if export_dir is not None:
-            save_evokeds(grands, grands_df, export_dir, participant_id='grand',
-                         suffix=key, to_df=to_df)
-
-        # Append to dicts
-        evokeds_dict[key] = evokeds
-        evokeds_df_dict[key] = evokeds_df
-
-    return trials, evokeds_dict, evokeds_df_dict
+    return trials, evokeds, evokeds_df
