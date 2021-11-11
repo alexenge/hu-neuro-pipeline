@@ -1,3 +1,4 @@
+import json
 from os import makedirs
 
 import pandas as pd
@@ -99,3 +100,14 @@ def save_montage(epochs, export_dir):
 
     # Save
     save_df(coords_df, export_dir, suffix='channel_locations')
+
+
+def save_config(config, export_dir):
+
+    # Create output directory
+    makedirs(export_dir, exist_ok=True)
+
+    # Save
+    fname = f'{export_dir}/config.json'
+    with open(fname, 'w') as f:
+        json.dump(config, f)

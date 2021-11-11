@@ -11,8 +11,8 @@ from .helpers import (add_heog_veog, apply_montage, check_participant_input,
                       compute_evokeds, compute_grands, compute_grands_df,
                       compute_single_trials, correct_besa, correct_ica,
                       get_bads, read_log)
-from .savers import (save_clean, save_df, save_epochs, save_evokeds,
-                     save_montage)
+from .savers import (save_clean, save_config, save_df, save_epochs,
+                     save_evokeds, save_montage)
 
 
 def pipeline_single(
@@ -44,8 +44,8 @@ def pipeline_single(
     to_df=True,
 ):
 
-    # Backup input arguments for later re-use
-    inputs = locals()
+    # Backup input arguments for re-use
+    config = locals()
 
     # Get participant ID from filename
     participant_id = path.basename(vhdr_file).split('.')[0]
@@ -113,11 +113,13 @@ def pipeline_single(
     bad_ixs, auto_channels = get_bads(epochs, reject_peak_to_peak, reject_flat)
 
     # Start over, repairing any (automatically deteced) bad channels
-    if bad_channels == 'auto' and auto_channels != []:
-        new_inputs = inputs.copy()
-        new_inputs['bad_channels'] = auto_channels
-        epochs = pipeline_single(**new_inputs)
-        return epochs
+    if bad_channels == 'auto':
+        if auto_channels != []:
+            config['bad_channels'] = auto_channels
+            trials, evokeds, evokeds_df, config = pipeline_single(**config)
+            return trials, evokeds, evokeds_df, config
+        else:
+            config['bad_channels'] = []
 
     # Add single trial mean ERP amplitudes to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
@@ -142,7 +144,7 @@ def pipeline_single(
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
-    return trials, evokeds, evokeds_df
+    return trials, evokeds, evokeds_df, config
 
 
 def pipeline(
@@ -302,14 +304,16 @@ def pipeline(
         Combined single trial behavioral and ERP component data for all
         participants. Can be used for running linear mixed models (LMMs) on
         reaction times and ERP mean amplitudes.
-    evokeds_dict : dict of list of evokeds
-        One set of evokeds for each (combination of) condition(s) of interest
-        (see `condition_cols`). Each set contains the evokeds from all
-        participants as a list.
-    evokeds_dict : dict of pandas.DataFrame
-        Same as `evokeds_dict`, but converted to data frames. Each data frame
-        contains the evokeds from all participants. Can be used, e.g., for
-        plotting grand averages with uncertainty intervals.
+    evokeds_df : pandas.DataFrame
+        Time-resolved by-participant averages for all channels and ERP
+        components. If multiple `condition_cols`, the column `average_by`
+        indicates for which column (main effects) or combination of columns
+        (interaction effects) the averages were computed.
+    config : dict
+        Configuration of the pipeline. Will be identical to the input arguments
+        except for the list of `bad_channels` (if `bad_channels == 'auto'`).
+        If directories were provided for the input files, the full list of
+        filenames is returned.
 
     Notes
     -----
@@ -318,18 +322,19 @@ def pipeline(
     [3] https://mne.tools/stable/generated/mne.channels.read_custom_montage.html
     """
 
-    # Create dict of non participant-specific inputs
-    shared_kwargs = locals().copy()
-    # shared_kwargs = aha_dict.copy()
+    # Backup input arguments for re-use
+    config = locals()
+    # config = aha_dict.copy()
+
+    # Remove arguments that are specific for each participant
     nonshared_keys = ['vhdr_files', 'log_files', 'ocular_correction',
                       'bad_channels', 'skip_log_rows', 'n_jobs']
-    for key in nonshared_keys:
-        shared_kwargs.pop(key)
+    _ = [config.pop(key) for key in nonshared_keys]
 
-    # Create partial function with shared arguments
-    pipeline_partial = partial(pipeline_single, **shared_kwargs)
+    # Create partial function with only the shared arguments
+    pipeline_partial = partial(pipeline_single, **config)
 
-    # Get file paths if directories were provided
+    # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
         if path.isdir(vhdr_files):
             vhdr_files = glob(f'{vhdr_files}/*.vhdr')
@@ -348,8 +353,10 @@ def pipeline(
             ocular_correction = glob(f'{ocular_correction}/*.matrix')
             ocular_correction.sort()
 
-    # Construct lists of bad_channels and skip_log_rows per participant
+    # Extract participant IDs from filenames
     participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
+
+    # Construct lists of bad_channels and skip_log_rows per participant
     bad_channels = check_participant_input(bad_channels, participant_ids)
     skip_log_rows = check_participant_input(skip_log_rows, participant_ids)
 
@@ -363,12 +370,12 @@ def pipeline(
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
-    n_jobs = -2 if n_jobs == 'auto' else n_jobs
-    res = Parallel(n_jobs)(
+    n_jobs_num = -2 if n_jobs == 'auto' else n_jobs
+    res = Parallel(n_jobs_num)(
         delayed(pipeline_partial)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    trials, evokeds, evokeds_dfs = list(map(list, zip(*res)))
+    trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
@@ -381,10 +388,18 @@ def pipeline(
     if export_dir is not None:
         save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
 
-    # Compute grand averages and saves
+    # Compute grand averages and save
     grands = compute_grands(evokeds)
     grands_df = compute_grands_df(evokeds_df)
     save_evokeds(
         grands, grands_df, export_dir, participant_id='grand', to_df=to_df)
 
-    return trials, evokeds, evokeds_df
+    # Add participant-specific arguments back to config and save
+    config = {'vhdr_files': vhdr_files, 'log_files': log_files,
+              'ocular_correction': ocular_correction,
+              'bad_channels': [cf['bad_channels'] for cf in configs],
+              'skip_log_rows': skip_log_rows, **config, 'n_jobs': n_jobs}
+    if export_dir is not None:
+        save_config(config, export_dir)
+
+    return trials, evokeds_df, config
