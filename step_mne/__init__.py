@@ -1,3 +1,4 @@
-"Single trial EEG pipeline using MNE-Python"
+"Single Trial EEG Pipeline using MNE-Python"
 
-from .pipeline import pipeline, pipeline_single
+from .group import group_pipeline
+from .participant import participant_pipeline

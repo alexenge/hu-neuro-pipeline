@@ -24,12 +24,12 @@ python3 -m pip install step-mne
 
 #### 2. Run the pipeline
 
-The `pipeline()` function can be used to process the EEG data for one or multiple participants:
+The `group_pipeline()` function can be used to process the EEG data for multiple participants in parallel:
 
 ```python
 from step_mne import pipeline
 
-trials, evokeds, config = pipeline(
+trials, evokeds, config = group_pipeline(
     vhdr_files='Results/EEG/raw',
     log_files='Results/RT',
     ocular_correction='fastica',
@@ -72,7 +72,7 @@ The experiment has two experimental factors: `Semantics` (`"related"` vs. `"unre
 
 ```R
 step_mne <- reticulate::import("step_mne")
-res <- step_mne$pipeline(
+res <- step_mne$group_pipeline(
     vhdr_files = "Results/EEG/raw",
     log_files = "Results/RT",
     ocular_correction = "Results/EEG/cali",
@@ -106,7 +106,7 @@ reticulate::py_help(step_mne$pipeline)
 
 #### 4. Use the results
 
-The `pipeline()` function returns three elements as its output (here stored in a list called `res`):
+The `group_pipeline()` function returns three elements as its output (here stored in a list called `res`):
 
 * `trials`: A data frame containing the single trial behavioral and ERP component data.
 Can be used, for instance, to fit a linear mixed model (LMM) predicting the mean amplitude of the N400 component:
