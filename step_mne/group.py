@@ -42,15 +42,14 @@ def group_pipeline(
     """Processes EEG data for all participants of an experiment in parallel.
 
     For each participant, reads raw data, performs downsampling (optional),
-    laods electrode locations, interpolates bad channels (optional), re-
+    loads electrode locations, interpolates bad channels (optional), re-
     references to common average, does ocular correction (ICA or MSEC/BESA,
     optional), does filtering (optional), does segmenting into epochs, rejects
     bad epochs, and computes single trial mean ERP amplitudes for components of
     interest as well as condition averages (evokeds).
 
-    At the group level,
-    combines all single trial behavioral data and mean amplitudes and combines
-    evokeds into grand averages (e.g., for plotting).
+    At the group level, combines all single trial behavioral data and mean
+    amplitudes and combines evokeds into grand averages (e.g., for plotting).
 
     For details about the EEG processing pipeline, see Frömer et al. (2018)[1].
 
@@ -67,9 +66,6 @@ def group_pipeline(
         Ocular correction method. Can either be an ICA method (`'fastica'` or
         `'infomax'` or `'picard'`), a list of MSEC (BESA) `.matrix` file paths,
         or their parent directory.
-    downsample_sfreq : float | None, default None
-        Downsampling frequency in Hz. Downsampling (e.g., from 500.0 Hz to
-        250.0 Hz) saves computation time and disk space.
     bad_channels : list of list | list of str | 'auto' | None, default 'auto'
         Bad channels that should be replaced via interpolation. If 'auto',
         interpolates channels if they meet the rejection threshold (see
@@ -87,14 +83,17 @@ def group_pipeline(
         useful to remove filler stimuli for which there are no EEG triggers.
         Dict keys are the column names in the log file, values (str or list of
         str) are the condition(s) that should be removed remove.
+    downsample_sfreq : float | None, default None
+        Downsampling frequency in Hz. Downsampling (e.g., from 500.0 Hz to
+        250.0 Hz) saves computation time and disk space.
     veog_channels : list of str | 'auto' | None, default 'auto'
         Names of two vertical EOG channels (above and below the eye) for
         creating a virtual, bipolar VEOG channel. If 'auto', try different
-        common VEOG electrodes ('Fp1'/'FP1', 'Auge_u'/'IO1').
+        common VEOG electrode labels ('Fp1'/'FP1', 'Auge_u'/'IO1').
     heog_channels : list of str | 'auto' | None, default 'auto'
         Names of two vertical EOG channels (left and right of the eye) for
         creating a virtual, bipolar HEOG channel. If 'auto', try different
-        common HEOG electrodes ('F9'/'Afp9', 'F10'/'Afp10').
+        common HEOG electrode labels ('F9'/'Afp9', 'F10'/'Afp10').
     montage : str | Path, default 'easycap-M1'
         Montage for looking up channel locations. Can either be the name of a
         standard montage (see [2]) or the path to a custom electrode location
@@ -124,8 +123,8 @@ def group_pipeline(
         Definition of ERP components for single trial analysis. Must have the
         following key (value) pairs: 'name' (list of str), `tmin` (list of
         float), `tmax` (list of float), `roi` (list of list of str), where
-        `tmin` and `tmax` are the time window of interest (in s) and `roi` is
-        a list of channel names for the spatial region of interest. All of the
+        `tmin` and `tmax` are the time windows of interest (in s) and `roi` are
+        the lists of channel names for the spatial regions of interest. All of
         four lists must have the same number of elements.
     condition_cols : str | list of str | None, default None
         Columns in the log file to compute condition averages (evokeds) for. If
@@ -137,11 +136,9 @@ def group_pipeline(
     clean_dir : str | Path | None, default None
         Output directory to save the cleaned (ocular corrected, filtered)
         continuous EEG data (always in `.fif` format) for each participant.
-        Not usually needed.
     epochs_dir : str | Path | None, default None
         Output directory to save the full (time-resolved) epochs data
         (in `.fif` and/or `.csv` format, see `to_df`) for each participant.
-        Not usually needed.
     trials_dir : str | Path | None, default None
         Output directory to save the single trial behavioral and ERP component
         DataFrame (always in `.csv` format) for each participant.

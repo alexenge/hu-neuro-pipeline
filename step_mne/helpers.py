@@ -13,6 +13,7 @@ from mne.preprocessing import ICA
 
 
 def add_heog_veog(raw, heog_channels='auto', veog_channels='auto'):
+    """Adds virtual HEOG and VEOG using default or non-default EOG names."""
 
     # Add bipolar HEOG channel
     if heog_channels is not None:
@@ -30,6 +31,7 @@ def add_heog_veog(raw, heog_channels='auto', veog_channels='auto'):
 
 
 def add_eog(raw, channels, new_name):
+    """Computes a single bipolar EOG channel from a list of possible names."""
 
     # Check that exactly two of the provided channels are in the data
     channels = [ch for ch in channels if ch in raw.ch_names]
@@ -49,6 +51,7 @@ def add_eog(raw, channels, new_name):
 
 
 def apply_montage(raw, montage):
+    """Reads electrode positions from custom file or standard montage."""
 
     # Load custom montage from file
     if path.isfile(montage):
@@ -79,6 +82,7 @@ def apply_montage(raw, montage):
 
 
 def correct_ica(raw, n_components=15, random_seed=1234, method='fastica'):
+    """Corrects ocular artifacts using ICA and automatic component removal."""
 
     # Run ICA on a copy of the data
     raw_filt_ica = raw.copy()
@@ -95,6 +99,7 @@ def correct_ica(raw, n_components=15, random_seed=1234, method='fastica'):
 
 
 def correct_besa(raw, besa_file):
+    """Corrects ocular artifacts using a pre-computed MSEC (BESA) matrix."""
 
     # Read BESA matrix
     print(f'Doing ocular correction with MSEC (BESA)')
@@ -122,6 +127,7 @@ def correct_besa(raw, besa_file):
 
 
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
+    """Reads the behavioral log file with information about each EEG trial."""
 
     # Detect file encoding
     with open(log_file, 'rb') as f:
@@ -154,6 +160,7 @@ def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
 
 def get_bads(
         epochs, reject_peak_to_peak=None, reject_flat=None, percent_bad=0.05):
+    """Detects bad epochs/channels based on peak-to-peak and flat amplitude."""
 
     # Convert thresholds to volts in dicts
     if reject_peak_to_peak is not None:
@@ -182,6 +189,7 @@ def get_bads(
 
 
 def compute_single_trials(epochs, components, bad_ixs=None):
+    """Computes mean ERP amplitude for a dict of multiple components."""
 
     # Compute single trial mean ERP amplitudes for each component
     components_df = pd.DataFrame(components)
@@ -194,6 +202,7 @@ def compute_single_trials(epochs, components, bad_ixs=None):
 
 
 def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
+    """Computes mean ERP amplitude for single component."""
 
     # Create virtual channel for the average in the region of interest
     print(f'Computing single trial ERP amplitudes for {name}')
@@ -223,6 +232,7 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 
 def compute_evokeds(
         epochs, condition_cols=None, bad_ixs=[], participant_id=None):
+    """Computes condition averages (evokeds) based on triggers or metadata."""
 
     # Prepare emtpy list for storing
     all_evokeds = []
@@ -280,6 +290,7 @@ def compute_evokeds(
 
 
 def update_events(epochs, cols):
+    """Updates the events/event_id structures using cols from the metadata."""
 
     # Generate event codes for the relevant columns
     cols_df = pd.DataFrame(epochs.metadata[cols])
@@ -296,6 +307,7 @@ def update_events(epochs, cols):
 
 
 def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
+    """Converts mne.Evoked into a pd.DataFrame with metadata."""
 
     # Convert all evokeds to a single DataFrame
     scalings = {'eeg': 1e6, 'misc': 1e6}
@@ -328,6 +340,7 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
 
 
 def compute_grands(evokeds_per_participant):
+    """Averages evokeds of all participants into grand averages."""
 
     # Average across participants for each condition
     evokeds_per_condition = list(map(list, zip(*evokeds_per_participant)))
@@ -342,6 +355,7 @@ def compute_grands(evokeds_per_participant):
 
 
 def compute_grands_df(evokeds_df):
+    """Averages evoked DataFrames of all participants into grand averages."""
 
     # Average by condition columns (between participant_id and time)
     time_col_ix = evokeds_df.columns.get_loc('time')
@@ -356,6 +370,7 @@ def compute_grands_df(evokeds_df):
 
 
 def check_participant_input(input, participant_ids):
+    """Converts different inputs (e.g., dict) into a per-participant list."""
 
     # If it's a dict, convert to list
     if isinstance(input, dict):
@@ -378,6 +393,7 @@ def check_participant_input(input, participant_ids):
 
 
 def is_nested_list(input):
+    """Checks if a list is nested, i.e., contains at least one other list."""
 
     # Check if there is any list in the list
     if isinstance(input, list):

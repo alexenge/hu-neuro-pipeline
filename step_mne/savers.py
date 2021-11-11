@@ -6,6 +6,7 @@ from mne import write_evokeds
 
 
 def save_clean(raw, clean_dir, participant_id=''):
+    """Saves cleaned (continuous) EEG data in `.fif` format."""
 
     # Re-format participant ID for filename
     participant_id_ = '' if participant_id == '' else f'{participant_id}_'
@@ -18,6 +19,7 @@ def save_clean(raw, clean_dir, participant_id=''):
 
 
 def save_df(df, output_dir, participant_id='', suffix=''):
+    """Saves pd.DataFrame in `.csv` format."""
 
     # Create output folder
     makedirs(output_dir, exist_ok=True)
@@ -33,6 +35,7 @@ def save_df(df, output_dir, participant_id='', suffix=''):
 
 
 def save_epochs(epochs, epochs_dir, participant_id='', to_df=True):
+    """Saves mne.Epochs with metadata in `.fif` and/or `.csv` format."""
 
     # Create output folder
     makedirs(epochs_dir, exist_ok=True)
@@ -66,6 +69,7 @@ def save_epochs(epochs, epochs_dir, participant_id='', to_df=True):
 
 def save_evokeds(
         evokeds, evokeds_df, evokeds_dir, participant_id='', to_df=True):
+    """Saves a list of mne.Evokeds in `.fif` and/or `.csv` format."""
 
     # Re-format participant ID for filename
     participant_id_ = '' if participant_id == '' else f'{participant_id}_'
@@ -85,6 +89,7 @@ def save_evokeds(
 
 
 def save_montage(epochs, export_dir):
+    """Saves channel locations in `.csv` format."""
 
     # Create output directory
     makedirs(export_dir, exist_ok=True)
@@ -103,6 +108,7 @@ def save_montage(epochs, export_dir):
 
 
 def save_config(config, export_dir):
+    """Saves dict of pipeline config options in `.json` format."""
 
     # Create output directory
     makedirs(export_dir, exist_ok=True)
