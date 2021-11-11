@@ -1,6 +1,6 @@
 # STEP-MNE
 
-Single trial EEG pipeline using [MNE-Python](https://mne.tools)
+Single Trial EEG Pipeline using [MNE-Python](https://mne.tools)
 
 ![PyPI](https://img.shields.io/pypi/v/step-mne)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/step-mne)
@@ -11,6 +11,37 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 *Frontiers in Neuroscience*, *12*, 48. <https://doi.org/10.3389/fnins.2018.00048>
 
 ## Usage
+
+### For Python users
+
+#### 1. Install STEP-MNE
+
+Install as usual from the [Python Package Index (PyPI)](https://pypi.org/project/step-mne/):
+
+```bash
+python3 -m pip install step-mne
+```
+
+#### 2. Run the pipeline
+
+The `pipeline()` function can be used to process the EEG data for one or multiple participants:
+
+```python
+from step_mne import pipeline
+
+trials, evokeds, config = pipeline(
+    vhdr_files='Results/EEG/raw',
+    log_files='Results/RT',
+    ocular_correction='fastica',
+    triggers={'standard': 101, 'target': 102},
+    components={'name': ['P3'], 'tmin': [0.3], 'tmax': [0.5],
+                'roi': [['C1', 'C2', 'Cz', 'CP1', 'CP2', 'CPz']]},
+    condition_cols=['Frequency'],
+    export_dir='Results/EEG/export',
+)
+```
+
+See `help(pipeline)` for information on these and other (optional) input arguments as well as on the returns.
 
 ### For R users
 
@@ -51,7 +82,7 @@ res <- step_mne$pipeline(
         "unrelated/negative" = 211,
         "unrelated/neutral" = 212
     ),
-    skip_log_rows = list("Semantics" = "filler"),
+    skip_log_conditions = list("Semantics" = "filler"),
     components = list(
         "name" = c("N400", "P600"),
         "tmin" = c(300, 500),
