@@ -16,7 +16,7 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 
 #### 1. Install STEP-MNE
 
-Install as usual from the [Python Package Index (PyPI)](https://pypi.org/project/step-mne/):
+Install as usual from the [Python Package Index](https://pypi.org/project/step-mne/) (PyPI):
 
 ```bash
 python3 -m pip install step-mne
@@ -24,10 +24,10 @@ python3 -m pip install step-mne
 
 #### 2. Run the pipeline
 
-The `group_pipeline()` function can be used to process the EEG data for multiple participants in parallel:
+The `group_pipeline()` function is used to process the EEG data for multiple participants in parallel.
 
 ```python
-from step_mne import pipeline
+from step_mne import group_pipeline
 
 trials, evokeds, config = group_pipeline(
     vhdr_files='Results/EEG/raw',
@@ -36,20 +36,20 @@ trials, evokeds, config = group_pipeline(
     triggers={'standard': 101, 'target': 102},
     components={'name': ['P3'], 'tmin': [0.3], 'tmax': [0.5],
                 'roi': [['C1', 'C2', 'Cz', 'CP1', 'CP2', 'CPz']]},
-    condition_cols=['Frequency'],
+    condition_cols=['Stim_freq'],
     export_dir='Results/EEG/export',
 )
 ```
 
-See `help(pipeline)` for information on these and other (optional) input arguments as well as on the returns.
+See `help(group_pipeline)` for documentation of the input and output arguments.
 
 ### For R users
 
-#### 1. Install reticulate and miniconda
+#### 1. Install reticulate and Miniconda
 
-You can use Python packages (including STEP-MNE) directly from R with the help of the [reticulate](https://rstudio.github.io/reticulate/) package.
-It can also be used to install [Miniconda](https://docs.conda.io/en/latest/miniconda.html), which is a scientific Python distribution and package management system.
-You will only need do this once for each machine that you want to use STEP-MNE on.
+Python packages can be installed and used directly from R via the [reticulate](https://rstudio.github.io/reticulate/) package.
+You will also need a Python installation for this to work.
+Reticulate can help you to get one in the form of the [Miniconda](https://docs.conda.io/en/latest/miniconda.html) distribution.
 
 ```r
 install.packages("reticulate")
@@ -58,7 +58,7 @@ reticulate::install_miniconda()
 
 #### 2. Install STEP-MNE
 
-Once you have installed reticulate and Python (with Miniconda), you can install STEP-MNE from the [Python Package Index (PyPI)](https://pypi.org/project/step-mne/).
+Reticulate can install STEP-MNE from the [Python Package Index](https://pypi.org/project/step-mne/) (PyPI).
 
 ```r
 py_install("step_mne", pip = TRUE, python_version = "3.8")
@@ -66,8 +66,8 @@ py_install("step_mne", pip = TRUE, python_version = "3.8")
 
 #### 3. Run the pipeline from R
 
-In your scripts for data analysis, you can then import the STEP-MNE module and use it directly from R.
-Here is an example for running the pipeline on a fictional N400/P600 experiment.
+You are now ready to import and use STEP-MNE in your R scripts.
+Here is an example for running the group level pipeline on a fictional N400/P600 experiment.
 The experiment has two experimental factors: `Semantics` (`"related"` vs. `"unrelated"`) and emotinal `Context` (`"negative"` vs. `"neutral"`).
 
 ```R
@@ -85,8 +85,8 @@ res <- step_mne$group_pipeline(
     skip_log_conditions = list("Semantics" = "filler"),
     components = list(
         "name" = c("N400", "P600"),
-        "tmin" = c(300, 500),
-        "tmax" = c(500, 900),
+        "tmin" = c(0.3, 0.5),
+        "tmax" = c(0.5, 0.9),
         "roi" = list(
             c("C1", "Cz", "C2", "CP1", "CPz", "CP2"),
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
@@ -97,32 +97,30 @@ res <- step_mne$group_pipeline(
 )
 ```
 
-Note that the pipeline has further (optional) input options which are documented in the [script](https://github.com/alexenge/step-mne/blob/main/step_mne/pipeline.py).
-You can also check them via:
+For documentation of the input and output arguments, see the [source code](https://github.com/alexenge/step-mne/blob/dev/step_mne/group.py) or:
 
 ```r
-reticulate::py_help(step_mne$pipeline)
+reticulate::py_help(step$mnegroup_pipeline)
 ```
 
 #### 4. Use the results
 
-The `group_pipeline()` function returns three elements as its output (here stored in a list called `res`):
+The `group_pipeline()` function returns three elements as a list (here "`res`"):
 
-* `trials`: A data frame containing the single trial behavioral and ERP component data.
-Can be used, for instance, to fit a linear mixed model (LMM) predicting the mean amplitude of the N400 component:
+* `trials`: A data frame with the single trial behavioral and ERP component data.
+Can be used, e.g., to fit a linear mixed model (LMM) predicting the mean amplitude of the N400 component:
 
 ```r
 library(lme4)
 form <- N400 ~ semantics * context + (semantics * context | participant_id)
-trials <- res[[1]]  # The first output is the single trial data frame
+trials <- res[[1]]  # First output is the single trial data frame
 mod <- lmer(form, trials)
 summary(mod)
 ```
 
-* `evokeds`: The by-participant averages for each condition (or combination of conditions) in the `condition_cols`.
-Unlike the single trial data frame, these are averaged over trials, but not averaged over space (EEG sensors) or time (samples).
-Can be used, for example, for plotting time courses or scalp topographies.
-Here is an example for plotting the grand averages for the `Semantics * Context` interaction (and their standard error across participants). The [eegUtils](https://craddm.github.io/eegUtils) package could be used to plot the corresponding scalp topographies (an example of this will be added).
+* `evokeds`: The by-participant averages for each condition (or combination of conditions) in `condition_cols`.
+Unlike `trials`, these are averaged over trials, but not averaged over EEG channels or time points.
+Can be used, e.g., for plotting the time course for the `Semantics * Context` interaction (incl. standard errors). The [eegUtils](https://craddm.github.io/eegUtils) package could be used to plot the corresponding scalp topographies (example to be added).
 
 ```r
 library(dplyr)
@@ -136,12 +134,12 @@ evokeds %>%
     stat_summary(geom = "line", fun = mean)    
 ```
 
-* `config`: A list of the input options that were used by the pipeline.
-You can check this to see which default options were used in addition to the non-default options that you have provided.
+* `config`: A list of the options that were used by the pipeline.
+Can be used to check which default options were used in addition to the inputs that you have provided.
 You can also extract the number of channels that were interpolated for each participant (when using `bad_channels = "auto"`):
 
 ```r
 config <- res[[3]]  # The third output is the pipeline config
-n_bads <- lengths(config$bad_channels)
-print(mean(n_bads))
+num_bad_chans <- lengths(config$bad_channels)
+print(mean(num_bad_chans))
 ```
