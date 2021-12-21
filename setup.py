@@ -8,7 +8,8 @@ setuptools.setup(
     version='0.0.1',
     author='Alexander Enge',
     author_email='alexander.enge@hu-berlin.de',
-    description='Single trial EEG pipeline using MNE-Python',
+    description='Single trial EEG pipeline at the Neurocognitive '
+                'Psychology Lab, Humboldt-Universität zu Berlin',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/alexenge/hu-neuro-pipeline',
