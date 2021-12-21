@@ -5,7 +5,6 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setuptools.setup(
     name='hu-neuro-pipeline',
-    version='0.0.1',
     author='Alexander Enge',
     author_email='alexander.enge@hu-berlin.de',
     description='Single trial EEG pipeline at the Neurocognitive '
