@@ -1,10 +1,10 @@
-# STEP-MNE
+# hu-neuro-pipeline
 
-Single Trial EEG Pipeline using [MNE-Python](https://mne.tools)
+Single trial EEG pipeline at the Neurocognitive Psychology lab, Humboldt-Universität zu Berlin
 
-![PyPI](https://img.shields.io/pypi/v/step-mne)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/step-mne)
-![GitHub](https://img.shields.io/github/license/alexenge/step-mne)
+![PyPI](https://img.shields.io/pypi/v/hu-neuro-pipeline)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hu-neuro-pipeline)
+![GitHub](https://img.shields.io/github/license/alexenge/hu-neuro-pipeline)
 
 Based on Frömer, R., Maier, M., & Abdel Rahman, R. (2018).
 Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models.
@@ -14,12 +14,12 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 
 ### For Python users
 
-#### 1. Install STEP-MNE
+#### 1. Install the pipeline
 
-Install as usual from the [Python Package Index](https://pypi.org/project/step-mne/) (PyPI):
+Install as usual from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
 
 ```bash
-python3 -m pip install step-mne
+python3 -m pip install hu-neuro-pipeline
 ```
 
 #### 2. Run the pipeline
@@ -27,7 +27,7 @@ python3 -m pip install step-mne
 The `group_pipeline()` function is used to process the EEG data for multiple participants in parallel.
 
 ```python
-from step_mne import group_pipeline
+from pipeline import group_pipeline
 
 trials, evokeds, config = group_pipeline(
     vhdr_files='Results/EEG/raw',
@@ -56,23 +56,23 @@ install.packages("reticulate")
 reticulate::install_miniconda()
 ```
 
-#### 2. Install STEP-MNE
+#### 2. Install the pipeline
 
-Reticulate can install STEP-MNE from the [Python Package Index](https://pypi.org/project/step-mne/) (PyPI).
+Reticulate can install the pipeline from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI).
 
 ```r
-py_install("step_mne", pip = TRUE, python_version = "3.8")
+py_install("hu_neuro_pipeline", pip = TRUE, python_version = "3.8")
 ```
 
 #### 3. Run the pipeline from R
 
-You are now ready to import and use STEP-MNE in your R scripts.
+You are now ready to import and use the pipeline in your R scripts.
 Here is an example for running the group level pipeline on a fictional N400/P600 experiment.
 The experiment has two experimental factors: `Semantics` (`"related"` vs. `"unrelated"`) and emotinal `Context` (`"negative"` vs. `"neutral"`).
 
 ```R
-step_mne <- reticulate::import("step_mne")
-res <- step_mne$group_pipeline(
+pipeline <- reticulate::import("pipeline")
+res <- pipeline$group_pipeline(
     vhdr_files = "Results/EEG/raw",
     log_files = "Results/RT",
     ocular_correction = "Results/EEG/cali",
@@ -97,10 +97,10 @@ res <- step_mne$group_pipeline(
 )
 ```
 
-For documentation of the input and output arguments, see the [source code](https://github.com/alexenge/step-mne/blob/dev/step_mne/group.py) or:
+For documentation of the input and output arguments, see the [source code](https://github.com/alexenge/hu-neuro-pipeline/blob/dev/pipeline/group.py) or:
 
 ```r
-reticulate::py_help(step$mnegroup_pipeline)
+reticulate::py_help(pipeline$group_pipeline)
 ```
 
 #### 4. Use the results

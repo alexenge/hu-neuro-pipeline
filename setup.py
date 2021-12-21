@@ -4,23 +4,23 @@ with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='step-mne',
+    name='hu-neuro-pipeline',
     version='0.0.1',
     author='Alexander Enge',
     author_email='alexander.enge@hu-berlin.de',
     description='Single trial EEG pipeline using MNE-Python',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/alexenge/step-mne',
+    url='https://github.com/alexenge/hu-neuro-pipeline',
     project_urls={
-        'Issue trackers': 'https://github.com/alexenge/step-mne/issues',
+        'Issue trackers': 'https://github.com/alexenge/hu-neuro-pipeline/issues',
     },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
     ],
-    packages=['step_mne'],
+    packages=['pipeline'],
     install_requires=[
         'chardet',
         'joblib',
