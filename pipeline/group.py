@@ -37,7 +37,7 @@ def group_pipeline(
     evokeds_dir=None,
     export_dir=None,
     to_df=True,
-    n_jobs='auto'
+    n_jobs=1
 ):
     """Processes EEG data for all participants of an experiment in parallel.
 
@@ -154,9 +154,10 @@ def group_pipeline(
         Convert all MNE objects (epochs, evokeds, grand averages) to data
         frames and save them in `.csv` instead of `.fif` format. If `both`,
         save in both `.csv` and `.fif` format.
-    n_jobs : int | 'auto', default 'auto'
+    n_jobs : int | 'auto', default 1
         Number of CPU cores to use for processing participants in parallel. If
-        'auto', use all available cores on the machine minus one.
+        'auto', use all available cores on the machine minus one. Numbers > 1
+        (including 'auto') do not work under Windows.
 
     Returns
     -------
@@ -184,7 +185,6 @@ def group_pipeline(
 
     # Backup input arguments for re-use
     config = locals()
-    # config = aha_dict.copy()
 
     # Remove arguments that are specific for each participant
     nonshared_keys = ['vhdr_files', 'log_files', 'ocular_correction',
@@ -221,11 +221,6 @@ def group_pipeline(
     skip_log_rows = check_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
-    vhdr_files = vhdr_files[0:2]
-    log_files = log_files[0:2]
-    ocular_correction = ocular_correction[0:2]
-    bad_channels = bad_channels[0:2]
-    skip_log_rows = skip_log_rows[0:2]
     participant_args = zip(vhdr_files, log_files, ocular_correction,
                            bad_channels, skip_log_rows)
 
