@@ -129,17 +129,22 @@ def correct_besa(raw, besa_file):
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
     """Reads the behavioral log file with information about each EEG trial."""
 
-    # Detect file encoding
-    with open(log_file, 'rb') as f:
-        data = f.read()
-    chardet_res = chardet.detect(data)
-    encoding = chardet_res['encoding']
-
-    # Read into DataFrame
-    if '.csv' in log_file:
-        log = pd.read_csv(log_file, encoding=encoding)
+    # Check if data are already in a DataFrame
+    if isinstance(log_file, pd.DataFrame):
+        log = log_file
     else:
-        log = pd.read_csv(log_file, delimiter='\t', encoding=encoding)
+
+        # Detect file encoding
+        with open(log_file, 'rb') as f:
+            data = f.read()
+        chardet_res = chardet.detect(data)
+        encoding = chardet_res['encoding']
+
+        # Read into DataFrame
+        if '.csv' in log_file:
+            log = pd.read_csv(log_file, encoding=encoding)
+        else:
+            log = pd.read_csv(log_file, delimiter='\t', encoding=encoding)
 
     # Remove rows via indices (e.g., if the EEG was paused accidently)
     if skip_log_rows is not None:

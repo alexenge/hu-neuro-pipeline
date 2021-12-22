@@ -58,10 +58,11 @@ def group_pipeline(
     vhdr_files : str | Path | list of str | list of Path
         Raw EEG files for all participants. Can either be a list of `.vhdr`
         file paths or the path of their parent directory.
-    log_files : str | Path | list of str | list of Path
+    log_files : str | Path | list of str | list of Path | list of pd.DataFrame
         Behavioral log files for all participants. Can either be a list of
         `.txt`, `.log`, or `.csv` file paths or the path of their parent
-        directory.
+        directory. Can also be a list of pandas DataFrames, in which case no
+        files are being read.
     ocular_correction : str | list of str | list of Path | None, default 'fastica'
         Ocular correction method. Can either be an ICA method (`'fastica'` or
         `'infomax'` or `'picard'`), a list of MSEC (BESA) `.matrix` file paths,
@@ -161,11 +162,11 @@ def group_pipeline(
 
     Returns
     -------
-    trials : pandas.DataFrame
+    trials : pd.DataFrame
         Combined single trial behavioral and ERP component data for all
         participants. Can be used for running linear mixed models (LMMs) on
         reaction times and ERP mean amplitudes.
-    evokeds_df : pandas.DataFrame
+    evokeds_df : pd.DataFrame
         Time-resolved by-participant averages for all channels and ERP
         components. If multiple `condition_cols`, the column `average_by`
         indicates for which column (main effects) or combination of columns
