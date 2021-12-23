@@ -61,7 +61,7 @@ reticulate::install_miniconda()
 Reticulate can install the pipeline from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI).
 
 ```r
-py_install("hu_neuro_pipeline", pip = TRUE, python_version = "3.8")
+py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 ```
 
 #### 3. Run the pipeline from R
@@ -105,7 +105,7 @@ reticulate::py_help(pipeline$group_pipeline)
 
 #### 4. Use the results
 
-The `group_pipeline()` function returns three elements as a list (here "`res`"):
+The `group_pipeline()` function returns three elements as a list (here `res`):
 
 * `trials`: A data frame with the single trial behavioral and ERP component data.
 Can be used, e.g., to fit a linear mixed model (LMM) predicting the mean amplitude of the N400 component:
@@ -125,7 +125,7 @@ Can be used, e.g., for plotting the time course for the `Semantics * Context` in
 ```r
 library(dplyr)
 library(ggplot2)
-evokeds <- res[[2]]  # The second output is the evokeds data frame
+evokeds <- res[[2]]  # Second output is the evokeds data frame
 evokeds %>%
     filter(average_by == "Semantics * Context") %>%
     ggplot(aes(x = time, y = N400, color = Semantics) +
@@ -139,7 +139,7 @@ Can be used to check which default options were used in addition to the inputs t
 You can also extract the number of channels that were interpolated for each participant (when using `bad_channels = "auto"`):
 
 ```r
-config <- res[[3]]  # The third output is the pipeline config
+config <- res[[3]]  # Third output is the pipeline config
 num_bad_chans <- lengths(config$bad_channels)
 print(mean(num_bad_chans))
 ```
