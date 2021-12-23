@@ -1,10 +1,10 @@
 # hu-neuro-pipeline
 
-Single trial EEG pipeline at the Neurocognitive Psychology lab, Humboldt-Universität zu Berlin
-
 ![PyPI](https://img.shields.io/pypi/v/hu-neuro-pipeline)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hu-neuro-pipeline)
 ![GitHub](https://img.shields.io/github/license/alexenge/hu-neuro-pipeline)
+
+Single trial EEG pipeline at the Neurocognitive Psychology lab, Humboldt-Universität zu Berlin
 
 Based on Frömer, R., Maier, M., & Abdel Rahman, R. (2018).
 Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models.
