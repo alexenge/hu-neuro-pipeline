@@ -194,20 +194,30 @@ def get_bads(
 
 
 def compute_single_trials(epochs, components, bad_ixs=None):
-    """Computes mean ERP amplitude for a dict of multiple components."""
+    """Computes single trial ERP or power for a dict of multiple components."""
 
-    # Compute single trial mean ERP amplitudes for each component
+    # Loop over components
     components_df = pd.DataFrame(components)
     for _, component in components_df.iterrows():
-        compute_component(
-            epochs, component['name'], component['tmin'],
-            component['tmax'], component['roi'], bad_ixs)
+
+        # Compute either single trial mean ERP amplitudes...
+        if 'fmin' not in components:
+            compute_erp_component(
+                epochs, component['name'], component['tmin'],
+                component['tmax'], component['roi'], bad_ixs)
+
+        # ... or single trial power
+        else:
+            compute_tfr_component(
+                epochs, component['name'], component['tmin'],
+                component['tmax'], component['fmin'], component['fmax'],
+                component['roi'], bad_ixs)
 
     return epochs.metadata
 
 
-def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
-    """Computes mean ERP amplitude for single component."""
+def compute_erp_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
+    """Computes single trial mean ERP amplitude for single component."""
 
     # Create virtual channel for the average in the region of interest
     print(f'Computing single trial ERP amplitudes for {name}')
@@ -233,6 +243,26 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     # Add as a new column to the original metadata
     epochs.metadata.reset_index(drop=True, inplace=True)
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
+
+
+def compute_tfr_component(
+        epochs, name, tmin, tmax, fmin, fmax, roi, bad_ixs=None):
+    """Computes single trial power for single component."""
+
+    # Select region, time window, and frequencies of interest
+    epochs_oi = epochs.copy().pick_channels(roi).crop(tmin, tmax, fmin, fmax)
+
+    # Compute mean power per trial
+    mean_power = epochs_oi.data.mean(axis=(1, 2, 3))
+
+    # Set power for bad epochs to NaN
+    if bad_ixs is not None:
+        if isinstance(bad_ixs, int):
+            bad_ixs = [bad_ixs]
+        mean_power[bad_ixs] = np.nan
+
+    # Add as a new column to the original metadata
+    epochs.metadata[name] = mean_power
 
 
 def compute_evokeds(

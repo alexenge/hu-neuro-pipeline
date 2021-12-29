@@ -31,6 +31,12 @@ def group_pipeline(
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
+    perform_tfr=False,
+    tfr_freqs=range(4, 51, 2),
+    tfr_cycles=range(2, 26, 1),
+    tfr_baseline=(-0.3, -0.1),
+    tfr_components={
+        'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -183,6 +189,10 @@ def group_pipeline(
     [2] https://mne.tools/stable/generated/mne.channels.make_standard_montage.html
     [3] https://mne.tools/stable/generated/mne.channels.read_custom_montage.html
     """
+
+    # Make sure that TFR frequencies and cycles are lists
+    tfr_freqs = list(tfr_freqs)
+    tfr_cycles = list(tfr_cycles)
 
     # Backup input arguments for re-use
     config = locals()

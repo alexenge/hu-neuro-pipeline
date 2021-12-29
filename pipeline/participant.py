@@ -1,7 +1,9 @@
 from os import path
 
+import numpy as np
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
+from mne.time_frequency import tfr_morlet
 
 from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
                       compute_single_trials, correct_besa, correct_ica,
@@ -31,6 +33,12 @@ def participant_pipeline(
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
+    perform_tfr=False,
+    tfr_freqs=range(4, 51, 2),
+    tfr_cycles=range(2, 26, 1),
+    tfr_baseline=(-0.3, -0.1),
+    tfr_components={
+        'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -206,21 +214,21 @@ def participant_pipeline(
             correct_ica(raw, method=ocular_correction)
 
     # Filtering
-    _ = raw.filter(highpass_freq, lowpass_freq)
+    filt = raw.copy().filter(highpass_freq, lowpass_freq)
 
     # Save cleaned continuous data
     if clean_dir is not None:
-        save_clean(raw, clean_dir, participant_id)
+        save_clean(filt, clean_dir, participant_id)
 
     # Determine events and the corresponding (selection of) triggers
     events, event_id = events_from_annotations(
-        raw, regexp='Stimulus', verbose=False)
+        filt, regexp='Stimulus', verbose=False)
     if triggers is not None:
         triggers = {key: int(value) for key, value in triggers.items()}
         event_id = triggers
 
     # Epoching including baseline correction
-    epochs = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax, baseline,
+    epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
                     preload=True)
 
     # Drop the last sample to produce a nice even number
@@ -251,10 +259,6 @@ def participant_pipeline(
     if epochs_dir is not None:
         save_epochs(epochs, epochs_dir, participant_id, to_df)
 
-    # Save single trial behavioral and ERP data
-    if trials_dir is not None:
-        save_df(trials, trials_dir, participant_id, suffix='trials')
-
     # Save channel locations
     if export_dir is not None:
         save_montage(epochs, export_dir)
@@ -266,5 +270,38 @@ def participant_pipeline(
     # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
+
+    # Time-frequency analysis
+    if perform_tfr:
+
+        # Epoching again without filtering
+        print('Computing time-frequency representation with Morlet wavelets')
+        epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
+                               tfr_baseline, preload=True, verbose=False)
+
+        # Drop the last sample to produce a nice even number
+        _ = epochs_unfilt.crop(epochs_tmin, epochs_tmax, include_tmax=False)
+
+        # Copy original metadata
+        epochs_unfilt.metadata = epochs.metadata.copy()
+
+        # Morlet wavelet convolution
+        tfr_freqs = list(tfr_freqs)
+        tfr_cycles = list(tfr_cycles)
+        tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
+                         return_itc=False, average=False)
+
+        # Baseline correction
+        tfr.apply_baseline(tfr_baseline, mode='percent')
+
+        # Reduce numerical precision to reduce object size
+        tfr.data = np.float32(tfr.data)
+
+        # Add single trial mean power to metadata
+        trials = compute_single_trials(tfr, tfr_components, bad_ixs)
+
+    # Save single trial data
+    if trials_dir is not None:
+        save_df(trials, trials_dir, participant_id, suffix='trials')
 
     return trials, evokeds, evokeds_df, config
