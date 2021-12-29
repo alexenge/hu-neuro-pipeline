@@ -282,7 +282,7 @@ def compute_evokeds(
         # Compute evokeds
         epochs_good = epochs.copy().drop(bad_ixs, verbose=False)
         evokeds = epochs_good.average(picks, by_event_type=True)
-        all_evokeds.append(evokeds)
+        all_evokeds = all_evokeds + evokeds
 
         # Convert to DataFrame
         evokeds_df = create_evokeds_df(evokeds, participant_id=participant_id)

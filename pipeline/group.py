@@ -250,7 +250,6 @@ def group_pipeline(
 
     # Combine evokeds_dfs and save
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
-    evokeds_df[condition_cols] = evokeds_df[condition_cols].astype(str)
     if export_dir is not None:
         save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
 
