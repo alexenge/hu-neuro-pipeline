@@ -42,6 +42,7 @@ def group_pipeline(
     trials_dir=None,
     evokeds_dir=None,
     export_dir=None,
+    tfr_dir=None,
     to_df=True,
     n_jobs=1
 ):
@@ -241,7 +242,7 @@ def group_pipeline(
         delayed(pipeline_partial)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))
+    trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
@@ -253,11 +254,30 @@ def group_pipeline(
     if export_dir is not None:
         save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
 
-    # Compute grand averages and save
+    # Compute grand averaged ERPs and save
     grands = compute_grands(evokeds)
     grands_df = compute_grands_df(evokeds_df)
     save_evokeds(
         grands, grands_df, export_dir, participant_id='grand', to_df=to_df)
+
+    # Combine time-frequency stuff
+    if perform_tfr:
+
+        # Sort outputs into seperate lists
+        tfr_evokeds, tfr_evokeds_dfs = list(map(list, zip(*res)))[4:6]
+
+        # Combine evokeds_df for power and save
+        tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
+        if export_dir is not None:
+            save_df(tfr_evokeds_df, export_dir,
+                    participant_id='all', suffix='tfr-ave')
+
+        # Compute grand averaged power and save
+        tfr_grands = compute_grands(tfr_evokeds)
+        tfr_grands_df = compute_grands_df(tfr_evokeds_df)
+        if export_dir is not None:
+            save_evokeds(tfr_grands, tfr_grands_df, export_dir,
+                         participant_id='tfr-grand', to_df=to_df)
 
     # Add participant-specific arguments back to config
     config = {'vhdr_files': vhdr_files, 'log_files': log_files,

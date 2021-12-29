@@ -44,6 +44,7 @@ def participant_pipeline(
     trials_dir=None,
     evokeds_dir=None,
     export_dir=None,
+    tfr_dir=None,
     to_df=True,
 ):
     """Processes EEG data for a single participant.
@@ -271,6 +272,9 @@ def participant_pipeline(
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
+    # Define tuple of objects to return
+    returns = (trials, evokeds, evokeds_df, config)
+
     # Time-frequency analysis
     if perform_tfr:
 
@@ -300,8 +304,20 @@ def participant_pipeline(
         # Add single trial mean power to metadata
         trials = compute_single_trials(tfr, tfr_components, bad_ixs)
 
-    # Save single trial data
-    if trials_dir is not None:
-        save_df(trials, trials_dir, participant_id, suffix='trials')
+        # Save single trial data (again)
+        if trials_dir is not None:
+            save_df(trials, trials_dir, participant_id, suffix='trials')
 
-    return trials, evokeds, evokeds_df, config
+        # Compute evoked power
+        tfr_evokeds, tfr_evokeds_df = compute_evokeds(
+            tfr, condition_cols, bad_ixs, participant_id)
+
+        # Save evoked power
+        if tfr_dir is not None:
+            save_evokeds(
+                tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
+
+        # Update objects to return
+        returns = returns + (tfr_evokeds, tfr_evokeds_df)
+
+    return returns

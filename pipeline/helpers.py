@@ -6,7 +6,8 @@ from sys import exit
 import chardet
 import numpy as np
 import pandas as pd
-from mne import combine_evoked, pick_channels, set_bipolar_reference
+from mne import (Epochs, Evoked, combine_evoked, pick_channels,
+                 set_bipolar_reference)
 from mne.channels import (combine_channels, make_standard_montage,
                           read_custom_montage)
 from mne.preprocessing import ICA
@@ -273,15 +274,15 @@ def compute_evokeds(
     all_evokeds = []
     all_evokeds_dfs = []
 
-    # Always use EEG and misc (component) channels for averaging
-    picks = ['eeg', 'misc']
+    # Get indices of good epochs
+    good_ixs = [ix for ix in range(len(epochs)) if ix not in bad_ixs]
 
     # If no condition_cols were provided, use the events from the epochs
     if condition_cols is None:
 
         # Compute evokeds
-        epochs_good = epochs.copy().drop(bad_ixs, verbose=False)
-        evokeds = epochs_good.average(picks, by_event_type=True)
+        epochs_good = epochs.copy()[good_ixs]
+        evokeds = average_by_events(epochs_good)
         all_evokeds = all_evokeds + evokeds
 
         # Convert to DataFrame
@@ -302,9 +303,8 @@ def compute_evokeds(
             cols = list(cols)
 
             # Compute evokeds
-            epochs_update = update_events(epochs, cols)
-            epochs_update.drop(bad_ixs, verbose=False)
-            evokeds = epochs_update.average(picks, by_event_type=True)
+            epochs_update = update_events(epochs, cols)[good_ixs]
+            evokeds = average_by_events(epochs_update)
             all_evokeds = all_evokeds + evokeds
 
             # Convert to DataFrame
@@ -322,6 +322,25 @@ def compute_evokeds(
     all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
 
     return all_evokeds, all_evokeds_df
+
+
+def average_by_events(epochs, method='mean'):
+    """Create a list of evokeds from epochs, one per event type"""
+
+    # Pick channel types for ERPs
+    # This is necessary because ERP component ROIs are stored as misc channels
+    if isinstance(epochs, Epochs):
+        epochs.pick_types(eeg=True, misc=True)
+
+    # Loop over event types and average
+    # TODO: Use MNE built-in argument 'by_event_type' once it's in EpochsTFR
+    evokeds = []
+    for event_type in epochs.event_id.keys():
+        evoked = epochs[event_type].average(method=method)
+        evoked.comment = event_type
+        evokeds.append(evoked)
+
+    return evokeds
 
 
 def update_events(epochs, cols):
@@ -344,27 +363,32 @@ def update_events(epochs, cols):
 def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
     """Converts mne.Evoked into a pd.DataFrame with metadata."""
 
+    # Convert ERP amplitudes from volts to microvolts
+    for evoked in evokeds:
+        if isinstance(evokeds, Evoked):
+            evoked.data = evoked.data * 1e6
+
     # Convert all evokeds to a single DataFrame
-    scalings = {'eeg': 1e6, 'misc': 1e6}
-    evokeds_dfs = [evoked.to_data_frame(scalings=scalings)
-                   for evoked in evokeds]
+    evokeds_dfs = [evoked.to_data_frame() for evoked in evokeds]
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
 
     # Optionally add columns from the metadata
-    n_samples = len(evokeds[0].times)
+    repeats = len(evokeds_df)
     if cols is not None:
         assert trials is not None, 'Must provide trials (metadata) with cols'
         cols_df = pd.DataFrame(trials[cols])
         cols_df = cols_df.astype('str')
         cols_df = cols_df.drop_duplicates()
-        cols_df = cols_df.loc[cols_df.index.repeat(n_samples)]
+        repeats = len(evokeds_df) / len(cols_df)
+        cols_df = cols_df.loc[cols_df.index.repeat(repeats)]
         cols_df = cols_df.reset_index(drop=True)
         evokeds_df = pd.concat([cols_df, evokeds_df], axis=1)
 
     # Otherwise add comments from evokeds (assumed to contain event IDs)
     else:
         comments = [evoked.comment for evoked in evokeds]
-        comments = np.repeat(comments, n_samples)
+        repeats = len(evokeds_df) / len(comments)
+        comments = np.repeat(comments, repeats)
         evokeds_df.insert(loc=0, column='event_id', value=comments)
 
     # Optionally add participant_id
