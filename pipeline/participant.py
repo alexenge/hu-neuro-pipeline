@@ -272,9 +272,6 @@ def participant_pipeline(
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
-    # Define tuple of objects to return
-    returns = (trials, evokeds, evokeds_df, config)
-
     # Time-frequency analysis
     if perform_tfr:
 
@@ -317,7 +314,6 @@ def participant_pipeline(
             save_evokeds(
                 tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
 
-        # Update objects to return
-        returns = returns + (tfr_evokeds, tfr_evokeds_df)
+        return trials, evokeds, evokeds_df, config, tfr_evokeds, tfr_evokeds_df
 
-    return returns
+    return trials, evokeds, evokeds_df, config

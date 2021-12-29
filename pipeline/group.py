@@ -260,6 +260,20 @@ def group_pipeline(
     save_evokeds(
         grands, grands_df, export_dir, participant_id='grand', to_df=to_df)
 
+    # Add participant-specific arguments back to config
+    config = {'vhdr_files': vhdr_files, 'log_files': log_files,
+              'ocular_correction': ocular_correction,
+              'bad_channels': bad_channels,
+              'skip_log_rows': skip_log_rows, **config, 'n_jobs': n_jobs}
+
+    # Add automatically detected bad channels
+    if 'auto' in bad_channels:
+        config['auto_bad_channels'] = [cf['bad_channels'] for cf in configs]
+
+    # Save config
+    if export_dir is not None:
+        save_config(config, export_dir)
+
     # Combine time-frequency stuff
     if perform_tfr:
 
@@ -279,18 +293,6 @@ def group_pipeline(
             save_evokeds(tfr_grands, tfr_grands_df, export_dir,
                          participant_id='tfr-grand', to_df=to_df)
 
-    # Add participant-specific arguments back to config
-    config = {'vhdr_files': vhdr_files, 'log_files': log_files,
-              'ocular_correction': ocular_correction,
-              'bad_channels': bad_channels,
-              'skip_log_rows': skip_log_rows, **config, 'n_jobs': n_jobs}
-
-    # Add automatically detected bad channels
-    if 'auto' in bad_channels:
-        config['auto_bad_channels'] = [cf['bad_channels'] for cf in configs]
-
-    # Save config
-    if export_dir is not None:
-        save_config(config, export_dir)
+        return trials, evokeds_df, config, tfr_evokeds_df
 
     return trials, evokeds_df, config

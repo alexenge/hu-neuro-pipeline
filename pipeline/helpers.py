@@ -416,10 +416,14 @@ def compute_grands(evokeds_per_participant):
 def compute_grands_df(evokeds_df):
     """Averages evoked DataFrames of all participants into grand averages."""
 
-    # Average by condition columns (between participant_id and time)
-    time_col_ix = evokeds_df.columns.get_loc('time')
-    participant_id_ix = 1
-    group_cols = list(evokeds_df.columns[participant_id_ix:(time_col_ix + 1)])
+    # Get indices of columns to group by (conditions, times, frequencies)
+    first_grouping_ix = 1  # Column 0 is participant_id (to average over)
+    last_grouping_col = 'freq' if 'freq' in evokeds_df.columns else 'time'
+    last_grouping_ix = evokeds_df.columns.get_loc(last_grouping_col)
+    grouping_ixs = range(first_grouping_ix, last_grouping_ix + 1)
+
+    # Average by grouping columns
+    group_cols = list(evokeds_df.columns[grouping_ixs])
     grands_df = evokeds_df.groupby(group_cols, dropna=False).mean()
 
     # Convert conditions from index back to columns
