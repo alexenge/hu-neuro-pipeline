@@ -103,24 +103,65 @@ config <- res[[3]]
 
 ### 2.3 Pipeline options
 
-| Argument            | Possible values                                  | Python example                          | R example                                |
-| ------------------- | ------------------------------------------------ | --------------------------------------- | ---------------------------------------- |
-| `vhdr_files`        | A list of `.vhdr` file name paths                | `['Results/EEG/raw/Vp01.vhdr', ...]`    | `c("Results/EEG/raw/Vp01.vhdr", ...)`    |
-|                     | A parent directory of `.vhdr` files              | `'Results/EEG/raw'`                     | `"Results/EEG/raw"`                      |
-| `log_files`         | A list of `.csv`/`.tsv`/`.txt` file paths        | `['Results/RT/Vp01.txt', ...]`          | `c("Results/RT/Vp01.txt", ...)`          |
-|                     | A parent directory of `.csv`/`.tsv`/`.txt` files | `'Results/RT'`                          | `"Results/RT"`                           |
-|                     | A list of data frames                            | `[pd.DataFrame({...}), ...]`            | `list(data.frame(...), ...)`             |
-| `ocular_correction` | An ICA method (`fastica`, `picard`, or `picard`) | `'fastica'` (default)                   | `"fastica` (default)                     |
-|                     | A list of BESA/MSEC `.matrix` file paths         | `['Results/EEG/cali/Vp01.matrix', ...]` | `c("Results/EEG/cali/Vp01.matrix", ...)` |
-|                     | A parent directory of BESA/MSEC `.matrix` files  | `'Results/EEG/cali'`                    | `"Results/EEG/cali"`                     |
-|                     | Skip ocular correction                           | `None`                                  | `NULL`                                   |
-| `bad_channels`      | Don't interpolate any channels                   | `None` (default)                        | `NULL` (default)                         |
-|                     | A list of bad channels for each participant      | `[['Fp1', 'TP9'], ...]`                 | `list(c("Fp1", "TP9"), ...)`             |
-|                     | A dictionary of participant IDs and bad channels | `{Vp05: ['Cz', 'T7'], ...}`             | `list(Vp05 = c('Cz', 'T7'), ...)`        |
-|                     | Automatic detection based on `reject_*` (> 5 %)  | `'auto'`                                | `"auto"`                                 |
-| `skip_log_rows`     | Use all rows from the `log_files`                | `None` (default)                        | `NULL` (default)                         |
-|                     | A list of row indices for each participant       | `[[5, 123, 124], ...]`                  | `list(c(5, 123, 124), ...)`              |
-|                     | A list of row indices for all participants       | `[1, 2, 3]`                             | `c(1, 2, 3)`                             |
+#### **`vhdr_files`**
+
+Input BrainVision EEG header files.
+Must be one of:
+
+* The path of a directory with `.vhdr` files (Python: `'Results/EEG/raw'`, R: `"Results/EEG/raw"`)
+
+* A list of `.vhdr` file paths (Python: `['Results/EEG/raw/Vp01.vhdr', ...]`, R: `c("Results/EEG/raw/Vp01.vhdr", ...)`)
+
+#### **`log_files`**
+
+Input behavioral log files.
+Must be one of:
+
+* The path of a directory with `.csv`/`.tsv`/`.txt` files (Python: `'Results/RT'`, R: `"Results/RT"`)
+
+* A list of `.csv`/`.tsv`/`.txt` file paths (Python: `['Results/RT/Vp01.txt', ...]`, R: `c("Results/RT/Vp01.txt", ...)`)
+
+* A list of data frames (Python: `[pd.DataFrame({...}), ...]`, R: `list(data.frame(...), ...)`)
+
+#### **`ocular_correction`**
+
+Method for performing correction of eye movement artifacts (default: `'fastica'`).
+Must be one of:
+
+* The name of an algorithm for independent component analysis (either `fastica`, `infomax`, or `picard`)
+
+* The path of a directory with BESA/MSEC matrix files (Python: `'Results/EEG/cali'`, R: `"Results/EEG/cali"`)
+
+* A list of BESA/MSEC matrix file paths (Python: `['Results/EEG/cali/Vp01.matrix', ...]`, R: `c("Results/EEG/cali/Vp01.matrix", ...)`)
+
+* `None` (Python) or `NULL` (R) to skip ocular correction
+
+#### **`bad_channels`**
+
+Bad EEG channels that need to be repaired via interpolation (default: `None`).
+Must be one of:
+
+* `None` (Python) or `NULL` (R) to not interpolate any bad channels
+
+* A list of lists, each containing the bad channels for one participant (Python: `[['Fp1', 'TP9'], ...]`, R: `list(c("Fp1", "TP9"), ...)`)
+
+* A dictionary where keys are participant IDs (based on the `.vhdr` file names) and values are a list of their bad channels (Python: `{Vp05: ['Cz', 'T7'], ...}`, R: `list(Vp05 = c('Cz', 'T7'), ...)`)
+
+* `'auto'` to detect bad channels automatically if they cause more than 5% of bad epochs (based on `reject_peak_to_peak` and `reject_flat`, see below)
+
+#### **`skip_log_rows`**
+
+Row indices to skip in the log file before matching it to the EEG epochs (default: `None`).
+Must be one of:
+
+* `None` (Python) or `NULL` (R) to use all rows from the log files
+
+* A list of row indices that should be skipped for all participants (Python: `[0, 1, 2]`, R: `c(0, 1, 2)`)
+
+* A list of lists, each containing the row indices that should be skipped for one participant (Python: `[[5, 123, 124], ...]`, R: `list(c(5, 123, 124), ...)`)
+
+The second option is useful if all log files contain a fixed number of "junk" rows that are not actual trials.
+The third option is useful if some (idiosyncratic) EEG trials are missing for certain participants due to technical or human error.
 
 ## 3. Output
 
