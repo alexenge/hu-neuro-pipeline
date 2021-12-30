@@ -13,8 +13,8 @@ from .savers import (save_clean, save_df, save_epochs, save_evokeds,
 
 
 def participant_pipeline(
-    vhdr_file=None,
-    log_file=None,
+    vhdr_file,
+    log_file,
     ocular_correction='fastica',
     bad_channels='auto',
     skip_log_rows=None,

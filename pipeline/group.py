@@ -11,8 +11,8 @@ from .savers import save_config, save_df, save_evokeds
 
 
 def group_pipeline(
-    vhdr_files=None,
-    log_files=None,
+    vhdr_files,
+    log_files,
     ocular_correction='fastica',
     bad_channels='auto',
     skip_log_rows=None,
