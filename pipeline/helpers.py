@@ -8,9 +8,10 @@ import numpy as np
 import pandas as pd
 from mne import (Epochs, Evoked, combine_evoked, pick_channels,
                  set_bipolar_reference)
-from mne.channels import (combine_channels, make_standard_montage,
-                          read_custom_montage)
+from mne.channels import (combine_channels, find_ch_adjacency,
+                          make_standard_montage, read_custom_montage)
 from mne.preprocessing import ICA
+from mne.stats import permutation_cluster_1samp_test
 
 
 def add_heog_veog(raw, heog_channels='auto', veog_channels='auto'):
@@ -463,3 +464,72 @@ def is_nested_list(input):
         return any(isinstance(elem, list) for elem in input)
     else:
         return False
+
+
+def compute_cbpts(
+        evokeds_per_participant, cbpts_contrasts, n_permutations=1024):
+    """Performs a cluster based permutation test for a given contrast"""
+
+    # Get number of participants
+    n_participants = len(evokeds_per_participant)
+
+    # Get dimensions of each participant's data
+    example_evoked = evokeds_per_participant[0][0]
+    times = example_evoked.times
+    channels = example_evoked.ch_names
+    n_times = len(times)
+    n_channels = len(channels)
+
+    # Compute channel adjacency
+    channel_adjacency, _ = find_ch_adjacency(example_evoked.info, 'eeg')
+
+    # Prepare emtpy list
+    cluster_dfs = []
+
+    # Sequentially handle each contrast
+    for contrast in cbpts_contrasts:
+
+        # Prepare empty array
+        X = np.zeros((n_participants, n_times, n_channels))
+
+        # Compute a difference wave for each participant
+        for ix, evokeds in enumerate(evokeds_per_participant):
+
+            # Extract data for the relevant conditions
+            evoked_cond0 = [ev for ev in evokeds if ev.comment == contrast[0]]
+            evoked_cond1 = [ev for ev in evokeds if ev.comment == contrast[1]]
+            data_0 = evoked_cond0[0].data
+            data_1 = evoked_cond1[0].data
+
+            # Compute difference between conditions
+            data_diff = data_0 - data_1
+            data_diff = data_diff.swapaxes(1, 0)  # Time points, channels
+            X[ix] = data_diff
+
+        # Run permutation test
+        t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
+            X, n_permutations=n_permutations, adjacency=channel_adjacency,
+            seed=1234)
+
+        # Create cluster image
+        cluster_arr = np.ones_like(t_obs)
+        for ix, cluster in enumerate(clusters):
+            pv = cluster_pv[ix]
+            cluster_arr[cluster] = pv
+
+        # Convert to DataFrame
+        cluster_df = pd.DataFrame(cluster_arr, index=times, columns=channels)
+        cluster_df = cluster_df.reset_index().rename(columns={'index': 'time'})
+
+        # Add info about the current contrast
+        contrast_str = ' - '.join(contrast)
+        cluster_df.insert(0, 'contrast', contrast_str)
+
+        # Append to the list of all contrasts
+        cluster_dfs.append(cluster_df)
+
+    # Combine DataFrames of all contrasts
+    # TODO: Maybe we should convert this to long format for easier plotting
+    cluster_df = pd.concat(cluster_dfs, ignore_index=True)
+
+    return cluster_df

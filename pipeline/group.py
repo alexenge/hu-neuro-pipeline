@@ -5,7 +5,8 @@ from os import path
 import pandas as pd
 from joblib import Parallel, delayed
 
-from .helpers import check_participant_input, compute_grands, compute_grands_df
+from .helpers import (check_participant_input, compute_cbpts, compute_grands,
+                      compute_grands_df)
 from .participant import participant_pipeline
 from .savers import save_config, save_df, save_evokeds
 
@@ -37,6 +38,7 @@ def group_pipeline(
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
+    cbpts_contrasts=[],
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -294,5 +296,9 @@ def group_pipeline(
                          participant_id='tfr-grand', to_df=to_df)
 
         return trials, evokeds_df, config, tfr_evokeds_df
+
+    # Perform cluster based permutation tests
+    if cbpts_contrasts != []:
+        cluster_df = compute_cbpts(evokeds, cbpts_contrasts)
 
     return trials, evokeds_df, config
