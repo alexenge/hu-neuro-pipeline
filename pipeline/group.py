@@ -5,7 +5,7 @@ from os import path
 import pandas as pd
 from joblib import Parallel, delayed
 
-from .helpers import (check_participant_input, compute_cbpts, compute_grands,
+from .helpers import (check_participant_input, compute_pts, compute_grands,
                       compute_grands_df)
 from .participant import participant_pipeline
 from .savers import save_config, save_df, save_evokeds
@@ -38,7 +38,12 @@ def group_pipeline(
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
-    cbpts_contrasts=[],
+    pt_contrasts=[],
+    pt_tmin=0.,
+    pt_tmax=1.,
+    pt_fmin=None,
+    pt_fmax=None,
+    pt_channels=None,
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -201,8 +206,10 @@ def group_pipeline(
     config = locals()
 
     # Remove arguments that are specific for each participant
-    nonshared_keys = ['vhdr_files', 'log_files', 'ocular_correction',
-                      'bad_channels', 'skip_log_rows', 'n_jobs']
+    nonshared_keys = [
+        'vhdr_files', 'log_files', 'ocular_correction', 'bad_channels',
+        'skip_log_rows', 'pt_contrasts', 'pt_tmin', 'pt_tmax', 'pt_channels',
+        'pt_fmin', 'pt_fmax', 'n_jobs']
     _ = [config.pop(key) for key in nonshared_keys]
 
     # Create partial function with only the shared arguments
@@ -276,6 +283,9 @@ def group_pipeline(
     if export_dir is not None:
         save_config(config, export_dir)
 
+    # Define standard returns
+    returns = [trials, evokeds_df, config]
+
     # Combine time-frequency stuff
     if perform_tfr:
 
@@ -295,10 +305,13 @@ def group_pipeline(
             save_evokeds(tfr_grands, tfr_grands_df, export_dir,
                          participant_id='tfr-grand', to_df=to_df)
 
-        return trials, evokeds_df, config, tfr_evokeds_df
+        # Add to the list of returns
+        returns.append(tfr_evokeds_dfs)
 
     # Perform cluster based permutation tests
-    if cbpts_contrasts != []:
-        cluster_df = compute_cbpts(evokeds, cbpts_contrasts)
+    if pt_contrasts != []:
+        cluster_df = compute_pts(
+            evokeds, pt_contrasts, pt_tmin, pt_tmax, pt_channels)
+        returns.append(cluster_df)
 
-    return trials, evokeds_df, config
+    return returns

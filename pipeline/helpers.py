@@ -466,28 +466,37 @@ def is_nested_list(input):
         return False
 
 
-def compute_cbpts(
-        evokeds_per_participant, cbpts_contrasts, n_permutations=1024):
+def compute_pts(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
+                channels=None, fmin=None, fmax=None, n_permutations=1024):
     """Performs a cluster based permutation test for a given contrast"""
 
-    # Get number of participants
-    n_participants = len(evokeds_per_participant)
-
-    # Get dimensions of each participant's data
+    # Extract one example evoked for reading data dimensions
     example_evoked = evokeds_per_participant[0][0]
+
+    # Get relevant time samples
     times = example_evoked.times
-    channels = example_evoked.ch_names
+    if tmin is not None:
+        times = [t for t in times if t >= tmin]
+    if tmax is not None:
+        times = [t for t in times if t < tmax]
+
+    # Get relevant channels
+    if channels is None:
+        channels = example_evoked.ch_names
+    else:
+        assert all([ch in example_evoked.ch_names for ch in channels]), \
+            'All channels in `pt_channels` must be present in the data!'
+
+    # Get dimensions of data for the permutation test
+    n_participants = len(evokeds_per_participant)
     n_times = len(times)
     n_channels = len(channels)
 
-    # Compute channel adjacency
-    channel_adjacency, _ = find_ch_adjacency(example_evoked.info, 'eeg')
-
-    # Prepare emtpy list
+    # Prepare emtpy list for results
     cluster_dfs = []
 
     # Sequentially handle each contrast
-    for contrast in cbpts_contrasts:
+    for contrast in contrasts:
 
         # Prepare empty array
         X = np.zeros((n_participants, n_times, n_channels))
@@ -495,16 +504,21 @@ def compute_cbpts(
         # Compute a difference wave for each participant
         for ix, evokeds in enumerate(evokeds_per_participant):
 
-            # Extract data for the relevant conditions
-            evoked_cond0 = [ev for ev in evokeds if ev.comment == contrast[0]]
-            evoked_cond1 = [ev for ev in evokeds if ev.comment == contrast[1]]
-            data_0 = evoked_cond0[0].data
-            data_1 = evoked_cond1[0].data
+            # Extract evoked data for the two conditions of interest
+            data_conditions = []
+            for condition in contrast:
+                evoked = [ev for ev in evokeds if ev.comment == condition][0]
+                evoked = evoked.copy().crop(
+                    tmin, tmax, include_tmax=False).pick_channels(channels)
+                data_conditions.append(evoked.data)
 
             # Compute difference between conditions
-            data_diff = data_0 - data_1
+            data_diff = data_conditions[0] - data_conditions[1]
             data_diff = data_diff.swapaxes(1, 0)  # Time points, channels
             X[ix] = data_diff
+
+            # Compute channel adjacency
+            channel_adjacency, _ = find_ch_adjacency(evoked.info, 'eeg')
 
         # Run permutation test
         t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
