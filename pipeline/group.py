@@ -32,18 +32,18 @@ def group_pipeline(
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
+    pt_contrasts=[],
+    pt_tmin=0.,
+    pt_tmax=1.,
+    pt_channels=None,
+    pt_fmin=None,
+    pt_fmax=None,
     perform_tfr=False,
     tfr_freqs=range(4, 51, 2),
     tfr_cycles=range(2, 26, 1),
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
-    pt_contrasts=[],
-    pt_tmin=0.,
-    pt_tmax=1.,
-    pt_fmin=None,
-    pt_fmax=None,
-    pt_channels=None,
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -286,7 +286,13 @@ def group_pipeline(
     # Define standard returns
     returns = [trials, evokeds_df, config]
 
-    # Combine time-frequency stuff
+    # Cluster based permutation tests for ERPs
+    if pt_contrasts != []:
+        cluster_df = compute_pts(
+            evokeds, pt_contrasts, pt_tmin, pt_tmax, pt_channels)
+        returns.append(cluster_df)
+
+    # Combine time-frequency results
     if perform_tfr:
 
         # Sort outputs into seperate lists
@@ -307,11 +313,5 @@ def group_pipeline(
 
         # Add to the list of returns
         returns.append(tfr_evokeds_dfs)
-
-    # Perform cluster based permutation tests
-    if pt_contrasts != []:
-        cluster_df = compute_pts(
-            evokeds, pt_contrasts, pt_tmin, pt_tmax, pt_channels)
-        returns.append(cluster_df)
 
     return returns
