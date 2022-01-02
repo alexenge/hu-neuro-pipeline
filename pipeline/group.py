@@ -5,8 +5,8 @@ from os import path
 import pandas as pd
 from joblib import Parallel, delayed
 
-from .helpers import (check_participant_input, compute_pts, compute_grands,
-                      compute_grands_df)
+from .helpers import (check_participant_input, compute_pts, compute_pt_tfr,
+                      compute_grands, compute_grands_df)
 from .participant import participant_pipeline
 from .savers import save_config, save_df, save_evokeds
 
@@ -311,7 +311,11 @@ def group_pipeline(
             save_evokeds(tfr_grands, tfr_grands_df, export_dir,
                          participant_id='tfr-grand', to_df=to_df)
 
+        # Cluster based permutation tests for ERPs
+        tfr_cluster_df = compute_pt_tfr(tfr_evokeds, pt_contrasts, pt_tmin,
+                                        pt_tmax, pt_channels, pt_fmin, pt_fmax)
+
         # Add to the list of returns
-        returns.append(tfr_evokeds_dfs)
+        returns += [tfr_evokeds_dfs, tfr_cluster_df]
 
     return returns
