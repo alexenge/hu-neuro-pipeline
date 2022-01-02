@@ -46,10 +46,7 @@ def group_pipeline(
     perm_fmax=None,
     clean_dir=None,
     epochs_dir=None,
-    trials_dir=None,
-    evokeds_dir=None,
     export_dir=None,
-    tfr_dir=None,
     to_df=True,
     n_jobs=1
 ):
@@ -154,13 +151,6 @@ def group_pipeline(
     epochs_dir : str | Path | None, default None
         Output directory to save the full (time-resolved) epochs data
         (in `.fif` and/or `.csv` format, see `to_df`) for each participant.
-    trials_dir : str | Path | None, default None
-        Output directory to save the single trial behavioral and ERP component
-        DataFrame (always in `.csv` format) for each participant.
-    evokeds_dir : str | Path | None, default None
-        Output directory to save the condition averages (evokeds; in `.fif`
-        and/or `.csv` format, see `to_df`) for each participant; see
-        `condition_cols`.
     export_dir : str | Path | None, default None
         Output directory to save data at the group level, namely channel
         locations (in `.csv` format), combined single trial and evoked data,
