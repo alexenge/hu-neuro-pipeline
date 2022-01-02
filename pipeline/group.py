@@ -14,178 +14,72 @@ from .savers import save_config, save_df, save_evokeds
 def group_pipeline(
     vhdr_files,
     log_files,
-    ocular_correction='fastica',
-    bad_channels='auto',
-    skip_log_rows=None,
-    skip_log_conditions=None,
+    export_dir,
     downsample_sfreq=None,
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
+    bad_channels='auto',
+    ocular_correction='fastica',
     highpass_freq=0.1,
-    lowpass_freq=30.0,
+    lowpass_freq=40.,
+    triggers=None,
     epochs_tmin=-0.5,
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
-    triggers=None,
+    skip_log_rows=None,
+    skip_log_conditions=None,
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
-    perm_contrasts=[],
-    perm_tmin=0.,
-    perm_tmax=1.,
-    perm_channels=None,
     perform_tfr=False,
     tfr_freqs=range(4, 51, 2),
     tfr_cycles=range(2, 26, 1),
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
+    perm_contrasts=[],
+    perm_tmin=0.,
+    perm_tmax=1.,
+    perm_channels=None,
     perm_fmin=None,
     perm_fmax=None,
     clean_dir=None,
     epochs_dir=None,
-    export_dir=None,
     to_df=True,
     n_jobs=1
 ):
-    """Processes EEG data for all participants of an experiment in parallel.
+    """Processes EEG data for all participants of an experiment.
 
-    For each participant, reads raw data, performs downsampling (optional),
-    loads electrode locations, interpolates bad channels (optional), re-
-    references to common average, does ocular correction (ICA or MSEC/BESA,
-    optional), does filtering (optional), does segmenting into epochs, rejects
-    bad epochs, and computes single trial mean ERP amplitudes for components of
-    interest as well as condition averages (evokeds).
+    For each participant, the raw data is read and cleaned using standard steps
+    (downsampling, bad channel interpolation, ocular correction, frequency
+    domain filtering). Epochs are created around the `triggers`. Bad epochs are
+    removed based on peak-to-peak amplitude. Single trial mean ERP amplitudes
+    for ERP `components` of interest are computed and matched to the single
+    trial behavioral data from the `log_files`.
 
-    At the group level, combines all single trial behavioral data and mean
-    amplitudes and combines evokeds into grand averages (e.g., for plotting).
+    Optionally, this last step is repeated on a time-frequency representation
+    (TFR) of the data obtained via Morlet wavelet convolution.
 
-    For details about the EEG processing pipeline, see Frömer et al. (2018)[1].
+    The result is a single trial data frame which can be used for fitting
+    linear mixed-effects models on the mean ERP amplitudes (and power).
 
-    Parameters
-    ----------
-    vhdr_files : str | Path | list of str | list of Path
-        Raw EEG files for all participants. Can either be a list of `.vhdr`
-        file paths or the path of their parent directory.
-    log_files : str | Path | list of str | list of Path | list of pd.DataFrame
-        Behavioral log files for all participants. Can either be a list of
-        `.txt`, `.log`, or `.csv` file paths or the path of their parent
-        directory. Can also be a list of pandas DataFrames, in which case no
-        files are being read.
-    ocular_correction : str | list of str | list of Path | None, default 'fastica'
-        Ocular correction method. Can either be an ICA method (`'fastica'` or
-        `'infomax'` or `'picard'`), a list of MSEC (BESA) `.matrix` file paths,
-        or their parent directory.
-    bad_channels : list of list | list of str | 'auto' | None, default 'auto'
-        Bad channels that should be replaced via interpolation. If 'auto',
-        interpolates channels if they meet the rejection threshold (see
-        `reject_peak_to_peak` and `reject_flat`) in more than 5% of all epochs.
-        If list of lists, must contain one list of bad channel labels per
-        participants. If list of str, interpolates the same channels for all
-        participants. If None, doesn't interpolate any channels.
-    skip_log_rows : list of list | list of int | None, default None
-        Rows to remove from the log file based on their indices. This is useful
-        if the EEG was paused or interrupted at some point. If list of list,
-        must contain one list of row indices (starting at 0) per participant.
-        If list of int, removes the same row indices for all participants.
-    skip_log_conditions : dict | None, default None
-        Rows to remove from the log file based on their condition. This is
-        useful to remove filler stimuli for which there are no EEG triggers.
-        Dict keys are the column names in the log file, values (str or list of
-        str) are the condition(s) that should be removed remove.
-    downsample_sfreq : float | None, default None
-        Downsampling frequency in Hz. Downsampling (e.g., from 500.0 Hz to
-        250.0 Hz) saves computation time and disk space.
-    veog_channels : list of str | 'auto' | None, default 'auto'
-        Names of two vertical EOG channels (above and below the eye) for
-        creating a virtual, bipolar VEOG channel. If 'auto', try different
-        common VEOG electrode labels ('Fp1'/'FP1', 'Auge_u'/'IO1').
-    heog_channels : list of str | 'auto' | None, default 'auto'
-        Names of two vertical EOG channels (left and right of the eye) for
-        creating a virtual, bipolar HEOG channel. If 'auto', try different
-        common HEOG electrode labels ('F9'/'Afp9', 'F10'/'Afp10').
-    montage : str | Path, default 'easycap-M1'
-        Montage for looking up channel locations. Can either be the name of a
-        standard montage (see [2]) or the path to a custom electrode location
-        file (see [3]).
-    highpass_freq : float | None, default 0.1
-        Pass-band edge (in Hz) for the highpass filter. If None, don't use
-        highpass filter.
-    lowpass_freq : float | None, default 30.0
-        Pass-band edge (in Hz) for the lowpass filter. If None, don't use
-        lowpass filter.
-    epochs_tmin : float, default -0.5
-        Starting point of the epoch (in s) relative to stimulus onset.
-    epochs_tmax : float, default 1.5
-        Ending point of the epoch (in s) relative to stimulus onset.    
-    baseline : tuple of (float, float), default (-0.2, 0.0)
-        Time window (in s) for baseline correction relative to stimulus onset.
-    triggers : dict of {str: int, ...} | None, default None
-        Triggers (values, int) of the relevant events (usually stimuli) and
-        their corresponding labels (keys, str) for creating epochs. If None,
-        use all triggers. This will not work if there are more triggers than
-        trials in the log file.
-    reject_peak_to_peak : float | None, default 200.0
-        Peak-to-peak amplitude (in microvolts) for rejecting bad epochs.
-    reject_flat : float | None, default 1.0
-        Amplitude (in microvolts) for rejecting bad epochs as flat.
-    components : dict | None, default None
-        Definition of ERP components for single trial analysis. Must have the
-        following key (value) pairs: 'name' (list of str), `tmin` (list of
-        float), `tmax` (list of float), `roi` (list of list of str), where
-        `tmin` and `tmax` are the time windows of interest (in s) and `roi` are
-        the lists of channel names for the spatial regions of interest. All of
-        four lists must have the same number of elements.
-    condition_cols : str | list of str | None, default None
-        Columns in the log file to compute condition averages (evokeds) for. If
-        given a single column name, computes averages for each condition in
-        this column. If given multiple column names, computes averages for each
-        condition in each column (i.e., main effects) as well as for each
-        combination of conditions across columns (i.e., interaction effects).
-        If None, creates one average for each EEG trigger (see `triggers`).
-    clean_dir : str | Path | None, default None
-        Output directory to save the cleaned (ocular corrected, filtered)
-        continuous EEG data (always in `.fif` format) for each participant.
-    epochs_dir : str | Path | None, default None
-        Output directory to save the full (time-resolved) epochs data
-        (in `.fif` and/or `.csv` format, see `to_df`) for each participant.
-    export_dir : str | Path | None, default None
-        Output directory to save data at the group level, namely channel
-        locations (in `.csv` format), combined single trial and evoked data,
-        and grand averages (in `.fif` and/or `.csv` format, see `to_df`).
-    to_df : bool | 'both', default True
-        Convert all MNE objects (epochs, evokeds, grand averages) to data
-        frames and save them in `.csv` instead of `.fif` format. If `both`,
-        save in both `.csv` and `.fif` format.
-    n_jobs : int | 'auto', default 1
-        Number of CPU cores to use for processing participants in parallel. If
-        'auto', use all available cores on the machine minus one. Numbers > 1
-        (including 'auto') do not work under Windows.
+    Additionally, by-participant condition averages (`evokeds`) for the ERPs
+    (and power) are computed to facilitate plotting. Optionally, these can also
+    be tested for condition differences in an exploratory fashion using
+    cluster-based permutation tests.
 
-    Returns
-    -------
-    trials : pd.DataFrame
-        Combined single trial behavioral and ERP component data for all
-        participants. Can be used for running linear mixed models (LMMs) on
-        reaction times and ERP mean amplitudes.
-    evokeds_df : pd.DataFrame
-        Time-resolved by-participant averages for all channels and ERP
-        components. If multiple `condition_cols`, the column `average_by`
-        indicates for which column (main effects) or combination of columns
-        (interaction effects) the averages were computed.
-    config : dict
-        Configuration of the pipeline. Will be identical to the input arguments
-        except for the list of `bad_channels` (if `bad_channels == 'auto'`).
-        If directories were provided for the input files, the full list of
-        filenames is returned.
+    For details about the pipeline, see Frömer et al. (2018)[1].
+
+    Parameters & returns
+    --------------------
+    See the README[2] in the GitHub repository for the pipeline.
 
     Notes
     -----
     [1] https://doi.org/10.3389/fnins.2018.00048
-    [2] https://mne.tools/stable/generated/mne.channels.make_standard_montage.html
-    [3] https://mne.tools/stable/generated/mne.channels.read_custom_montage.html
+    [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
     """
 
     # Make sure that TFR frequencies and cycles are lists
