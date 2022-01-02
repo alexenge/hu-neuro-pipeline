@@ -10,6 +10,7 @@ from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
                       get_bads, read_log)
 from .savers import (save_clean, save_df, save_epochs, save_evokeds,
                      save_montage)
+from .tfr import compute_single_trials_tfr
 
 
 def participant_pipeline(
@@ -299,7 +300,7 @@ def participant_pipeline(
         tfr.data = np.float32(tfr.data)
 
         # Add single trial mean power to metadata
-        trials = compute_single_trials(tfr, tfr_components, bad_ixs)
+        trials = compute_single_trials_tfr(tfr, tfr_components, bad_ixs)
 
         # Save single trial data (again)
         if trials_dir is not None:
