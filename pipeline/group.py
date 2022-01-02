@@ -5,9 +5,9 @@ from os import path
 import pandas as pd
 from joblib import Parallel, delayed
 
-from .helpers import (check_participant_input, compute_pts, compute_pt_tfr,
-                      compute_grands, compute_grands_df)
+from .helpers import check_participant_input, compute_grands, compute_grands_df
 from .participant import participant_pipeline
+from .perm import compute_perm, compute_perm_tfr
 from .savers import save_config, save_df, save_evokeds
 
 
@@ -32,18 +32,18 @@ def group_pipeline(
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
-    pt_contrasts=[],
-    pt_tmin=0.,
-    pt_tmax=1.,
-    pt_channels=None,
-    pt_fmin=None,
-    pt_fmax=None,
+    perm_contrasts=[],
+    perm_tmin=0.,
+    perm_tmax=1.,
+    perm_channels=None,
     perform_tfr=False,
     tfr_freqs=range(4, 51, 2),
     tfr_cycles=range(2, 26, 1),
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
+    perm_fmin=None,
+    perm_fmax=None,
     clean_dir=None,
     epochs_dir=None,
     trials_dir=None,
@@ -208,8 +208,8 @@ def group_pipeline(
     # Remove arguments that are specific for each participant
     nonshared_keys = [
         'vhdr_files', 'log_files', 'ocular_correction', 'bad_channels',
-        'skip_log_rows', 'pt_contrasts', 'pt_tmin', 'pt_tmax', 'pt_channels',
-        'pt_fmin', 'pt_fmax', 'n_jobs']
+        'skip_log_rows', 'perm_contrasts', 'perm_tmin', 'perm_tmax',
+        'perm_channels', 'perm_fmin', 'perm_fmax', 'n_jobs']
     _ = [config.pop(key) for key in nonshared_keys]
 
     # Create partial function with only the shared arguments
@@ -287,9 +287,9 @@ def group_pipeline(
     returns = [trials, evokeds_df, config]
 
     # Cluster based permutation tests for ERPs
-    if pt_contrasts != []:
-        cluster_df = compute_pts(
-            evokeds, pt_contrasts, pt_tmin, pt_tmax, pt_channels)
+    if perm_contrasts != []:
+        cluster_df = compute_perm(
+            evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels)
         returns.append(cluster_df)
 
     # Combine time-frequency results
@@ -312,8 +312,9 @@ def group_pipeline(
                          participant_id='tfr-grand', to_df=to_df)
 
         # Cluster based permutation tests for ERPs
-        tfr_cluster_df = compute_pt_tfr(tfr_evokeds, pt_contrasts, pt_tmin,
-                                        pt_tmax, pt_channels, pt_fmin, pt_fmax)
+        tfr_cluster_df = compute_perm_tfr(
+            tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels,
+            perm_fmin, perm_fmax)
 
         # Add to the list of returns
         returns += [tfr_evokeds_dfs, tfr_cluster_df]
