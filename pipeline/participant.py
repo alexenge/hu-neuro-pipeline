@@ -7,7 +7,7 @@ from mne.time_frequency import tfr_morlet
 
 from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
                       compute_single_trials, correct_besa, correct_ica,
-                      get_bads, read_log)
+                      events_from_triggers, get_bads, read_log)
 from .savers import (save_clean, save_df, save_epochs, save_evokeds,
                      save_montage)
 from .tfr import compute_single_trials_tfr
@@ -128,8 +128,7 @@ def participant_pipeline(
     events, event_id = events_from_annotations(
         filt, regexp='Stimulus', verbose=False)
     if triggers is not None:
-        triggers = {key: int(value) for key, value in triggers.items()}
-        event_id = triggers
+        event_id = events_from_triggers(triggers)
 
     # Epoching including baseline correction
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
