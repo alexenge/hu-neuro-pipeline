@@ -1,7 +1,6 @@
 from collections import Counter
 from itertools import chain, combinations
 from os import path
-from string import ascii_lowercase
 from sys import exit
 
 import chardet
@@ -131,10 +130,9 @@ def correct_besa(raw, besa_file):
 def events_from_triggers(triggers):
     """Convert list or dict of triggers to MNE-style event_id"""
 
-    # Convert list to dict with dummy condition names
+    # Convert list to dict with triggers as condition names
     if isinstance(triggers, list):
-        dummy_conditions = list(ascii_lowercase)[:len(triggers)]
-        triggers = {con: trig for con, trig in zip(dummy_conditions, triggers)}
+        triggers = {str(trigger): trigger for trigger in triggers}
 
     # Make sure that trigger values are integers (R would pass them as floats)
     triggers = {key: int(value) for key, value in triggers.items()}
