@@ -130,8 +130,7 @@ def group_pipeline(
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
-    n_jobs_num = -2 if n_jobs == 'auto' else n_jobs
-    res = Parallel(n_jobs_num)(
+    res = Parallel(n_jobs)(
         delayed(pipeline_partial)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
@@ -173,7 +172,7 @@ def group_pipeline(
     # Cluster based permutation tests for ERPs
     if perm_contrasts != []:
         cluster_df = compute_perm(evokeds, perm_contrasts, perm_tmin,
-                                  perm_tmax, perm_channels, n_jobs_num)
+                                  perm_tmax, perm_channels, n_jobs)
         returns.append(cluster_df)
 
     # Combine time-frequency results
@@ -198,7 +197,7 @@ def group_pipeline(
         # Cluster based permutation tests for ERPs
         tfr_cluster_df = compute_perm_tfr(
             tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels,
-            perm_fmin, perm_fmax, n_jobs_num)
+            perm_fmin, perm_fmax, n_jobs)
 
         # Add to the list of returns
         returns += [tfr_evokeds_dfs, tfr_cluster_df]
