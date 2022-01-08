@@ -29,8 +29,8 @@ def group_pipeline(
     baseline=(-0.2, 0.0),
     skip_log_rows=None,
     skip_log_conditions=None,
-    reject_peak_to_peak=200.0,
-    reject_flat=1.0,
+    reject_peak_to_peak=200.,
+    reject_flat=1.,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     condition_cols=None,
     perform_tfr=False,
@@ -172,8 +172,8 @@ def group_pipeline(
 
     # Cluster based permutation tests for ERPs
     if perm_contrasts != []:
-        cluster_df = compute_perm(
-            evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels)
+        cluster_df = compute_perm(evokeds, perm_contrasts, perm_tmin,
+                                  perm_tmax, perm_channels, n_jobs_num)
         returns.append(cluster_df)
 
     # Combine time-frequency results
@@ -198,7 +198,7 @@ def group_pipeline(
         # Cluster based permutation tests for ERPs
         tfr_cluster_df = compute_perm_tfr(
             tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels,
-            perm_fmin, perm_fmax)
+            perm_fmin, perm_fmax, n_jobs_num)
 
         # Add to the list of returns
         returns += [tfr_evokeds_dfs, tfr_cluster_df]

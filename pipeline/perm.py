@@ -5,7 +5,7 @@ from mne.stats import combine_adjacency, permutation_cluster_1samp_test
 
 
 def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
-                 channels=None, n_permutations=1024):
+                 channels=None, n_jobs=1, n_permutations=1024):
     """Performs a cluster based permutation test for a given contrast"""
 
     # Extract one example evoked for reading data dimensions
@@ -61,7 +61,7 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
         # Run permutation test
         t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
             X, n_permutations=n_permutations, adjacency=channel_adjacency,
-            seed=1234)
+            n_jobs=n_jobs, seed=1234)
 
         # Create cluster image
         cluster_arr = np.ones_like(t_obs)
@@ -87,8 +87,9 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
     return cluster_df
 
 
-def compute_perm_tfr(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
-                     channels=None, fmin=None, fmax=None, n_permutations=1024):
+def compute_perm_tfr(
+        evokeds_per_participant, contrasts, tmin=0., tmax=1., channels=None,
+        fmin=None, fmax=None, n_jobs=1, n_permutations=1024):
     """Performs a cluster based permutation test on time-frequency data"""
 
     # Extract one example evoked for reading data dimensions
@@ -155,7 +156,7 @@ def compute_perm_tfr(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
         # Run permutation test
         t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
             X, n_permutations=n_permutations, adjacency=adjacency,
-            seed=1234)
+            n_jobs=n_jobs, seed=1234)
 
         # Create cluster image
         cluster_arr = np.ones_like(t_obs)
