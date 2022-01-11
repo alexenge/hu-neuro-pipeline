@@ -4,7 +4,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hu-neuro-pipeline)
 ![GitHub](https://img.shields.io/github/license/alexenge/hu-neuro-pipeline)
 
-Single trial EEG pipeline at the Neurocognitive Psychology lab, Humboldt-Universität zu Berlin
+Single trial EEG pipeline at the [Neurocognitive Psychology lab](https://www.psychology.hu-berlin.de/en/profship/nk), Humboldt-Universität zu Berlin
 
 Based on Frömer, R., Maier, M., & Abdel Rahman, R. (2018).
 Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models.
@@ -14,7 +14,7 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 
 ### 1.1 For Python users
 
-Via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
+Install the pipeline via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
 
 ```bash
 python3 -m pip install hu-neuro-pipeline
@@ -22,17 +22,17 @@ python3 -m pip install hu-neuro-pipeline
 
 ### 1.2 For R users
 
-Install [reticulate](https://rstudio.github.io/reticulate/) and [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for being able to import Python packages into R:
+First install [reticulate](https://rstudio.github.io/reticulate/) and [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for being able to import Python packages into R:
 
 ```r
 install.packages("reticulate")
 reticulate::install_miniconda()
 ```
 
-Install the pipeline:
+Then install the pipeline via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
 
 ```r
-py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
+reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 ```
 
 ## 2. Usage
@@ -45,7 +45,7 @@ py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 
 ### 3.1 For Python users
 
-Minimal example for a (fictional) N400/P600 experiment with two experimental factors: `Semantics` (`"related"` vs. `"unrelated"`) and emotional `Context` (`"negative"` vs. `"neutral"`).
+This is a minimal example for a (fictional) N400/P600 experiment with two experimental factors: `Semantics` (`"related"` vs. `"unrelated"`) and emotional `Context` (`"negative"` vs. `"neutral"`).
 
 ```python
 from pipeline import group_pipeline
@@ -55,7 +55,7 @@ trials, evokeds_df, config = group_pipeline(
     log_files='Results/RT',
     ocular_correction='Results/EEG/cali',
     triggers={'related/negative': 201,
-               'related/neutral': 202,
+              'related/neutral': 202,
               'unrelated/negative': 211,
               'unrelated/neutral': 212},
     skip_log_conditions={'Semantics': 'filler'},
@@ -70,7 +70,7 @@ trials, evokeds_df, config = group_pipeline(
 
 ### 3.2 For R users
 
-Same example as above:
+Here's the same example as above:
 
 ```R
 # Import Python module
