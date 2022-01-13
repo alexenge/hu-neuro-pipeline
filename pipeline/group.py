@@ -82,7 +82,7 @@ def group_pipeline(
     [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
     """
 
-    # Make sure that TFR frequencies and cycles are lists
+    # Convert TFR frequencies and cycles to lists
     tfr_freqs = list(tfr_freqs)
     tfr_cycles = list(tfr_cycles)
 
@@ -97,22 +97,46 @@ def group_pipeline(
     _ = [config.pop(key) for key in nonshared_keys]
 
     # Create partial function with only the shared arguments
-    pipeline_partial = partial(participant_pipeline, **config)
+    partial_pipeline = partial(
+        participant_pipeline,
+        skip_log_conditions=skip_log_conditions,
+        downsample_sfreq=downsample_sfreq,
+        veog_channels=veog_channels,
+        heog_channels=heog_channels,
+        montage=montage,
+        highpass_freq=highpass_freq,
+        lowpass_freq=lowpass_freq,
+        triggers=triggers,
+        epochs_tmin=epochs_tmin,
+        epochs_tmax=epochs_tmax,
+        baseline=baseline,
+        reject_peak_to_peak=reject_peak_to_peak,
+        reject_flat=reject_flat,
+        components=components,
+        condition_cols=condition_cols,
+        perform_tfr=perform_tfr,
+        tfr_freqs=list(tfr_freqs),
+        tfr_cycles=list(tfr_cycles),
+        tfr_baseline=tfr_baseline,
+        tfr_components=tfr_components,
+        clean_dir=clean_dir,
+        epochs_dir=epochs_dir)
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
-        if path.isdir(vhdr_files):
-            vhdr_files = glob(f'{vhdr_files}/*.vhdr')
-            vhdr_files.sort()
+        assert path.isdir(vhdr_files), 'Path of `vhdr_files` doesn\'t exist!'
+        vhdr_files = glob(f'{vhdr_files}/*.vhdr')
+        vhdr_files.sort()
     if isinstance(log_files, str):
-        if path.isdir(log_files):
-            log_files = glob(f'{log_files}/*.csv') + \
-                glob(f'{log_files}/*.txt') + glob(f'{log_files}/*.tsv')
-            log_files.sort()
+        assert path.isdir(log_files), 'Path of `log_files` doesn\'t exist!'
+        log_files = glob(f'{log_files}/*.csv') + \
+            glob(f'{log_files}/*.txt') + glob(f'{log_files}/*.tsv')
+        log_files.sort()
 
     # Prepare ocular correction method
-    if isinstance(ocular_correction, str):
-        if ocular_correction in ['fastica', 'infomax', 'picard']:
+    if not isinstance(ocular_correction, list):
+        ica_methods = ['fastica', 'infomax', 'picard']
+        if ocular_correction is None or ocular_correction in ica_methods:
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
             ocular_correction = glob(f'{ocular_correction}/*.matrix')
@@ -131,7 +155,7 @@ def group_pipeline(
 
     # Do processing in parallel
     res = Parallel(n_jobs)(
-        delayed(pipeline_partial)(*args) for args in participant_args)
+        delayed(partial_pipeline)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
     trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
