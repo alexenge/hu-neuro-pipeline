@@ -81,6 +81,11 @@ def participant_pipeline(
     # Backup input arguments for re-use
     config = locals()
 
+    # Convert some input arguments so that MNE will handle them
+    baseline = tuple(baseline)
+    tfr_freqs = list(tfr_freqs)
+    tfr_cycles = list(tfr_cycles)
+
     # Get participant ID from filename
     participant_id = path.basename(vhdr_file).split('.')[0]
 
@@ -185,8 +190,6 @@ def participant_pipeline(
         epochs_unfilt.metadata = epochs.metadata.copy()
 
         # Morlet wavelet convolution
-        tfr_freqs = list(tfr_freqs)
-        tfr_cycles = list(tfr_cycles)
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
                          return_itc=False, average=False)
 
