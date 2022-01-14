@@ -196,6 +196,6 @@ def group_pipeline(
             perm_fmin, perm_fmax, n_jobs)
 
         # Add to the list of returns
-        returns += [tfr_evokeds_dfs, tfr_cluster_df]
+        returns += [tfr_evokeds_df, tfr_cluster_df]
 
     return returns
