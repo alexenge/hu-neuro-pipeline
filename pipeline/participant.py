@@ -149,11 +149,7 @@ def participant_pipeline(
     if bad_channels == 'auto':
         if auto_channels != []:
             config['bad_channels'] = auto_channels
-            trials, evokeds, evokeds_df, config = \
-                participant_pipeline(**config)
-            return trials, evokeds, evokeds_df, config
-        else:
-            config['bad_channels'] = []
+            return participant_pipeline(**config)
 
     # Add single trial mean ERP amplitudes to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
@@ -216,6 +212,6 @@ def participant_pipeline(
             save_evokeds(
                 tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
 
-        return trials, evokeds, evokeds_df, config, tfr_evokeds, tfr_evokeds_df
+        return trials, evokeds, evokeds_df, tfr_evokeds, tfr_evokeds_df
 
-    return trials, evokeds, evokeds_df, config
+    return trials, evokeds, evokeds_df

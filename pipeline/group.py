@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from .helpers import check_participant_input, compute_grands, compute_grands_df
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
-from .savers import save_config, save_df, save_evokeds
+from .savers import save_df, save_evokeds
 
 
 def group_pipeline(
@@ -82,21 +82,7 @@ def group_pipeline(
     [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
     """
 
-    # Convert TFR frequencies and cycles to lists
-    tfr_freqs = list(tfr_freqs)
-    tfr_cycles = list(tfr_cycles)
-
-    # Backup input arguments for re-use
-    config = locals()
-
-    # Remove arguments that are specific for each participant
-    nonshared_keys = [
-        'vhdr_files', 'log_files', 'ocular_correction', 'bad_channels',
-        'skip_log_rows', 'perm_contrasts', 'perm_tmin', 'perm_tmax',
-        'perm_channels', 'perm_fmin', 'perm_fmax', 'n_jobs']
-    _ = [config.pop(key) for key in nonshared_keys]
-
-    # Create partial function with only the shared arguments
+    # Create partial function with arguments shared across participants
     partial_pipeline = partial(
         participant_pipeline,
         skip_log_conditions=skip_log_conditions,
@@ -158,7 +144,7 @@ def group_pipeline(
         delayed(partial_pipeline)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
+    trials, evokeds, evokeds_dfs = list(map(list, zip(*res)))[0:3]
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
@@ -176,22 +162,8 @@ def group_pipeline(
     save_evokeds(
         grands, grands_df, export_dir, participant_id='grand', to_df=to_df)
 
-    # Add participant-specific arguments back to config
-    config = {'vhdr_files': vhdr_files, 'log_files': log_files,
-              'ocular_correction': ocular_correction,
-              'bad_channels': bad_channels,
-              'skip_log_rows': skip_log_rows, **config, 'n_jobs': n_jobs}
-
-    # Add automatically detected bad channels
-    if 'auto' in bad_channels:
-        config['auto_bad_channels'] = [cf['bad_channels'] for cf in configs]
-
-    # Save config
-    if export_dir is not None:
-        save_config(config, export_dir)
-
     # Define standard returns
-    returns = [trials, evokeds_df, config]
+    returns = [trials, evokeds_df]
 
     # Cluster based permutation tests for ERPs
     if perm_contrasts != []:
@@ -203,7 +175,7 @@ def group_pipeline(
     if perform_tfr:
 
         # Sort outputs into seperate lists
-        tfr_evokeds, tfr_evokeds_dfs = list(map(list, zip(*res)))[4:6]
+        tfr_evokeds, tfr_evokeds_dfs = list(map(list, zip(*res)))[3:5]
 
         # Combine evokeds_df for power and save
         tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
