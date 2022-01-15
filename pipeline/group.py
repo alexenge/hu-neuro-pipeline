@@ -106,7 +106,8 @@ def group_pipeline(
         tfr_baseline=tfr_baseline,
         tfr_components=tfr_components,
         clean_dir=clean_dir,
-        epochs_dir=epochs_dir)
+        epochs_dir=epochs_dir,
+        chanlocs_dir=export_dir)
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):

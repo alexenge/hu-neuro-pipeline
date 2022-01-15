@@ -44,7 +44,7 @@ def participant_pipeline(
     epochs_dir=None,
     trials_dir=None,
     evokeds_dir=None,
-    export_dir=None,
+    chanlocs_dir=None,
     tfr_dir=None,
     to_df=True,
 ):
@@ -164,8 +164,8 @@ def participant_pipeline(
         save_epochs(epochs, epochs_dir, participant_id, to_df)
 
     # Save channel locations
-    if export_dir is not None:
-        save_montage(epochs, export_dir)
+    if chanlocs_dir is not None:
+        save_montage(epochs, chanlocs_dir)
 
     # Compute evokeds
     evokeds, evokeds_df = compute_evokeds(
