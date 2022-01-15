@@ -148,13 +148,11 @@ def group_pipeline(
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
-    if export_dir is not None:
-        save_df(trials, export_dir, participant_id='all', suffix='trials')
+    save_df(trials, export_dir, participant_id='all', suffix='trials')
 
     # Combine evokeds_dfs and save
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
-    if export_dir is not None:
-        save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
+    save_df(evokeds_df, export_dir, participant_id='all', suffix='ave')
 
     # Compute grand averaged ERPs and save
     grands = compute_grands(evokeds)
@@ -179,17 +177,15 @@ def group_pipeline(
 
         # Combine evokeds_df for power and save
         tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
+        save_df(tfr_evokeds_df, export_dir, participant_id='all',
+                suffix='tfr-ave')
         returns.append(tfr_evokeds_df)
-        if export_dir is not None:
-            save_df(tfr_evokeds_df, export_dir,
-                    participant_id='all', suffix='tfr-ave')
 
         # Compute grand averaged power and save
         tfr_grands = compute_grands(tfr_evokeds)
         tfr_grands_df = compute_grands_df(tfr_evokeds_df)
-        if export_dir is not None:
-            save_evokeds(tfr_grands, tfr_grands_df, export_dir,
-                         participant_id='tfr-grand', to_df=to_df)
+        save_evokeds(tfr_grands, tfr_grands_df, export_dir,
+                     participant_id='tfr-grand', to_df=to_df)
 
         # Cluster based permutation tests for TFR
         if perm_contrasts != []:
