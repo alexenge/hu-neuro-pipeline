@@ -211,6 +211,10 @@ def get_bads(
 def compute_single_trials(epochs, components, bad_ixs=None):
     """Computes single trial mean amplitudes a dict of multiple components."""
 
+    # Check that values in the dict are lists
+    if not isinstance(components['name'], list):
+        components = {key: [value] for key, value in components.items()}
+
     # Loop over components
     components_df = pd.DataFrame(components)
     for _, component in components_df.iterrows():
