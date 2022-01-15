@@ -190,10 +190,11 @@ def group_pipeline(
             save_evokeds(tfr_grands, tfr_grands_df, export_dir,
                          participant_id='tfr-grand', to_df=to_df)
 
-        # Cluster based permutation tests for ERPs
-        tfr_cluster_df = compute_perm_tfr(
-            tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax, perm_channels,
-            perm_fmin, perm_fmax, n_jobs)
+        # Cluster based permutation tests for TFR
+        if perm_contrasts != []:
+            tfr_cluster_df = compute_perm_tfr(
+                tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax,
+                perm_channels, perm_fmin, perm_fmax, n_jobs)
 
         # Add to the list of returns
         returns += [tfr_evokeds_df, tfr_cluster_df]
