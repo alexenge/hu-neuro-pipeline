@@ -1,5 +1,23 @@
 # Pipeline inputs
 
+---
+
+* [1. Input file options](#1-input-file-options)
+
+* [2. Output directory options](#2-output-directory-options)
+
+* [3. Preprocessing options](#3-preprocessing-options)
+
+* [4. Epoching options](#4-epoching-options)
+
+* [5. Options for time-frequency analysis](#5-options-for-time-frequency-analysis)
+
+* [6. Options for cluster-based permutation tests](#6-options-for-cluster-based-permutation-tests)
+
+* [7. Performance options](#7-performance-options)
+
+---
+
 ## 1. Input file options
 
 ### **`vhdr_files` (required)**
@@ -199,7 +217,7 @@ End of the epoching interval relative to stimulus onset (in s).
 | --------------- | ---------- |
 | `1.5`           | `1.5`      |
 
-## **`baseline` (optional, default: `(-0.2, 0.0)`)**
+### **`baseline` (optional, default: `(-0.2, 0.0)`)**
 
 Time period (in s relative to stimulus onset) for baseline correction.
 For each epoch and channel, the average voltage during this interval is being subtracted from all time points in the epoch so as to correct for shifts in voltage level that had occured before stimulus onset.
@@ -210,7 +228,7 @@ Setting the first or the second value to `None` will use the start or the end of
 | `(-0.2, 0.0)`   | `c(-0.2, 0.0)` |
 | `(None, 0.0)`   | `c(NULL, 0.0)` |
 
-## **`skip_log_rows` (optional, default: `None`)**
+### **`skip_log_rows` (optional, default: `None`)**
 
 Row indices to skip from the log file.
 In case of `None`, all rows from the log file are used (but see also `skip_log_conditions` below).
@@ -225,7 +243,7 @@ All indices are in Python style, i.e., starting from `0` (not from `1` as in R).
 | `[113, 114, 115], [], [12], ...]` | `list(c(113, 114, 115), c(), c(12), ...)` |
 | `{'Vp12': [55, 239], ...}`        | `list("Vp12" = c(55, 239), ...)`          |
 
-## **`skip_log_conditions` (optional, default: `None`)**
+### **`skip_log_conditions` (optional, default: `None`)**
 
 An alternative to `skip_log_rows` for excluding an entire condition (or multiple conditions) from the log file (rather than individual trials).
 If `None`, all rows from the file are used (but see also `skip_log_rows` above).
@@ -325,7 +343,7 @@ The corresponding frequencies divided by a factor of two seems to be a common ch
 | `range(2, 26, 1)`                   | `seq(2, 25, 1)`                      |
 | `[4, 6, 8, 10, 12, 14, 16, 18, 20]` | `c(4, 6, 8, 10, 12, 14, 16, 18, 20)` |
 
-### **`tfr_baseline` (optional, default: `range(2, 26, 1)`)**
+### **`tfr_baseline` (optional, default: `(-0.3, 0.1)`)**
 
 Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
 Unlike the `baseline` for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical $1/f$ scaling of EEG frequencies.
