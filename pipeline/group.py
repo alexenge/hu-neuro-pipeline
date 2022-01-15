@@ -179,6 +179,7 @@ def group_pipeline(
 
         # Combine evokeds_df for power and save
         tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
+        returns.append(tfr_evokeds_df)
         if export_dir is not None:
             save_df(tfr_evokeds_df, export_dir,
                     participant_id='all', suffix='tfr-ave')
@@ -195,8 +196,6 @@ def group_pipeline(
             tfr_cluster_df = compute_perm_tfr(
                 tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax,
                 perm_channels, perm_fmin, perm_fmax, n_jobs)
-
-        # Add to the list of returns
-        returns += [tfr_evokeds_df, tfr_cluster_df]
+            returns.append(tfr_cluster_df)
 
     return returns
