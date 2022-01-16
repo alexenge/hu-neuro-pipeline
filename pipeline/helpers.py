@@ -256,8 +256,8 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(
-        epochs, condition_cols=None, bad_ixs=[], participant_id=None):
+def compute_evokeds(epochs, condition_cols=None, interaction_levels='all',
+                    bad_ixs=[], participant_id=None):
     """Computes condition averages (evokeds) based on triggers or metadata."""
 
     # Prepare emtpy list for storing
@@ -285,8 +285,9 @@ def compute_evokeds(
         # Create the powerset (all possible main effects and interactions)
         c = condition_cols if isinstance(condition_cols, list) \
             else [condition_cols]
+        ias = len(c) if interaction_levels == 'all' else interaction_levels
         powerset = chain.from_iterable(
-            combinations(c, r) for r in range(1, len(c) + 1))
+            combinations(c, r) for r in range(1, ias + 1))
 
         # Iterate over the possible main effects and interactions
         for cols in powerset:
