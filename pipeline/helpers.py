@@ -256,7 +256,7 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(epochs, condition_cols=None, interaction_levels='all',
+def compute_evokeds(epochs, condition_cols=None, interactions='all',
                     bad_ixs=[], participant_id=None):
     """Computes condition averages (evokeds) based on triggers or metadata."""
 
@@ -282,15 +282,25 @@ def compute_evokeds(epochs, condition_cols=None, interaction_levels='all',
     # Otherwise use condition_cols
     else:
 
-        # Create the powerset (all possible main effects and interactions)
-        c = condition_cols if isinstance(condition_cols, list) \
-            else [condition_cols]
-        ias = len(c) if interaction_levels == 'all' else interaction_levels
-        powerset = chain.from_iterable(
-            combinations(c, r) for r in range(1, ias + 1))
+        # Get main effects and interactions
+        if interactions == 'all':
+
+            # Get all possible main effects and interactions (i.e., powerset)
+            # See https://stackoverflow.com/a/1482316
+            c = condition_cols if isinstance(condition_cols, list) \
+                else [condition_cols]
+            cols_combinations = chain.from_iterable(
+                combinations(c, r) for r in range(1, len(c) + 1))
+
+        else:
+
+            # Compute only main effects and required interactions
+            interactions = [] if interactions is None else interactions
+            condition_cols = [(col,) for col in condition_cols]
+            cols_combinations = condition_cols + interactions
 
         # Iterate over the possible main effects and interactions
-        for cols in powerset:
+        for cols in cols_combinations:
             cols = list(cols)
 
             # Compute evokeds
