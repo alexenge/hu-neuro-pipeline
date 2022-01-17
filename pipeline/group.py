@@ -6,10 +6,9 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .helpers import check_participant_input
+from .io import check_participant_input, save_df, save_evokeds
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
-from .savers import save_df, save_evokeds
 
 
 def group_pipeline(

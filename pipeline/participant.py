@@ -8,10 +8,9 @@ from mne.time_frequency import tfr_morlet
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bads, read_log,
                        triggers_to_event_id)
+from .io import save_clean, save_df, save_epochs, save_evokeds, save_montage
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica)
-from .savers import (save_clean, save_df, save_epochs, save_evokeds,
-                     save_montage)
 from .tfr import compute_single_trials_tfr
 
 
