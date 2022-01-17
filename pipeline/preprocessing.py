@@ -1,5 +1,4 @@
 from os import path
-from sys import exit
 
 import pandas as pd
 from mne import set_bipolar_reference
@@ -30,9 +29,9 @@ def add_eog(raw, channels, new_name):
 
     # Check that exactly two of the provided channels are in the data
     channels = [ch for ch in channels if ch in raw.ch_names]
-    if len(channels) != 2:
-        exit(f'Could not find two channels for computing bipolar {new_name}. '
-             'Please provide different channel names or choose None.')
+    assert len(channels) == 2, (
+        'Could not find exactly two channels for computing bipolar '
+        f'{new_name}. Please provide different channel names or choose `None`')
 
     # Compute bipolar EOG channel
     anode = channels[0]
