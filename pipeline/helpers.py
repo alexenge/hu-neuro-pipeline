@@ -256,54 +256,79 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 
 
 def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
-    """Computes condition averages (evokeds) based on triggers or metadata."""
+    """Computes condition averages (evokeds) based on triggers or columns."""
 
-    # Prepare emtpy list for storing
-    all_evokeds = []
-    all_evokeds_dfs = []
+    # Average by triggers in case no log file columns were provided
+    if average_by is None:
+        all_evokeds, all_evokeds_df = compute_evokeds_triggers(
+            epochs, bad_ixs, participant_id)
+    else:
+        all_evokeds, all_evokeds_df = compute_evokeds_cols(
+            epochs, average_by, bad_ixs, participant_id)
+
+    return all_evokeds, all_evokeds_df
+
+
+def compute_evokeds_triggers(epochs, bad_ixs=[], participant_id=None):
+    """Computes condition averages (evokeds) based on triggers."""
 
     # Get indices of good epochs
     good_ixs = [ix for ix in range(len(epochs)) if ix not in bad_ixs]
 
-    # If no condition_cols were provided, use the events from the epochs
-    if average_by is None:
+    # Prepare emtpy lists
+    all_evokeds = []
+    all_evokeds_dfs = []
+
+    # Compute evokeds
+    epochs_good = epochs.copy()[good_ixs]
+    evokeds = average_by_events(epochs_good)
+    all_evokeds = all_evokeds + evokeds
+
+    # Convert to DataFrame
+    evokeds_df = create_evokeds_df(evokeds, participant_id=participant_id)
+    all_evokeds_dfs.append(evokeds_df)
+
+    # Combine DataFrames
+    all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
+
+    return all_evokeds, all_evokeds_df
+
+
+def compute_evokeds_cols(
+        epochs, average_by=None, bad_ixs=[], participant_id=None):
+    """Computes condition averages (evokeds) based on log file columns."""
+
+    # Make sure that provided values are stored in a list
+    if isinstance(average_by, str):
+        average_by = [average_by]
+
+    # Get indices of good epochs
+    good_ixs = [ix for ix in range(len(epochs)) if ix not in bad_ixs]
+
+    # Prepare emtpy lists
+    all_evokeds = []
+    all_evokeds_dfs = []
+
+    # Iterate over the provided main effects and interactions
+    for cols in average_by:
+
+        # Parse interaction effects into a list
+        cols = cols.split('/')
 
         # Compute evokeds
-        epochs_good = epochs.copy()[good_ixs]
-        evokeds = average_by_events(epochs_good)
+        epochs_update = update_events(epochs, cols)[good_ixs]
+        evokeds = average_by_events(epochs_update)
         all_evokeds = all_evokeds + evokeds
 
         # Convert to DataFrame
-        evokeds_df = create_evokeds_df(evokeds, participant_id=participant_id)
+        trials = epochs.metadata
+        evokeds_df = create_evokeds_df(
+            evokeds, cols, trials, participant_id)
+
+        # Append info about averaging
+        value = '/'.join(cols)
+        evokeds_df.insert(loc=1, column='average_by', value=value)
         all_evokeds_dfs.append(evokeds_df)
-
-    # Otherwise use condition_cols
-    else:
-
-        # Make sure that provided values are stored in a list
-        if isinstance(average_by, str):
-            average_by = [average_by]
-
-        # Iterate over the provided main effects and interactions
-        for cols in average_by:
-
-            # Parse interaction effects into a list
-            cols = cols.split('/')
-
-            # Compute evokeds
-            epochs_update = update_events(epochs, cols)[good_ixs]
-            evokeds = average_by_events(epochs_update)
-            all_evokeds = all_evokeds + evokeds
-
-            # Convert to DataFrame
-            trials = epochs.metadata
-            evokeds_df = create_evokeds_df(
-                evokeds, cols, trials, participant_id)
-
-            # Append info about averaging
-            value = '/'.join(cols)
-            evokeds_df.insert(loc=1, column='average_by', value=value)
-            all_evokeds_dfs.append(evokeds_df)
 
     # Combine DataFrames
     all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
@@ -321,7 +346,7 @@ def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
 
 
 def average_by_events(epochs, method='mean'):
-    """Create a list of evokeds from epochs, one per event type"""
+    """Create a list of evokeds from epochs, one per event type."""
 
     # Pick channel types for ERPs
     # This is necessary because ERP component ROIs are stored as misc channels
