@@ -100,15 +100,15 @@ def average_by_events(epochs, method='mean'):
     """Create a list of evokeds from epochs, one per event type."""
 
     # Pick channel types for ERPs
-    # This is necessary because ERP component ROIs are stored as misc channels
-    if isinstance(epochs, Epochs):
-        epochs.pick_types(eeg=True, misc=True)
+    # The `average` method for `EpochsTFR` doesn't support `picks`
+    picks_dict = {'picks': ['eeg', 'misc']} \
+        if isinstance(epochs, Epochs) else {}
 
     # Loop over event types and average
     # TODO: Use MNE built-in argument 'by_event_type' once it's in EpochsTFR
     evokeds = []
     for event_type in epochs.event_id.keys():
-        evoked = epochs[event_type].average(method=method)
+        evoked = epochs[event_type].average(**picks_dict, method=method)
         evoked.comment = event_type
         evokeds.append(evoked)
 
@@ -136,12 +136,12 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
     """Converts mne.Evoked into a pd.DataFrame with metadata."""
 
     # Convert ERP amplitudes from volts to microvolts
-    for evoked in evokeds:
-        if isinstance(evokeds, Evoked):
-            evoked.data = evoked.data * 1e6
+    # The `to_data_frame` method for `AverageTFR` doesn't support `scalings`
+    scalings_dict = {'scalings': {'eeg': 1e6, 'misc': 1e6}} \
+        if isinstance(evokeds[0], Evoked) else {}
 
     # Convert all evokeds to a single DataFrame
-    evokeds_dfs = [evoked.to_data_frame() for evoked in evokeds]
+    evokeds_dfs = [evoked.to_data_frame(**scalings_dict) for evoked in evokeds]
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
 
     # Optionally add columns from the metadata

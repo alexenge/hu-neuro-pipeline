@@ -9,7 +9,7 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
     """Performs a cluster based permutation test for a given contrast"""
 
     # Extract one example evoked for reading data dimensions
-    example_evoked = evokeds_per_participant[0][0]
+    example_evoked = evokeds_per_participant[0][0].copy()
 
     # Get relevant time samples
     times = example_evoked.times
@@ -20,7 +20,7 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
 
     # Get relevant channels
     if channels is None:
-        channels = example_evoked.ch_names
+        channels = example_evoked.pick_types(eeg=True).ch_names
     else:
         assert all([ch in example_evoked.ch_names for ch in channels]), \
             'All channels in `perm_channels` must be present in the data!'
@@ -93,7 +93,7 @@ def compute_perm_tfr(
     """Performs a cluster based permutation test on time-frequency data"""
 
     # Extract one example evoked for reading data dimensions
-    example_evoked = evokeds_per_participant[0][0]
+    example_evoked = evokeds_per_participant[0][0].copy()
 
     # Get relevant time samples
     times = example_evoked.times
@@ -111,7 +111,7 @@ def compute_perm_tfr(
 
     # Get relevant channels
     if channels is None:
-        channels = example_evoked.ch_names
+        channels = example_evoked.pick_types(eeg=True).ch_names
     else:
         assert all([ch in example_evoked.ch_names for ch in channels]), \
             'All channels in `perm_channels` must be present in the data!'
