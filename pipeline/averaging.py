@@ -90,6 +90,9 @@ def compute_evokeds_cols(
                 all_evokeds_df.insert(
                     time_ix - 1, column=cols, value=all_evokeds_df.pop(cols))
 
+                # Convert data type so that NaNs are handled correctly
+                all_evokeds_df[cols] = all_evokeds_df[cols].astype("string")
+
     return all_evokeds, all_evokeds_df
 
 
@@ -164,9 +167,6 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
     if participant_id is not None:
         evokeds_df.insert(loc=0, column='participant_id', value=participant_id)
 
-    # Replace pandas.NA with numpy.nan so that R understands them as NA
-    evokeds_df = evokeds_df.fillna(np.nan)
-
     return evokeds_df
 
 
@@ -200,8 +200,5 @@ def compute_grands_df(evokeds_df):
 
     # Convert conditions from index back to columns
     grands_df = grands_df.reset_index()
-
-    # Replace pandas.NA with numpy.nan so that R understands them as NA
-    evokeds_df = evokeds_df.fillna(np.nan)
 
     return grands_df
