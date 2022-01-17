@@ -255,8 +255,7 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(
-        epochs, condition_cols=None, bad_ixs=[], participant_id=None):
+def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
     """Computes condition averages (evokeds) based on triggers or metadata."""
 
     # Prepare emtpy list for storing
@@ -267,7 +266,7 @@ def compute_evokeds(
     good_ixs = [ix for ix in range(len(epochs)) if ix not in bad_ixs]
 
     # If no condition_cols were provided, use the events from the epochs
-    if condition_cols is None:
+    if average_by is None:
 
         # Compute evokeds
         epochs_good = epochs.copy()[good_ixs]
@@ -281,19 +280,15 @@ def compute_evokeds(
     # Otherwise use condition_cols
     else:
 
-        # Check for the input type of `condition_cols`
-        assert isinstance(condition_cols, list), (
-            '`condition_cols` must be a list that contains strings (for main '
-            'effects) and/or tuples of strings (for interaction effects)')
+        # Make sure that provided values are stored in a list
+        if isinstance(average_by, str):
+            average_by = [average_by]
 
         # Iterate over the provided main effects and interactions
-        for cols in condition_cols:
+        for cols in average_by:
 
-            # Convert column names to list
-            if isinstance(cols, str):
-                cols = [cols]
-            elif isinstance(cols, tuple):
-                cols = list(cols)
+            # Parse interaction effects into a list
+            cols = cols.split('/')
 
             # Compute evokeds
             epochs_update = update_events(epochs, cols)[good_ixs]
@@ -306,7 +301,7 @@ def compute_evokeds(
                 evokeds, cols, trials, participant_id)
 
             # Append info about averaging
-            value = ' * '.join(cols)
+            value = '/'.join(cols)
             evokeds_df.insert(loc=1, column='average_by', value=value)
             all_evokeds_dfs.append(evokeds_df)
 
@@ -315,10 +310,10 @@ def compute_evokeds(
 
     # Move condition columns back to the front
     # They might have been moved to the end while concatenating
-    if condition_cols is not None:
+    if average_by is not None:
         time_ix = all_evokeds_df.columns.get_loc('time')
-        for cols in reversed(condition_cols):
-            if isinstance(cols, str):
+        for cols in reversed(average_by):
+            if not '/' in cols:
                 all_evokeds_df.insert(
                     time_ix - 1, column=cols, value=all_evokeds_df.pop(cols))
 

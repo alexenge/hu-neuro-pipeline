@@ -10,11 +10,13 @@
 
 * [4. Epoching options](#4-epoching-options)
 
-* [5. Options for time-frequency analysis](#5-options-for-time-frequency-analysis)
+* [5. Averaging options](#5-averaging-options)
 
-* [6. Options for cluster-based permutation tests](#6-options-for-cluster-based-permutation-tests)
+* [6. Options for time-frequency analysis](#6-options-for-time-frequency-analysis)
 
-* [7. Performance options](#7-performance-options)
+* [7. Options for cluster-based permutation tests](#7-options-for-cluster-based-permutation-tests)
+
+* [8. Performance options](#8-performance-options)
 
 ---
 
@@ -296,23 +298,25 @@ Must be a dict with the following entries:
 | -------------------------------------------------------------------------------------------------------------------------- |
 | `list("name" = c("P1", "N170"), "tmin" = c(0.08, 0.15), "tmax" = c(0.13, 0.2), "roi" = list(c("PO3", ...), c("P7", ...)))` |
 
-### **`condition_cols` (recommended, default: `None`)**
+## 5. Averaging options
+
+### **`average_by` (recommended, default: `None`)**
 
 Column names from the log file for averaging.
-Can be one or multiple column names which code for the experimental conditions.
-The pipeline will then compute by-participant averages (a.k.a. "evokeds") for each condition in each of these columns.
-These are useful for plotting or for running cluster-based permutation tests (see the `perm_*` arguments below).
-If `None`, the condition labels provided by the `triggers` (see above) will be used.
-Interaction effects need to be specified explicitly by adding the combination of the column names as a list (as in the final example).
+Can be a single column name, in which case by-participant condition averages (a.k.a. "evokeds") will be computed for each condition in this column.
+The resulting evokeds are useful for plotting and for running permutation tests (see the `perm_*` arguments below).
+If a list of column names, evokeds will be computed for each condition in each of these column (i.e., for all main effects).
+Interaction effects can be added by combining two or more column names with a `/` character.
+If `None`, do not use columns in the log file for averaging and use the `triggers` instead.
 
-| Python examples                                      | R examples                                                |
-| ---------------------------------------------------- | --------------------------------------------------------- |
-| `None`                                               | `NULL`                                                    |
-| `'Semantics'`                                        | `"Semantics"`                                             |
-| `['Semantics', 'Context']`                           | `c("Semantics", "Context")`                               |
-| `['Semantics', 'Context', ('Semantics', 'Context')]` | `list("Semantics", "Context", c("Semantics", "Context"))` |
+| Python examples                                 | R examples                                       |
+| ----------------------------------------------- | ------------------------------------------------ |
+| `None`                                          | `NULL`                                           |
+| `'Semantics'`                                   | `"Semantics"`                                    |
+| `['Semantics', 'Context']`                      | `c("Semantics", "Context")`                      |
+| `['Semantics', 'Context', 'Semantics/Context']` | `c("Semantics", "Context", "Semantics/Context")` |
 
-## 5. Options for time-frequency analysis
+## 6. Options for time-frequency analysis
 
 ### **`perform_tfr` (optional, default: `False`)**
 
@@ -371,7 +375,7 @@ Note that the term "component" is specific to ERPs and is used here solely to hi
 | --------------------------------------------------------------------------------------------------------------------------- |
 | `list("name" = c("alpha"), "tmin" = c(0.05), "tmax" = c(0.25), "fmin" = c(8), "fmax" = c(13), "roi" = list(c("PO9", ...)))` |
 
-## 6. Options for cluster-based permutation tests
+## 7. Options for cluster-based permutation tests
 
 ### **`perm_contrasts` (optional, default: `None`)**
 
@@ -443,7 +447,7 @@ Cropping the frequency range (based on *a priori* knowledge about plausible effe
 | `None`          | `NULL`     |
 | `30.`           | `30`       |
 
-## 7. Performance options
+## 8. Performance options
 
 ### **`n_jobs` (optional, default: `1`)**
 

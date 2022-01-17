@@ -33,7 +33,7 @@ def participant_pipeline(
     reject_peak_to_peak=200.0,
     reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
-    condition_cols=None,
+    average_by=None,
     perform_tfr=False,
     tfr_freqs=range(4, 51, 2),
     tfr_cycles=range(2, 26, 1),
@@ -169,7 +169,7 @@ def participant_pipeline(
 
     # Compute evokeds
     evokeds, evokeds_df = compute_evokeds(
-        epochs, condition_cols, bad_ixs, participant_id)
+        epochs, average_by, bad_ixs, participant_id)
 
     # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
@@ -208,7 +208,7 @@ def participant_pipeline(
 
         # Compute evoked power
         tfr_evokeds, tfr_evokeds_df = compute_evokeds(
-            tfr, condition_cols, bad_ixs, participant_id)
+            tfr, average_by, bad_ixs, participant_id)
 
         # Save evoked power
         if tfr_dir is not None:
