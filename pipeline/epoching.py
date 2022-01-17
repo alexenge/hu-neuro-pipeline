@@ -7,12 +7,15 @@ from mne import pick_channels
 from mne.channels import combine_channels
 
 
-def events_from_triggers(triggers):
+def triggers_to_event_id(triggers):
     """Convert list or dict of triggers to MNE-style event_id"""
 
     # Convert list to dict with triggers as condition names
     if isinstance(triggers, list):
         triggers = {str(trigger): trigger for trigger in triggers}
+    else:
+        assert isinstance(triggers, dict), \
+            '`triggers` must be either list or dict'
 
     # Make sure that trigger values are integers (R would pass them as floats)
     triggers = {key: int(value) for key, value in triggers.items()}

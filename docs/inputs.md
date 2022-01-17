@@ -193,8 +193,8 @@ Can also be `None` to disable lowpass filtering.
 ### **`triggers` (recommended, default: `None`)**
 
 The EEG triggers for creating epochs, usually denoting the onset of stimuli (or responses) of interest.
-Can be list of numerical triggers or a dict of condition names (keys) and their corresponding triggers (values).
-Note that this dict option (i.e., including the condition names) is only useful if `condition_cols` (see below) is `None`, as otherwise the conditions will be inferred from the log file.
+Should be a list of numerical trigger values.
+The meaning of these triggers can be inferred later on based on the log file (see `average_by` below).
 Can also be `None`, in which *all* the triggers present in the experiment are used (so don't this to work).
 
 | Python examples                     | R examples                            |

@@ -6,8 +6,8 @@ from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
-from .epoching import (compute_single_trials, events_from_triggers, get_bads,
-                       read_log)
+from .epoching import (compute_single_trials, get_bads, read_log,
+                       triggers_to_event_id)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica)
 from .savers import (save_clean, save_df, save_epochs, save_evokeds,
@@ -135,7 +135,7 @@ def participant_pipeline(
     events, event_id = events_from_annotations(
         filt, regexp='Stimulus', verbose=False)
     if triggers is not None:
-        event_id = events_from_triggers(triggers)
+        event_id = triggers_to_event_id(triggers)
 
     # Epoching including baseline correction
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
