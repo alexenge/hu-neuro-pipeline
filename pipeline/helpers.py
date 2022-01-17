@@ -1,5 +1,4 @@
 from collections import Counter
-from itertools import chain, combinations
 from os import path
 from sys import exit
 
@@ -256,8 +255,8 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
 
 
-def compute_evokeds(epochs, condition_cols=None, interactions='all',
-                    bad_ixs=[], participant_id=None):
+def compute_evokeds(
+        epochs, condition_cols=None, bad_ixs=[], participant_id=None):
     """Computes condition averages (evokeds) based on triggers or metadata."""
 
     # Prepare emtpy list for storing
@@ -282,26 +281,19 @@ def compute_evokeds(epochs, condition_cols=None, interactions='all',
     # Otherwise use condition_cols
     else:
 
-        # Get main effects and interactions
-        if interactions == 'all':
+        # Check for the input type of `condition_cols`
+        assert isinstance(condition_cols, list), (
+            '`condition_cols` must be a list that contains strings (for main '
+            'effects) and/or tuples of strings (for interaction effects)')
 
-            # Get all possible main effects and interactions (i.e., powerset)
-            # See https://stackoverflow.com/a/1482316
-            c = condition_cols if isinstance(condition_cols, list) \
-                else [condition_cols]
-            cols_combinations = chain.from_iterable(
-                combinations(c, r) for r in range(1, len(c) + 1))
+        # Iterate over the provided main effects and interactions
+        for cols in condition_cols:
 
-        else:
-
-            # Compute only main effects and required interactions
-            interactions = [] if interactions is None else interactions
-            condition_cols = [(col,) for col in condition_cols]
-            cols_combinations = condition_cols + interactions
-
-        # Iterate over the possible main effects and interactions
-        for cols in cols_combinations:
-            cols = list(cols)
+            # Convert column names to list
+            if isinstance(cols, str):
+                cols = [cols]
+            elif isinstance(cols, tuple):
+                cols = list(cols)
 
             # Compute evokeds
             epochs_update = update_events(epochs, cols)[good_ixs]
@@ -319,8 +311,16 @@ def compute_evokeds(epochs, condition_cols=None, interactions='all',
             all_evokeds_dfs.append(evokeds_df)
 
     # Combine DataFrames
-    all_evokeds_dfs.reverse()
     all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
+
+    # Move condition columns back to the front
+    # They might have been moved to the end while concatenating
+    if condition_cols is not None:
+        time_ix = all_evokeds_df.columns.get_loc('time')
+        for cols in reversed(condition_cols):
+            if isinstance(cols, str):
+                all_evokeds_df.insert(
+                    time_ix - 1, column=cols, value=all_evokeds_df.pop(cols))
 
     return all_evokeds, all_evokeds_df
 
