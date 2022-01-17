@@ -90,8 +90,8 @@ def compute_evokeds_cols(
                 all_evokeds_df.insert(
                     time_ix - 1, column=cols, value=all_evokeds_df.pop(cols))
 
-                # Convert data type so that NaNs are handled correctly
-                all_evokeds_df[cols] = all_evokeds_df[cols].astype("string")
+                # Convert NaNs to empty strings so that R can represent them
+                all_evokeds_df[cols] = all_evokeds_df[cols].fillna('')
 
     return all_evokeds, all_evokeds_df
 
