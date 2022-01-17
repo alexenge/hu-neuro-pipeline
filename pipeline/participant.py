@@ -5,9 +5,11 @@ from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
-from .helpers import (add_heog_veog, apply_montage, compute_evokeds,
-                      compute_single_trials, correct_besa, correct_ica,
-                      events_from_triggers, get_bads, read_log)
+from .averaging import compute_evokeds
+from .epoching import (compute_single_trials, events_from_triggers, get_bads,
+                       read_log)
+from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
+                            correct_ica)
 from .savers import (save_clean, save_df, save_epochs, save_evokeds,
                      save_montage)
 from .tfr import compute_single_trials_tfr
