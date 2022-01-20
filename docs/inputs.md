@@ -200,7 +200,6 @@ Can also be `None`, in which *all* the triggers present in the experiment are us
 | Python examples                     | R examples                            |
 | ----------------------------------- | ------------------------------------- |
 | `[201, 202]`                        | `c(201, 202)`                         |
-| `{'negative': 201, 'neutral': 202}` | `list(negative = 201, neutral = 202)` |
 | `None`                              | `NULL`                                |
 
 ### **`epochs_tmin` (optional, default: `-0.5`)**
