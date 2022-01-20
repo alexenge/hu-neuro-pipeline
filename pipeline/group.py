@@ -168,6 +168,7 @@ def group_pipeline(
     if perm_contrasts != []:
         cluster_df = compute_perm(evokeds, perm_contrasts, perm_tmin,
                                   perm_tmax, perm_channels, n_jobs)
+        save_df(cluster_df, export_dir, suffix='clusters')
         returns.append(cluster_df)
 
     # Combine time-frequency results
@@ -193,6 +194,7 @@ def group_pipeline(
             tfr_cluster_df = compute_perm_tfr(
                 tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax,
                 perm_channels, perm_fmin, perm_fmax, n_jobs)
+            save_df(tfr_cluster_df, export_dir, suffix='tfr-clusters')
             returns.append(tfr_cluster_df)
 
     return returns
