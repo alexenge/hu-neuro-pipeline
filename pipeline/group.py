@@ -141,6 +141,7 @@ def group_pipeline(
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
+    n_jobs = int(n_jobs)
     res = Parallel(n_jobs)(
         delayed(partial_pipeline)(*args) for args in participant_args)
 

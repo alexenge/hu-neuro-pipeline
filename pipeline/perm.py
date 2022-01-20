@@ -61,7 +61,7 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
         # Run permutation test
         t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
             X, n_permutations=n_permutations, adjacency=channel_adjacency,
-            n_jobs=int(n_jobs), seed=seed)
+            n_jobs=n_jobs, seed=seed)
 
         # Create cluster image
         cluster_arr = np.ones_like(t_obs)
@@ -156,7 +156,7 @@ def compute_perm_tfr(
         # Run permutation test
         t_obs, clusters, cluster_pv, H0 = permutation_cluster_1samp_test(
             X, n_permutations=n_permutations, adjacency=adjacency,
-            n_jobs=int(n_jobs), seed=seed)
+            n_jobs=n_jobs, seed=seed)
 
         # Create cluster image
         cluster_arr = np.ones_like(t_obs)
