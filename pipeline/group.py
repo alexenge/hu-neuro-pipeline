@@ -15,6 +15,10 @@ def group_pipeline(
     vhdr_files,
     log_files,
     export_dir,
+    clean_dir=None,
+    epochs_dir=None,
+    report_dir=None,
+    to_df=True,
     downsample_sfreq=None,
     veog_channels='auto',
     heog_channels='auto',
@@ -45,10 +49,6 @@ def group_pipeline(
     perm_channels=None,
     perm_fmin=None,
     perm_fmax=None,
-    clean_dir=None,
-    epochs_dir=None,
-    report_dir=None,
-    to_df=True,
     n_jobs=1
 ):
     """Processes EEG data for all participants of an experiment.
