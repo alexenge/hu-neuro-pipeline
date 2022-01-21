@@ -5,7 +5,7 @@ from mne.stats import combine_adjacency, permutation_cluster_1samp_test
 
 
 def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
-                 channels=None, n_jobs=1, n_permutations=5000, seed=1234):
+                 channels=None, n_jobs=1, n_permutations=5001, seed=1234):
     """Performs a cluster based permutation test for a given contrast"""
 
     # Extract one example evoked for reading data dimensions
@@ -89,7 +89,7 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
 
 def compute_perm_tfr(
         evokeds_per_participant, contrasts, tmin=0., tmax=1., channels=None,
-        fmin=None, fmax=None, n_jobs=1, n_permutations=5000, seed=1234):
+        fmin=None, fmax=None, n_jobs=1, n_permutations=5001, seed=1234):
     """Performs a cluster based permutation test on time-frequency data"""
 
     # Extract one example evoked for reading data dimensions
