@@ -91,6 +91,8 @@ def correct_ica(raw, n_components=15, random_seed=1234, method='fastica'):
     ica.exclude = eog_indices
     raw = ica.apply(raw)
 
+    return raw, ica
+
 
 def correct_besa(raw, besa_file):
     """Corrects ocular artifacts using a pre-computed MSEC (BESA) matrix."""
@@ -118,3 +120,5 @@ def correct_besa(raw, besa_file):
     eeg_data, _ = raw[eeg_channels]
     eeg_data = besa_matrix.values.dot(eeg_data)
     raw[eeg_channels] = eeg_data
+
+    return raw

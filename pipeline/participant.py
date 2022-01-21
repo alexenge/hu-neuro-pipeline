@@ -125,9 +125,12 @@ def participant_pipeline(
     # Do ocular correction
     if ocular_correction is not None:
         if path.isfile(ocular_correction):
-            correct_besa(raw, besa_file=ocular_correction)
+            raw = correct_besa(raw, besa_file=ocular_correction)
         else:
-            correct_ica(raw, method=ocular_correction)
+            raw, ica = correct_ica(raw, method=ocular_correction)
+
+            # Add ICA to HTML report
+            report.add_ica(ica, title='ICA', inst=raw)
 
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
