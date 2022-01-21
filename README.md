@@ -50,9 +50,10 @@ This is a minimal example for a (fictional) N400/P600 experiment with two experi
 ```python
 from pipeline import group_pipeline
 
-trials, evokeds_df, config = group_pipeline(
+trials, evokeds = group_pipeline(
     vhdr_files='Results/EEG/raw',
     log_files='Results/RT',
+    export_dir='Results/EEG/export',
     ocular_correction='Results/EEG/cali',
     triggers={'related/negative': 201,
               'related/neutral': 202,
@@ -64,8 +65,7 @@ trials, evokeds_df, config = group_pipeline(
                 'tmax': [0.5, 0.9],
                 'roi': [['C1', 'Cz', 'C2', 'CP1', 'CPz', 'CP2'],
                         ['Fz', 'FC1', 'FC2', 'C1', 'Cz', 'C2']]},
-    condition_cols=['Semantics', 'Context'],
-    export_dir='Results/EEG/export')
+    average_by=['Semantics', 'Context', 'Semantics/Context'])
 ```
 
 ### 3.2 For R users
@@ -80,6 +80,7 @@ pipeline <- reticulate::import("pipeline")
 res <- pipeline$group_pipeline(
     vhdr_files = "Results/EEG/raw",
     log_files = "Results/RT",
+    export_dir = "Results/EEG/export",
     ocular_correction = "Results/EEG/cali",
     triggers = list(
         "related/negative" = 201,
@@ -97,12 +98,10 @@ res <- pipeline$group_pipeline(
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
         )
     ),
-    condition_cols = c("Semantics", "Context"),
-    export_dir = "Results/EEG/export"
+    average_by = c("Semantics", "Context", "Semantics/Context")
 )
 
 # Extract results
 trials <- res[[1]]
-evokeds_df <- res[[2]]
-config <- res[[3]]
+evokeds <- res[[2]]
 ```
