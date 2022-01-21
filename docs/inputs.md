@@ -82,7 +82,8 @@ Note that these files contain all samples and channels for all epochs, which mak
 ### **`report_dir` (optional, default `None`)**
 
 HTML report directory.
-The pipeline automatically creates one HTML report per participant, visualizing their data at various stages (raw, cleaned, events, epochs, evokeds).
+If not `None`, the pipeline automatically creates one HTML report per participant, visualizing their data at various stages of processing (raw, ICA, cleaned, events, epochs, evokeds).
+Note that this may increase the runtime of the pipeline by a couple of minutes.
 
 | Python examples         | R examples              |
 | ----------------------- | ----------------------- |

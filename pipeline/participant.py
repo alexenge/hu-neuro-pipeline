@@ -1,7 +1,7 @@
 from os import path
 
 import numpy as np
-from mne import Epochs, Report, events_from_annotations
+from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
@@ -95,13 +95,13 @@ def participant_pipeline(
     # Read raw data
     raw = read_raw_brainvision(vhdr_file, preload=True)
 
-    # Initialize HTML report
-    report = Report(title=f'Report for {participant_id}', verbose=False)
-    report.add_raw(raw, title='Raw data')
+    # Create backup of the raw data for the HTML report
+    if report_dir is not None:
+        dirty = raw.copy()
 
     # Downsample
-    sfreq = raw.info['sfreq']
     if downsample_sfreq is not None:
+        sfreq = raw.info['sfreq']
         downsample_sfreq = float(downsample_sfreq)
         print(f'Downsampling from {sfreq} Hz to {downsample_sfreq} Hz')
         raw.resample(downsample_sfreq)
@@ -126,17 +126,12 @@ def participant_pipeline(
     if ocular_correction is not None:
         if path.isfile(ocular_correction):
             raw = correct_besa(raw, besa_file=ocular_correction)
+            ica = None
         else:
             raw, ica = correct_ica(raw, method=ocular_correction)
 
-            # Add ICA to HTML report
-            report.add_ica(ica, title='ICA', inst=raw)
-
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
-
-    # Add cleaned continuous data to report
-    report.add_raw(filt, title='Cleaned data')
 
     # Save cleaned continuous data
     if clean_dir is not None:
@@ -147,10 +142,6 @@ def participant_pipeline(
         filt, regexp='Stimulus', verbose=False)
     if triggers is not None:
         event_id = triggers_to_event_id(triggers)
-
-    # Add events to HTML report
-    report.add_events(
-        events, title='Event triggers', sfreq=sfreq)
 
     # Epoching including baseline correction
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
@@ -176,9 +167,6 @@ def participant_pipeline(
     # Add single trial mean ERP amplitudes to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
 
-    # Add epochs to HTML report
-    report.add_epochs(epochs, title='epochs')
-
     # Save epochs as data frame and/or MNE object
     if epochs_dir is not None:
         save_epochs(epochs, epochs_dir, participant_id, to_df)
@@ -190,9 +178,6 @@ def participant_pipeline(
     # Compute evokeds
     evokeds, evokeds_df = compute_evokeds(
         epochs, average_by, bad_ixs, participant_id)
-
-    # Add evokeds to HTML report
-    report.add_evokeds(evokeds)  # Uses comments as titles
 
     # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
@@ -242,6 +227,7 @@ def participant_pipeline(
 
     # Save HTML report
     if report_dir is not None:
-        save_report(report, report_dir, participant_id)
+        save_report(dirty, ica, filt, events, event_id, epochs, evokeds,
+                    report_dir, participant_id)
 
     return trials, evokeds, evokeds_df
