@@ -150,3 +150,15 @@ def save_config(config, output_dir):
     fname = f'{output_dir}/config.json'
     with open(fname, 'w') as f:
         json.dump(config, f)
+
+
+def save_report(report, output_dir, participant_id):
+    """Saves HTML report."""
+
+    # Create output directory
+    makedirs(output_dir, exist_ok=True)
+
+    # Save
+    fname = f'{output_dir}/{participant_id}_report.html'
+    print(f'Saving HTML report to {fname}\n')
+    _ = report.save(fname, open_browser=False, overwrite=True)

@@ -1,14 +1,15 @@
 from os import path
 
 import numpy as np
-from mne import Epochs, events_from_annotations
+from mne import Epochs, Report, events_from_annotations
 from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bads, read_log,
                        triggers_to_event_id)
-from .io import save_clean, save_df, save_epochs, save_evokeds, save_montage
+from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
+                 save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica)
 from .tfr import compute_single_trials_tfr
@@ -47,6 +48,7 @@ def participant_pipeline(
     evokeds_dir=None,
     chanlocs_dir=None,
     tfr_dir=None,
+    report_dir=None,
     to_df=True,
 ):
     """Processes EEG data for a single participant.
@@ -93,11 +95,15 @@ def participant_pipeline(
     # Read raw data
     raw = read_raw_brainvision(vhdr_file, preload=True)
 
+    # Initialize HTML report
+    report = Report(title=f'Report for {participant_id}', verbose=False)
+    report.add_raw(raw, title='Raw data')
+
     # Downsample
+    sfreq = raw.info['sfreq']
     if downsample_sfreq is not None:
-        orig_sfreq = raw.info['sfreq']
         downsample_sfreq = float(downsample_sfreq)
-        print(f'Downsampling from {orig_sfreq} Hz to {downsample_sfreq} Hz')
+        print(f'Downsampling from {sfreq} Hz to {downsample_sfreq} Hz')
         raw.resample(downsample_sfreq)
 
     # Add EOG channels
@@ -126,6 +132,9 @@ def participant_pipeline(
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
 
+    # Add cleaned continuous data to report
+    report.add_raw(filt, title='Cleaned data')
+
     # Save cleaned continuous data
     if clean_dir is not None:
         save_clean(filt, clean_dir, participant_id)
@@ -135,6 +144,10 @@ def participant_pipeline(
         filt, regexp='Stimulus', verbose=False)
     if triggers is not None:
         event_id = triggers_to_event_id(triggers)
+
+    # Add events to HTML report
+    report.add_events(
+        events, title='Event triggers', sfreq=sfreq)
 
     # Epoching including baseline correction
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
@@ -160,6 +173,9 @@ def participant_pipeline(
     # Add single trial mean ERP amplitudes to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
 
+    # Add epochs to HTML report
+    report.add_epochs(epochs, title='epochs')
+
     # Save epochs as data frame and/or MNE object
     if epochs_dir is not None:
         save_epochs(epochs, epochs_dir, participant_id, to_df)
@@ -171,6 +187,9 @@ def participant_pipeline(
     # Compute evokeds
     evokeds, evokeds_df = compute_evokeds(
         epochs, average_by, bad_ixs, participant_id)
+
+    # Add evokeds to HTML report
+    report.add_evokeds(evokeds)  # Uses comments as titles
 
     # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
@@ -217,5 +236,9 @@ def participant_pipeline(
                 tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
 
         return trials, evokeds, evokeds_df, tfr_evokeds, tfr_evokeds_df
+
+    # Save HTML report
+    if report_dir is not None:
+        save_report(report, report_dir, participant_id)
 
     return trials, evokeds, evokeds_df

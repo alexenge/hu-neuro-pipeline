@@ -63,6 +63,7 @@ It is usually not necessary to save these intermediary files.
 
 | Python examples       | R examples            |
 | --------------------- | --------------------- |
+| `None`                | `NULL`                |
 | `'Results/EEG/clean'` | `"Results/EEG/clean"` |
 
 ### **`epochs_dir` (optional, default `None`)**
@@ -75,7 +76,18 @@ Note that these files contain all samples and channels for all epochs, which mak
 
 | Python examples        | R examples             |
 | ---------------------- | ---------------------- |
+| `None`                 | `NULL`                 |
 | `'Results/EEG/epochs'` | `"Results/EEG/epochs"` |
+
+### **`report_dir` (optional, default `None`)**
+
+HTML report directory.
+The pipeline automatically creates one HTML report per participant, visualizing their data at various stages (raw, cleaned, events, epochs, evokeds).
+
+| Python examples         | R examples              |
+| ----------------------- | ----------------------- |
+| `None`                  | `NULL`                  |
+| `'Results/EEG/reports'` | `"Results/EEG/reports"` |
 
 ### **`to_df` (optional, default `True`)**
 
@@ -197,10 +209,10 @@ Should be a list of numerical trigger values.
 The meaning of these triggers can be inferred later on based on the log file (see `average_by` below).
 Can also be `None`, in which *all* the triggers present in the experiment are used (so don't this to work).
 
-| Python examples                     | R examples                            |
-| ----------------------------------- | ------------------------------------- |
-| `[201, 202]`                        | `c(201, 202)`                         |
-| `None`                              | `NULL`                                |
+| Python examples | R examples    |
+| --------------- | ------------- |
+| `[201, 202]`    | `c(201, 202)` |
+| `None`          | `NULL`        |
 
 ### **`epochs_tmin` (optional, default: `-0.5`)**
 

@@ -47,6 +47,7 @@ def group_pipeline(
     perm_fmax=None,
     clean_dir=None,
     epochs_dir=None,
+    report_dir=None,
     to_df=True,
     n_jobs=1
 ):
@@ -107,7 +108,8 @@ def group_pipeline(
         tfr_components=tfr_components,
         clean_dir=clean_dir,
         epochs_dir=epochs_dir,
-        chanlocs_dir=export_dir)
+        chanlocs_dir=export_dir,
+        report_dir=report_dir)
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
