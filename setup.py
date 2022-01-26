@@ -26,6 +26,7 @@ setuptools.setup(
     install_requires=[
         'chardet',
         'joblib',
+        'matplotlib',
         'mne>=0.24.0',
         'pandas',
         'scikit-learn'
