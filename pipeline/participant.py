@@ -183,6 +183,11 @@ def participant_pipeline(
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
+    # Save HTML report
+    if report_dir is not None:
+        save_report(dirty, ica, filt, events, event_id, epochs, evokeds,
+                    report_dir, participant_id)
+
     # Time-frequency analysis
     if perform_tfr:
 
@@ -224,10 +229,5 @@ def participant_pipeline(
                 tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
 
         return trials, evokeds, evokeds_df, tfr_evokeds, tfr_evokeds_df
-
-    # Save HTML report
-    if report_dir is not None:
-        save_report(dirty, ica, filt, events, event_id, epochs, evokeds,
-                    report_dir, participant_id)
 
     return trials, evokeds, evokeds_df
