@@ -6,4 +6,5 @@ __pycache__/
 
 # Packaging
 *.egg-info/
+_version.py
 /dist/
