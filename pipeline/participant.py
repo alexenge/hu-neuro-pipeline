@@ -19,7 +19,7 @@ def participant_pipeline(
     vhdr_file,
     log_file,
     ocular_correction='fastica',
-    bad_channels='auto',
+    bad_channels=None,
     skip_log_rows=None,
     skip_log_conditions=None,
     downsample_sfreq=None,

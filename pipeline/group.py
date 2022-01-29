@@ -23,7 +23,7 @@ def group_pipeline(
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
-    bad_channels='auto',
+    bad_channels=None,
     ocular_correction='fastica',
     highpass_freq=0.1,
     lowpass_freq=40.,
