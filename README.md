@@ -55,10 +55,7 @@ trials, evokeds = group_pipeline(
     log_files='Results/RT',
     export_dir='Results/EEG/export',
     ocular_correction='Results/EEG/cali',
-    triggers={'related/negative': 201,
-              'related/neutral': 202,
-              'unrelated/negative': 211,
-              'unrelated/neutral': 212},
+    triggers=[201, 202, 211, 212],
     skip_log_conditions={'Semantics': 'filler'},
     components={'name': ['N400', 'P600'],
                 'tmin': [0.3, 0.5],
@@ -82,12 +79,7 @@ res <- pipeline$group_pipeline(
     log_files = "Results/RT",
     export_dir = "Results/EEG/export",
     ocular_correction = "Results/EEG/cali",
-    triggers = list(
-        "related/negative" = 201,
-        "related/neutral" = 202,
-        "unrelated/negative" = 211,
-        "unrelated/neutral" = 212
-    ),
+    triggers = c(201, 202, 211, 212),
     skip_log_conditions = list("Semantics" = "filler"),
     components = list(
         "name" = c("N400", "P600"),
