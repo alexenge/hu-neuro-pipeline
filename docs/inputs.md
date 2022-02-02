@@ -1,5 +1,7 @@
 # Pipeline inputs
 
+This page lists all input options for the `group_pipeline()` function as well as example arguments, both in Python and R syntax.
+
 ---
 
 * [1. Input file options](#1-input-file-options)
