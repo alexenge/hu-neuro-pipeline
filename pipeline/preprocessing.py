@@ -6,20 +6,20 @@ from mne.channels import make_standard_montage, read_custom_montage
 from mne.preprocessing import ICA
 
 
-def add_heog_veog(raw, heog_channels='auto', veog_channels='auto'):
-    """Adds virtual HEOG and VEOG using default or non-default EOG names."""
-
-    # Add bipolar HEOG channel
-    if heog_channels is not None:
-        if heog_channels == 'auto':
-            heog_channels = ['F9', 'F10', 'Afp9', 'Afp10']
-        raw = add_eog(raw, heog_channels, new_name='HEOG')
+def add_heog_veog(raw, veog_channels='auto', heog_channels='auto'):
+    """Adds virtual VEOG and HEOG using default or non-default EOG names."""
 
     # Add bipolar VEOG channel
     if veog_channels is not None:
         if veog_channels == 'auto':
             veog_channels = ['Fp1', 'FP1', 'Auge_u', 'IO1']
         raw = add_eog(raw, veog_channels, new_name='VEOG')
+
+    # Add bipolar HEOG channel
+    if heog_channels is not None:
+        if heog_channels == 'auto':
+            heog_channels = ['F9', 'F10', 'Afp9', 'Afp10']
+        raw = add_eog(raw, heog_channels, new_name='HEOG')
 
     return raw
 

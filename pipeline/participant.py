@@ -107,7 +107,7 @@ def participant_pipeline(
         raw.resample(downsample_sfreq)
 
     # Add EOG channels
-    raw = add_heog_veog(raw, heog_channels, veog_channels)
+    raw = add_heog_veog(raw, veog_channels, heog_channels)
 
     # Apply custom or standard montage
     apply_montage(raw, montage)
