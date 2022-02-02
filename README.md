@@ -45,7 +45,12 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 
 ### 3.1 For Python users
 
-This is a minimal example for a (fictional) N400/P600 experiment with two experimental factors: `Semantics` (`"related"` vs. `"unrelated"`) and emotional `Context` (`"negative"` vs. `"neutral"`).
+This is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `Semantics` (e.g., `'related'` vs. `'unrelated'`) and emotional `Context` (e.g., `'negative'` vs. `'neutral'`).
+We need to specify the paths to the raw EEG data, the behavioral log files, the output directory, and the BESA files for ocular correction (though we could also choose an ICA method like `'fastica'`).
+Four different EEG `triggers` correspond to each of the four different cells in the 2 × 2 design.
+The log files might contain additional rows (i.e., trials) from a `'filler'` condition which we want to skip because they don't have corresponding EEG triggers.
+We want to compute mean ERP amplitudes for pre-specified time windows and regions of interest corresponding to the N400 and P600 `components`.
+In addition, we want to obtain by-participant averages for each condition (for the main effects) and each combination of conditions (for the interaction effect), as specified with `average_by`.
 
 ```python
 from pipeline import group_pipeline
@@ -67,7 +72,7 @@ trials, evokeds = group_pipeline(
 
 ### 3.2 For R users
 
-Here's the same example as above:
+Here's the same example as above but for using the pipeline from R:
 
 ```R
 # Import Python module

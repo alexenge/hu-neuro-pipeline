@@ -72,7 +72,7 @@ Epoched data directory.
 Each participant's ERP epochs (defined via `triggers`) are saved there.
 It is usually not necessary to save these intermediary files.
 One use case for them would be to fit a linear mixed model with `time` as a groupping factor (see [here](https://mne.tools/mne-r/articles/plot_evoked_multilevel_model.html) for an example).
-Note that these files contain all samples and channels for all epochs, which makes them very large (especially with `to_df=True`).
+Note that these files contain all samples and channels for all epochs, which makes them very large (especially with `to_df=True`, see below).
 
 | Python examples        | R examples             |
 | ---------------------- | ---------------------- |
@@ -83,7 +83,7 @@ Note that these files contain all samples and channels for all epochs, which mak
 
 HTML report directory.
 If not `None`, the pipeline automatically creates one HTML report per participant, visualizing their data at various stages of processing (raw, ICA, cleaned, events, epochs, evokeds).
-Note that this may increase the runtime of the pipeline by a couple of minutes.
+Note that this is experimental and will increase the runtime of the pipeline by a minute or so per participant.
 
 | Python examples         | R examples              |
 | ----------------------- | ----------------------- |
@@ -93,8 +93,9 @@ Note that this may increase the runtime of the pipeline by a couple of minutes.
 ### **`to_df` (optional, default `True`)**
 
 How to save MNE-Python objects (i.e., epochs and evokeds).
-If `True`, save all objects as data frames in `.csv` format, which can easily be imported into other software like R or Excel.
-If `False`, save them as `.fif` files, which take up less disk space but can only be opened by MNE-Python and other specialized MEEG software.
+If `True`, save all objects as data frames in `.csv` format.
+These can then easily be imported into other software like R or Excel.
+If `False`, save them as `.fif` files, which take up less disk space but can only be opened by MNE-Python and other specialized M/EEG software.
 You can also save them in `'both'` formats.
 
 | Python examples               | R examples                    |
@@ -107,7 +108,7 @@ You can also save them in `'both'` formats.
 
 The sampling rate (in Hz) to downsample the EEG data to before doing any preprocessing.
 If `None`, retain the original sampling rate.
-Moderate downsampling (e.g., to 250 Hz) will significantly speed up the processing and reduce the output file sizes.
+Moderate downsampling (e.g., to 250 Hz) will significantly speed up the processing and reduce the size of the output files.
 
 | Python examples | R examples |
 | --------------- | ---------- |
@@ -118,9 +119,8 @@ Moderate downsampling (e.g., to 250 Hz) will significantly speed up the processi
 
 Two EEG or EOG channel labels from which to create a new vertical electrooculography (VEOG) channel.
 This virtual channel will then be used during `ocular_correction` (see below; only relevant for independent component analysis [ICA]).
-Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for VEOG (`['F9', 'F10', 'Afp9', 'Afp10']`).
-If `None`, don't construct a new VEOG channel.
-This will work only (a) if BESA/MSEC is used instead for `ocular_correction` instead of ICA or (b) if there already is a channel called `VEOG` present in the raw data.
+Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for VEOG (`['Fp1', 'FP1', 'Auge_u', 'IO1']`).
+If `None`, don't construct a new VEOG channel (which is okay if using BESA and/or if a channel named `VEOG` is already present in the raw data).
 
 | Python examples  | R examples        |
 | ---------------- | ----------------- |
@@ -132,9 +132,8 @@ This will work only (a) if BESA/MSEC is used instead for `ocular_correction` ins
 
 Two EEG or EOG channel labels from which to create a new horizontal electrooculography (HEOG) channel.
 This virtual channel will then be used during `ocular_correction` (see below; only relevant for independent component analysis [ICA]).
-Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for HEOG (`['Fp1', 'FP1', 'Auge_u', 'IO1']`).
-If `None`, don't construct a new HEOG channel.
-This will work only (a) if BESA/MSEC is used instead for `ocular_correction` instead of ICA or (b) if there already is a channel called `VEOG` present in the raw data.
+Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for HEOG (`['F9', 'F10', 'Afp9', 'Afp10']`).
+If `None`, don't construct a new HEOG channel (which is okay if using BESA and/or if a channel named `HEOG` is already present in the raw data).
 
 | Python examples | R examples       |
 | --------------- | ---------------- |
@@ -148,10 +147,10 @@ The standard or custom montage for reading channel locations.
 Can be the name of one of the [standard montages](https://mne.tools/stable/generated/mne.channels.make_standard_montage.html) shipped with MNE-Python (such as `'easycap-M1'` for the standard montage used at the Neuro lab).
 Can also be a file path pointing to a file with custom channel locations (see [here](https://mne.tools/stable/generated/mne.channels.read_custom_montage.html) for possible file types).
 
-| Python examples           | R examples                |
-| ------------------------- | ------------------------- |
-| `'easycap-M1'`            | `"easycap-M1"`            |
-| `'EEG/chanlocs_besa.txt'` | `"EEG/chanlocs_besa.txt"` |
+| Python examples                   | R examples                        |
+| --------------------------------- | --------------------------------- |
+| `'easycap-M1'`                    | `"easycap-M1"`                    |
+| `'Results/EEG/chanlocs_besa.txt'` | `"Results/EEG/chanlocs_besa.txt"` |
 
 ### **`bad_channels` (optional, default: `None`)**
 
@@ -165,13 +164,13 @@ Finally, there is an (experimental) `'auto'` option that automatically interpola
 | ----------------------------------- | ------------------------------------------ |
 | `None`                              | `NULL`                                     |
 | `[['Fp1', 'TP9'], [], ['Oz'], ...]` | `list(c("Fp1", "TP9"), c(), c("Oz"), ...)` |
-| `{'Vp05': ['Cz', 'F10'], ...}`      | `list(Vp05 = c("Cz", "F10"), ...)`         |
+| `{'Vp05': ['Cz', 'F10'], ...}`      | `list("Vp05" = c("Cz", "F10"), ...)`       |
 | `'auto'`                            | `"auto"`                                   |
 
 ### **`ocular_correction` (optional, default: `'fastica'`)**
 
-Method for performing the correction of eye movement artifacts (default: `'fastica'`).
-Either the name of an algorithm for Independent Component Analysis (`'fastica'`, `'infomax'`, or `'picard'`) or a list (or parent directory) of BESA matrix files for Multiple Source Eye Correction (MSEC).
+Method for performing the correction of eye movement artifacts.
+Can be either the name of an algorithm for Independent Component Analysis (`'fastica'`, `'infomax'`, or `'picard'`) or a list (or parent directory) of BESA matrix files for Multiple Source Eye Correction (MSEC).
 Can also be `None` for skipping ocular correction altogether.
 
 | Python examples                         | R examples                               |
@@ -207,8 +206,8 @@ Can also be `None` to disable lowpass filtering.
 
 The EEG triggers for creating epochs, usually denoting the onset of stimuli (or responses) of interest.
 Should be a list of numerical trigger values.
-The meaning of these triggers can be inferred later on based on the log file (see `average_by` below).
-Can also be `None`, in which *all* the triggers present in the experiment are used (so don't this to work).
+The meaning of these triggers will be inferred later on based on the log file (see `average_by` below).
+Can also be `None`, in which case *all* the triggers present in the experiment are used (so don't expect this to work).
 
 | Python examples | R examples    |
 | --------------- | ------------- |
@@ -217,7 +216,7 @@ Can also be `None`, in which *all* the triggers present in the experiment are us
 
 ### **`epochs_tmin` (optional, default: `-0.5`)**
 
-Start of the epoching interval relative to stimulus onset (in s).
+Start of the epoch relative to stimulus onset (in s).
 
 | Python examples | R examples |
 | --------------- | ---------- |
@@ -225,7 +224,7 @@ Start of the epoching interval relative to stimulus onset (in s).
 
 ### **`epochs_tmax` (optional, default: `1.5`)**
 
-End of the epoching interval relative to stimulus onset (in s).
+End of the epoch relative to stimulus onset (in s).
 
 | Python examples | R examples |
 | --------------- | ---------- |
@@ -234,7 +233,7 @@ End of the epoching interval relative to stimulus onset (in s).
 ### **`baseline` (optional, default: `(-0.2, 0.0)`)**
 
 Time period (in s relative to stimulus onset) for baseline correction.
-For each epoch and channel, the average voltage during this interval is being subtracted from all time points in the epoch so as to correct for shifts in voltage level that had occured before stimulus onset.
+For each epoch and channel, the average voltage during this interval is being subtracted from all time points in the epoch, so as to correct for shifts in voltage level that had occured before stimulus onset.
 Setting the first or the second value to `None` will use the start or the end of epoch, respectively.
 
 | Python examples | R examples     |
@@ -353,9 +352,9 @@ Note that the time-frequency representation is computed on the *unfiltered* epoc
 ### **`tfr_cycles` (optional, default: `range(2, 26, 1)`)**
 
 The number of cycles for the family of [Morlet wavelets](https://neuroimage.usc.edu/brainstorm/Tutorials/TimeFrequency#Morlet_wavelets).
-Should be increasing as the frequencies of the wavelets are increasing because.
+Should be increasing as the frequency of the wavelets is increasing.
 This is because at higher frequencies, more cycles will fit into the same time window, thus improving spatial resolution.
-The corresponding frequencies divided by a factor of two seems to be a common choice.
+A common choice would be the corresponding `tfr_freqs` divided by a factor of two.
 
 | Python examples                     | R examples                           |
 | ----------------------------------- | ------------------------------------ |
@@ -365,7 +364,7 @@ The corresponding frequencies divided by a factor of two seems to be a common ch
 ### **`tfr_baseline` (optional, default: `(-0.3, 0.1)`)**
 
 Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
-Unlike the `baseline` for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical $1/f$ scaling of EEG frequencies.
+Unlike the `baseline` for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical *1/f* scaling of EEG frequencies.
 Furthermore, the baseline window should end *before* stimulus onset so that post-stimulus power at low frequencies doesn't get contaminated by pre-stimulus fluctuations.
 
 | Python examples | R examples      |
@@ -466,8 +465,8 @@ Cropping the frequency range (based on *a priori* knowledge about plausible effe
 Number of jobs to run in parallel.
 If `1`, participants will be processed sequentially.
 If greater than `1`, multiple participants will be processed in parallel, thus reducing the overall runtime of the pipeline.
-Negative values can be used to use all cores (`-1`) or all but a certain number of cores (e.g., `-2` = all but one core) that are available on your machine.
-**Options other than `1` are currently not supported on Windows operating systems!**
+Negative values can be used to use all available cores (`-1`) or all but a certain number of available cores (e.g., `-2` = all but one core).
+**This option is experimental and values other than `1` are currently not supported on Windows operating systems!**
 
 | Python examples | R examples |
 | --------------- | ---------- |
