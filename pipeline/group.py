@@ -152,11 +152,11 @@ def group_pipeline(
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
-    save_df(trials, output_dir, participant_id='all', suffix='trials')
+    save_df(trials, output_dir, suffix='trials')
 
     # Combine evokeds_dfs and save
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
-    save_df(evokeds_df, output_dir, participant_id='all', suffix='ave')
+    save_df(evokeds_df, output_dir, suffix='ave')
 
     # Compute grand averaged ERPs and save
     grands = compute_grands(evokeds)
@@ -182,22 +182,22 @@ def group_pipeline(
 
         # Combine evokeds_df for power and save
         tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
-        save_df(tfr_evokeds_df, output_dir, participant_id='all',
-                suffix='tfr-ave')
+        save_df(tfr_evokeds_df, output_dir,
+                suffix='tfr_ave')
         returns.append(tfr_evokeds_df)
 
         # Compute grand averaged power and save
         tfr_grands = compute_grands(tfr_evokeds)
         tfr_grands_df = compute_grands_df(tfr_evokeds_df)
         save_evokeds(tfr_grands, tfr_grands_df, output_dir,
-                     participant_id='tfr-grand', to_df=to_df)
+                     participant_id='tfr_grand', to_df=to_df)
 
         # Cluster based permutation tests for TFR
         if perm_contrasts != []:
             tfr_cluster_df = compute_perm_tfr(
                 tfr_evokeds, perm_contrasts, perm_tmin, perm_tmax,
                 perm_channels, perm_fmin, perm_fmax, n_jobs)
-            save_df(tfr_cluster_df, output_dir, suffix='tfr-clusters')
+            save_df(tfr_cluster_df, output_dir, suffix='tfr_clusters')
             returns.append(tfr_cluster_df)
 
     return returns
