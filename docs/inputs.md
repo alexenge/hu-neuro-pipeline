@@ -325,9 +325,9 @@ If `None`, do not use columns in the log file for averaging and use the `trigger
 | Python examples                                 | R examples                                       |
 | ----------------------------------------------- | ------------------------------------------------ |
 | `None`                                          | `NULL`                                           |
-| `'Semantics'`                                   | `"Semantics"`                                    |
-| `['Semantics', 'Context']`                      | `c("Semantics", "Context")`                      |
-| `['Semantics', 'Context', 'Semantics/Context']` | `c("Semantics", "Context", "Semantics/Context")` |
+| `'semantics'`                                   | `"semantics"`                                    |
+| `['semantics', 'Context']`                      | `c("semantics", "Context")`                      |
+| `['semantics', 'Context', 'semantics/Context']` | `c("semantics", "Context", "semantics/Context")` |
 
 ## 6. Options for time-frequency analysis
 
