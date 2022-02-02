@@ -82,19 +82,24 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
             p_val = cluster_p_vals[ix]
             p_vals[cluster] = p_val
 
-        # Convert to DataFrames, adding info about contrast, stat, time
-        dfs = []
-        arrs = [t_obs, ixs, p_vals]
-        stats = ['t_obs', 'cluster_index', 'p_val']
-        for arr, stat in zip(arrs, stats):
-            df = pd.DataFrame(arr, columns=channels)
-            df.insert(0, 'contrast', ' - '.join(contrast))
-            df.insert(1, 'stat', stat)
-            df.insert(2, 'time', times)
-            dfs.append(df)
+        # Prepare DataFrame for storing t values, cluster indices, and p values
+        cluster_df = pd.DataFrame({
+            'contrast': ' - '.join(contrast),
+            'time': np.repeat(times, repeats=n_channels),
+            'channel': np.tile(channels, reps=n_times)})
 
-        # Combine DataFrames
-        cluster_df = pd.concat(dfs)
+        # Add t values, cluster indices, and p values
+        arrs = [t_obs, ixs, p_vals]
+        stats = ['t_obs', 'cl_index', 'p_val']
+        for arr, stat in zip(arrs, stats):
+
+            # Convert array to long format
+            # Initial array is has shape (times, channels)
+            # New array is has shape (times * channels,)
+            arr_long = arr.flatten()
+
+            # Add to DataFrame
+            cluster_df[stat] = arr_long
 
         # Append to the list of all contrasts
         cluster_dfs.append(cluster_df)
@@ -195,21 +200,25 @@ def compute_perm_tfr(
             p_val = cluster_p_vals[ix]
             p_vals[cluster] = p_val
 
-        # Convert to DataFrames, adding info about contrast, stat, time, freq
-        dfs = []
-        arrs = [t_obs, ixs, p_vals]
-        stats = ['t_obs', 'cluster_index', 'p_val']
-        for arr, stat in zip(arrs, stats):
-            arr = arr.reshape(n_times * n_freqs, n_channels)
-            df = pd.DataFrame(arr, columns=channels)
-            df.insert(0, 'contrast', ' - '.join(contrast))
-            df.insert(1, 'stat', stat)
-            df.insert(2, 'time', np.repeat(times, n_freqs))
-            df.insert(3, 'freq', np.tile(freqs, n_times))
-            dfs.append(df)
+        # Prepare DataFrame for storing t values, cluster indices, and p values
+        cluster_df = pd.DataFrame({
+            'contrast': ' - '.join(contrast),
+            'time': np.repeat(times, n_channels * n_freqs),
+            'freq': np.repeat(np.tile(freqs, n_times), n_channels),
+            'channel': np.tile(channels, n_times * n_freqs)})
 
-        # Combine DataFrames
-        cluster_df = pd.concat(dfs)
+        # Add t values, cluster indices, and p values
+        arrs = [t_obs, ixs, p_vals]
+        stats = ['t_obs', 'cl_index', 'p_val']
+        for arr, stat in zip(arrs, stats):
+
+            # Convert array to long format
+            # Initial array is has shape (times, channels)
+            # New array is has shape (times * channels,)
+            arr_long = arr.flatten()
+
+            # Add to DataFrame
+            cluster_df[stat] = arr_long
 
         # Append to the list of all contrasts
         cluster_dfs.append(cluster_df)
