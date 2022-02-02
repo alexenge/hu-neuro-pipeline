@@ -46,7 +46,7 @@ Either way, each log file must have the same number of rows (trials) as there ar
 
 ## 2. Output directory options
 
-### **`export_dir` (required)**
+### **`output_dir` (required)**
 
 Main output directory.
 All group level outputs are saved there, including, e.g., the single trial data frame (`all_trials.csv`) and the by-participant condition averages (`all_ave.csv`/`.fif`).

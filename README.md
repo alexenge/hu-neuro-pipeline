@@ -58,7 +58,7 @@ from pipeline import group_pipeline
 trials, evokeds = group_pipeline(
     vhdr_files='Results/EEG/raw',
     log_files='Results/RT',
-    export_dir='Results/EEG/export',
+    output_dir='Results/EEG/export',
     ocular_correction='Results/EEG/cali',
     triggers=[201, 202, 211, 212],
     skip_log_conditions={'Semantics': 'filler'},
@@ -82,7 +82,7 @@ pipeline <- reticulate::import("pipeline")
 res <- pipeline$group_pipeline(
     vhdr_files = "Results/EEG/raw",
     log_files = "Results/RT",
-    export_dir = "Results/EEG/export",
+    output_dir = "Results/EEG/export",
     ocular_correction = "Results/EEG/cali",
     triggers = c(201, 202, 211, 212),
     skip_log_conditions = list("Semantics" = "filler"),
