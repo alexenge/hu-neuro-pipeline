@@ -63,8 +63,13 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
             X, n_permutations=n_permutations, adjacency=channel_adjacency,
             n_jobs=n_jobs, seed=seed)
 
-        # Create cluster images with cluster indices and p values
-        ixs = np.zeros_like(t_obs)
+        # Sort clusters by p values
+        cluster_ranks = cluster_p_vals.argsort()
+        cluster_p_vals = cluster_p_vals[cluster_ranks]
+        clusters = [clusters[rank] for rank in cluster_ranks]
+
+        # Create cluster images with cluster labels and p values
+        labels = np.full_like(t_obs, 'NA', dtype=object)
         p_vals = np.ones_like(t_obs)
         pos_ix = 0
         neg_ix = 0
@@ -73,24 +78,24 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
             # Check if the cluster is positive or negative
             if t_obs[cluster][0] > 0:
                 pos_ix += 1
-                ixs[cluster] = pos_ix
+                labels[cluster] = f'pos_{pos_ix}'
             else:
-                neg_ix -= 1
-                ixs[cluster] = neg_ix
+                neg_ix += 1
+                labels[cluster] = f'neg_{neg_ix}'
 
             # Extract cluster level p value
             p_val = cluster_p_vals[ix]
             p_vals[cluster] = p_val
 
-        # Prepare DataFrame for storing t values, cluster indices, and p values
+        # Prepare DataFrame for storing t values, cluster labels, and p values
         cluster_df = pd.DataFrame({
             'contrast': ' - '.join(contrast),
             'time': np.repeat(times, repeats=n_channels),
             'channel': np.tile(channels, reps=n_times)})
 
-        # Add t values, cluster indices, and p values
-        arrs = [t_obs, ixs, p_vals]
-        stats = ['t_obs', 'cl_index', 'p_val']
+        # Add t values, cluster labels, and p values
+        arrs = [t_obs, labels, p_vals]
+        stats = ['t_obs', 'cluster', 'p_val']
         for arr, stat in zip(arrs, stats):
 
             # Convert array to long format
@@ -181,8 +186,13 @@ def compute_perm_tfr(
             X, n_permutations=n_permutations, adjacency=adjacency,
             n_jobs=n_jobs, seed=seed)
 
-        # Create cluster images with cluster indices and p values
-        ixs = np.zeros_like(t_obs)
+        # Sort clusters by p values
+        cluster_ranks = cluster_p_vals.argsort()
+        cluster_p_vals = cluster_p_vals[cluster_ranks]
+        clusters = [clusters[rank] for rank in cluster_ranks]
+
+        # Create cluster images with cluster labels and p values
+        labels = np.full_like(t_obs, 'NA', dtype=object)
         p_vals = np.ones_like(t_obs)
         pos_ix = 0
         neg_ix = 0
@@ -191,25 +201,25 @@ def compute_perm_tfr(
             # Check if the cluster is positive or negative
             if t_obs[cluster][0] > 0:
                 pos_ix += 1
-                ixs[cluster] = pos_ix
+                labels[cluster] = f'pos_{pos_ix}'
             else:
-                neg_ix -= 1
-                ixs[cluster] = neg_ix
+                neg_ix += 1
+                labels[cluster] = f'neg_{neg_ix}'
 
             # Extract cluster level p value
             p_val = cluster_p_vals[ix]
             p_vals[cluster] = p_val
 
-        # Prepare DataFrame for storing t values, cluster indices, and p values
+        # Prepare DataFrame for storing t values, cluster labels, and p values
         cluster_df = pd.DataFrame({
             'contrast': ' - '.join(contrast),
             'time': np.repeat(times, n_channels * n_freqs),
             'freq': np.repeat(np.tile(freqs, n_times), n_channels),
             'channel': np.tile(channels, n_times * n_freqs)})
 
-        # Add t values, cluster indices, and p values
-        arrs = [t_obs, ixs, p_vals]
-        stats = ['t_obs', 'cl_index', 'p_val']
+        # Add t values, cluster labels, and p values
+        arrs = [t_obs, labels, p_vals]
+        stats = ['t_obs', 'cluster', 'p_val']
         for arr, stat in zip(arrs, stats):
 
             # Convert array to long format

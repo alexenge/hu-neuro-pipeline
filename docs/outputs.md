@@ -73,19 +73,19 @@ This data frame can be used, for instance, to plot the time course of the differ
 
 Only returned if one or more `perm_contrasts` has been specified.
 This data frame contains the statistical results of the cluster-based permutations tests.
-These are (a) the (uncorrected) cluster-forming *t* values (`t_obs`), (b) an index for each cluster of connected time points/channels (`cl_index`), and (c) the corresponding cluster-level *p* value (`p_val`).
-Cluster indices > 0 indicate positive-going clusters and cluster indices < 0 indicate negative-negative clusters.
+These are (a) the (uncorrected) cluster-forming *t* values (`t_obs`), (b) a label for each cluster of connected time points/channels (`cluster`), and (c) the corresponding cluster-level *p* value (`p_val`).
+Cluster labels differentiate between positive-going clusters (`'pos_'`) and negative-going (`'neg_'`) clusters, and are sorted by their cluster-level *p* value.
 
 ```r
 > clusters <- res[[3]]
 > head(clusters)  
-             contrast time channel   t_obs cl_index p_val
-1 related - unrelated    0     Fp1 -0.2529        0     1
-2 related - unrelated    0     Fpz  0.3768        0     1
-3 related - unrelated    0     Fp2 -0.5500        0     1
-4 related - unrelated    0     AF7 -0.6792        0     1
-5 related - unrelated    0     AF3  0.0780        0     1
-6 related - unrelated    0     AFz  0.3211        0     1  
+             contrast time channel   t_obs cluster p_val
+1 related - unrelated    0     Fp1 -0.2529      NA     1
+2 related - unrelated    0     Fpz  0.3768      NA     1
+3 related - unrelated    0     Fp2 -0.5500      NA     1
+4 related - unrelated    0     AF7 -0.6792      NA     1
+5 related - unrelated    0     AF3  3.0780  pos_12  0.43
+6 related - unrelated    0     AFz  3.3211  pos_12  0.43  
 ```
 
 The data frame can be filtered for significant clusters (based on `p_val`) and, for instance, visualized using `geom_raster()` from `ggplot2`.
