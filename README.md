@@ -45,7 +45,7 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 
 ### 3.1 For Python users
 
-This is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., `'related'` vs. `'unrelated'`) and emotional `Context` (e.g., `'negative'` vs. `'neutral'`).
+This is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., `'related'` vs. `'unrelated'`) and emotional `context` (e.g., `'negative'` vs. `'neutral'`).
 We need to specify the paths to the raw EEG data, the behavioral log files, the output directory, and the BESA files for ocular correction (though we could also choose an ICA method like `'fastica'`).
 Four different EEG `triggers` correspond to each of the four different cells in the 2 × 2 design.
 The log files might contain additional rows (i.e., trials) from a `'filler'` condition which we want to skip because they don't have corresponding EEG triggers.
@@ -67,7 +67,7 @@ trials, evokeds = group_pipeline(
                 'tmax': [0.5, 0.9],
                 'roi': [['C1', 'Cz', 'C2', 'CP1', 'CPz', 'CP2'],
                         ['Fz', 'FC1', 'FC2', 'C1', 'Cz', 'C2']]},
-    average_by=['semantics', 'Context', 'semantics/Context'])
+    average_by=['semantics', 'context', 'semantics/context'])
 ```
 
 ### 3.2 For R users
@@ -95,7 +95,7 @@ res <- pipeline$group_pipeline(
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
         )
     ),
-    average_by = c("semantics", "Context", "semantics/Context")
+    average_by = c("semantics", "context", "semantics/context")
 )
 
 # Extract results
