@@ -46,11 +46,6 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 ### 3.1 For Python users
 
 This is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., `'related'` vs. `'unrelated'`) and emotional `context` (e.g., `'negative'` vs. `'neutral'`).
-We need to specify the paths to the raw EEG data, the behavioral log files, the output directory, and the BESA files for ocular correction (though we could also choose an ICA method like `'fastica'`).
-Four different EEG `triggers` correspond to each of the four different cells in the 2 × 2 design.
-The log files might contain additional rows (i.e., trials) from a `'filler'` condition which we want to skip because they don't have corresponding EEG triggers.
-We want to compute mean ERP amplitudes for pre-specified time windows and regions of interest corresponding to the N400 and P600 `components`.
-In addition, we want to obtain by-participant averages for each condition (for the main effects) and each combination of conditions (for the interaction effect), as specified with `average_by`.
 
 ```python
 from pipeline import group_pipeline
@@ -69,6 +64,12 @@ trials, evokeds = group_pipeline(
                         ['Fz', 'FC1', 'FC2', 'C1', 'Cz', 'C2']]},
     average_by=['semantics', 'context', 'semantics/context'])
 ```
+
+We need to specify the paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction (though we could also choose an ICA method like `'fastica'`).
+Four different EEG `triggers` correspond to each of the four different cells in the 2 × 2 design.
+The log files might contain additional trials from a `'filler'` condition which we want to skip because they don't have corresponding EEG triggers.
+We want to compute mean ERP amplitudes for pre-specified time windows and regions of interest corresponding to the N400 and P600 `components`.
+In addition, we want to obtain by-participant averages for each condition (for the main effects) and for each combination of conditions (for the interaction effect), as specified with `average_by`.
 
 ### 3.2 For R users
 
