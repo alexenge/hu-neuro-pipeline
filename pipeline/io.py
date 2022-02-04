@@ -2,7 +2,8 @@ import json
 from os import makedirs
 
 import pandas as pd
-from mne import Report, write_evokeds
+from mne import Evoked, Report, write_evokeds
+from mne.time_frequency import AverageTFR, write_tfrs
 
 
 def check_participant_input(input, participant_ids):
@@ -117,8 +118,16 @@ def save_evokeds(
 
     # Save evokeds as MNE object
     if to_df is False or to_df == 'both':
-        fname = f'{output_dir}/{participant_id_}{suffix}.fif'
-        write_evokeds(fname, evokeds, verbose=False)
+
+        # Save evokeds for ERPs
+        if isinstance(evokeds[0], Evoked):
+            fname = f'{output_dir}/{participant_id_}{suffix}.fif'
+            write_evokeds(fname, evokeds, verbose=False)
+
+        # Save vokeds for TFR
+        elif isinstance(evokeds[0], AverageTFR):
+            fname = f'{output_dir}/{participant_id_}{suffix}.h5'
+            write_tfrs(fname, evokeds, verbose=False)
 
 
 def save_montage(epochs, output_dir):
