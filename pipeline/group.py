@@ -109,7 +109,8 @@ def group_pipeline(
         clean_dir=clean_dir,
         epochs_dir=epochs_dir,
         chanlocs_dir=output_dir,
-        report_dir=report_dir)
+        report_dir=report_dir,
+        to_df=to_df)
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
