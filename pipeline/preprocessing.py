@@ -57,11 +57,17 @@ def apply_montage(raw, montage):
         print(f'Loading standard montage {montage}')
         digmontage = make_standard_montage(montage)
 
-    # Make sure that EOG channels are of the eog type
-    eog_channels = set(['HEOG', 'VEOG', 'IO1', 'IO2', 'Afp9', 'Afp10'])
+    # Make sure that EOG channels are of the `eog` type
+    eog_channels = ['HEOG', 'VEOG', 'IO1', 'IO2', 'Afp9', 'Afp10', 'Auge_u']
     for channel_name in eog_channels:
         if channel_name in raw.ch_names:
             raw.set_channel_types({channel_name: 'eog'})
+
+    # Make sure that mastoid channels are of the `misc` type
+    misc_channels = ['A1', 'A2', 'M1', 'M2']
+    for channel_name in misc_channels:
+        if channel_name in raw.ch_names:
+            raw.set_channel_types({channel_name: 'misc'})
 
     # Get EEG channels that are not in the montage
     raw_channels = set(raw.copy().pick_types(eeg=True).ch_names)
