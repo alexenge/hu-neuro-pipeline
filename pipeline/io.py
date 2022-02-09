@@ -3,6 +3,7 @@ from os import makedirs
 
 import pandas as pd
 from mne import Evoked, Report, write_evokeds
+from mne.channels.layout import _find_topomap_coords
 from mne.time_frequency import AverageTFR, write_tfrs
 
 
@@ -139,11 +140,15 @@ def save_montage(epochs, output_dir):
     # Get locations of EEG channels
     chs = epochs.copy().pick_types(eeg=True).info['chs']
     coords = [ch['loc'][0:3] for ch in chs]
-    coords_df = pd.DataFrame(columns=['x', 'y', 'z'], data=coords)
+    coords_df = pd.DataFrame(
+        columns=['cart_x', 'cart_y', 'cart_z'], data=coords)
 
     # Add channel names
     ch_names = [ch['ch_name'] for ch in chs]
     coords_df.insert(loc=0, column='ch_name', value=ch_names)
+
+    # Add 2D flattened coordinates
+    coords_df[['x', 'y']] = _find_topomap_coords(epochs.info, ch_names)
 
     # Save
     save_df(coords_df, output_dir, suffix='channel_locations')
