@@ -145,7 +145,7 @@ def save_montage(epochs, output_dir):
 
     # Add channel names
     ch_names = [ch['ch_name'] for ch in chs]
-    coords_df.insert(loc=0, column='ch_name', value=ch_names)
+    coords_df.insert(loc=0, column='channel', value=ch_names)
 
     # Add 2D flattened coordinates
     # Multiplied to mm scale (with head radius =~ 95 mm as in R-eegUtils)
