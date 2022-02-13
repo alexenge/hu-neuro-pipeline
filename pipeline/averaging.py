@@ -69,7 +69,7 @@ def compute_evokeds_cols(
         all_evokeds = all_evokeds + evokeds
 
         # Convert to DataFrame
-        trials = epochs.metadata
+        trials = epochs_update.metadata
         evokeds_df = create_evokeds_df(
             evokeds, cols, trials, participant_id)
 
@@ -105,7 +105,7 @@ def average_by_events(epochs, method='mean'):
         if isinstance(epochs, Epochs) else {}
 
     # Loop over event types and average
-    # TODO: Use MNE built-in argument 'by_event_type' once it's in EpochsTFR
+    # TODO: Use MNE built-in argument `by_event_type` once it's in `EpochsTFR`
     evokeds = []
     for event_type in epochs.event_id.keys():
         evoked = epochs[event_type].average(**picks_dict, method=method)
