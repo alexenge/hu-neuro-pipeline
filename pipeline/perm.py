@@ -56,11 +56,11 @@ def compute_perm(evokeds_per_participant, contrasts, tmin=0., tmax=1.,
             X[ix] = data_diff
 
         # Compute channel adjacency matrix
-        channel_adjacency, _ = find_ch_adjacency(evoked.info, 'eeg')
+        ch_adjacency, _ = find_ch_adjacency(evoked.info, 'eeg')
 
         # Run permutation test
         t_obs, clusters, cluster_p_vals, H0 = permutation_cluster_1samp_test(
-            X, n_permutations=n_permutations, adjacency=channel_adjacency,
+            X, n_permutations=n_permutations, adjacency=ch_adjacency,
             n_jobs=n_jobs, seed=seed)
 
         # Sort clusters by p values
@@ -178,8 +178,8 @@ def compute_perm_tfr(
 
         # Compute frequency and channel adjacency matrix
         # Based on channel locations and a lattice matrix for frequencies
-        channel_adjacency, _ = find_ch_adjacency(evoked.info, 'eeg')
-        adjacency = combine_adjacency(n_freqs, channel_adjacency)
+        ch_adjacency, _ = find_ch_adjacency(evoked.info, 'eeg')
+        adjacency = combine_adjacency(n_freqs, ch_adjacency)
 
         # Run permutation test
         t_obs, clusters, cluster_p_vals, H0 = permutation_cluster_1samp_test(
