@@ -67,7 +67,7 @@ def apply_montage(raw, montage):
     misc_channels = ['A1', 'A2', 'M1', 'M2']
     for ch_name in misc_channels:
         if ch_name in raw.ch_names:
-            raw.set_ch_types({ch_name: 'misc'})
+            raw.set_channel_types({ch_name: 'misc'})
 
     # Drop EEG channels that are not in the montage
     raw_channels = set(raw.copy().pick_types(eeg=True).ch_names)
