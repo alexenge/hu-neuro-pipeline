@@ -88,6 +88,7 @@ def participant_pipeline(
     baseline = tuple(baseline)
     tfr_freqs = list(tfr_freqs)
     tfr_cycles = list(tfr_cycles)
+    tfr_baseline = tuple(tfr_baseline)
 
     # Get participant ID from filename
     participant_id = path.basename(vhdr_file).split('.')[0]
