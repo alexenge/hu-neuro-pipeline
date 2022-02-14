@@ -128,7 +128,7 @@ def save_evokeds(
         # Save vokeds for TFR
         elif isinstance(evokeds[0], AverageTFR):
             fname = f'{output_dir}/{participant_id_}{suffix}.h5'
-            write_tfrs(fname, evokeds, verbose=False)
+            write_tfrs(fname, evokeds, overwrite=True, verbose=False)
 
 
 def save_montage(epochs, output_dir):
