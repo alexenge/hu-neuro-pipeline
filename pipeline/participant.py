@@ -6,7 +6,7 @@ from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
-from .epoching import (compute_single_trials, get_bad_channels, get_bads,
+from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
                        read_log, triggers_to_event_id)
 from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
@@ -158,7 +158,7 @@ def participant_pipeline(
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # Get indices of bad epochs and channels
-    bad_ixs, auto_channels = get_bads(epochs, reject_peak_to_peak, reject_flat)
+    bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak, reject_flat)
 
     # Start over, repairing any (automatically deteced) bad channels
     if bad_channels == 'auto':
