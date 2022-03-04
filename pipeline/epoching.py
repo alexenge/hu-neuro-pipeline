@@ -3,8 +3,9 @@ from collections import Counter
 import chardet
 import numpy as np
 import pandas as pd
-from mne import pick_channels
+from mne import combine_evoked, pick_channels
 from mne.channels import combine_channels
+from scipy.stats import zscore
 
 
 def triggers_to_event_id(triggers):
@@ -89,6 +90,36 @@ def get_bads(
                     if count > len(epochs) * percent_bad]
 
     return (bad_ixs, bad_channels)
+
+
+def get_bad_channels(epochs, threshold=3., by_event_type=True):
+    """Automatically detects bad channels using their average standard error"""
+
+    # Compute standard error for each condition seperately, then average...
+    if by_event_type:
+        ses = epochs.standard_error(by_event_type=True)
+        ses = combine_evoked(ses, weights='nave')
+    
+    # ... or directly compute standard error across all epochs
+    else:
+        ses = epochs.standard_error()
+
+    # Average across time points for each channel
+    ses = ses.data.mean(axis=1)
+
+    # Convert to z scores
+    zs = zscore(ses)
+
+    # Look up bad channel labels
+    ixs = np.where(zs > threshold)[0]
+    bad_channels = [epochs.ch_names[ix] for ix in ixs]
+    if bad_channels != []:
+        print(f'Automatically detected bad channels {bad_channels} with '
+              f'z_SE > {threshold}')
+    else:
+        print(f'Didn\'t detect any bad channels with z_SE > {threshold}')
+
+    return bad_channels
 
 
 def compute_single_trials(epochs, components, bad_ixs=None):

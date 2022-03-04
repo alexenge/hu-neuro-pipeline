@@ -6,8 +6,8 @@ from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
-from .epoching import (compute_single_trials, get_bads, read_log,
-                       triggers_to_event_id)
+from .epoching import (compute_single_trials, get_bad_channels, get_bads,
+                       read_log, triggers_to_event_id)
 from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
@@ -162,8 +162,10 @@ def participant_pipeline(
 
     # Start over, repairing any (automatically deteced) bad channels
     if bad_channels == 'auto':
-        if auto_channels != []:
-            config['bad_channels'] = auto_channels
+        bad_channels = get_bad_channels(epochs)
+        if bad_channels != []:
+            print('Restarting with interpolation of bad channels')
+            config['bad_channels'] = bad_channels
             return participant_pipeline(**config)
 
     # Add single trial mean ERP amplitudes to metadata

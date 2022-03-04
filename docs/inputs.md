@@ -160,7 +160,7 @@ Bad EEG channels to repair via interpolation.
 If `None`, assume that all channels of all participants are good and do not interpolate anything.
 Can be a list of lists, each containing the bad channel labels for one participants.
 Can also be a dict where the keys are (a selection of) participant labels and the values are lists of their corresponding bad channel labels.
-Finally, there is an (experimental) `'auto'` option that automatically interpolates channel if they would lead to an excessive number (> 5%) of bad epochs per participant (where bad epochs are defined based on `reject_peak_to_peak` and `reject_flat`; see below).
+Finally, there is an (experimental) `'auto'` option that automatically interpolates channels if their standard error (across epochs) exceeds a certain threshold (namely being more than three standard deviations away from the average standard error of all channels).
 
 | Python examples                     | R examples                                 |
 | ----------------------------------- | ------------------------------------------ |
