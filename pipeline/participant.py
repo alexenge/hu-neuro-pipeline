@@ -12,7 +12,7 @@ from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica)
-from .tfr import compute_single_trials_tfr
+from .tfr import compute_single_trials_tfr, subtract_evoked_cols
 
 
 def participant_pipeline(
@@ -37,6 +37,7 @@ def participant_pipeline(
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
+    tfr_subtract_evoked=False,
     tfr_freqs=range(4, 51, 2),
     tfr_cycles=range(2, 26, 1),
     tfr_baseline=(-0.3, -0.1),
@@ -202,6 +203,15 @@ def participant_pipeline(
 
         # Copy original metadata
         epochs_unfilt.metadata = epochs.metadata.copy()
+
+        # Optionally subtract evoked activity
+        # See, e.g., https://doi.org/10.1016/j.neuroimage.2006.02.034
+        if tfr_subtract_evoked:
+            if tfr_subtract_evoked is True:
+                epochs_unfilt = epochs_unfilt.subtract_evoked()
+            else:
+                epochs_unfilt = subtract_evoked_cols(
+                    epochs_unfilt, evokeds, cols=tfr_subtract_evoked)
 
         # Morlet wavelet convolution
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,

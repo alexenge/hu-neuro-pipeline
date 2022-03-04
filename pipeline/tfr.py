@@ -1,6 +1,30 @@
 import numpy as np
 import pandas as pd
 
+from mne import concatenate_epochs
+
+def subtract_evoked_cols(epochs, evokeds, cols):
+
+        # Combine relevant columns
+        cols = cols.split('/')
+        cols_df = pd.DataFrame(epochs.metadata[cols])
+        cols_df = cols_df.astype('str')
+        ids = cols_df.agg('/'.join, axis=1).reset_index(drop=True)
+
+        # Loop over epochs
+        epochs_subtracted = []
+        for ix, id in enumerate(ids):
+
+            # Subtract the relevant evoked from each epoch
+            evoked_id = [ev for ev in evokeds if ev.comment == id][0]
+            epoch_subtracted = epochs[ix].subtract_evoked(evoked_id)
+            epochs_subtracted.append(epoch_subtracted)
+        
+        # Combine list of subtracted epochs
+        epochs_subtracted = concatenate_epochs(epochs_subtracted)
+        
+        return epochs_subtracted
+
 
 def compute_single_trials_tfr(epochs, components, bad_ixs=None):
     """Computes single trial power for a dict of multiple components."""
