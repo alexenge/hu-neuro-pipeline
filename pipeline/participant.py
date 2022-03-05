@@ -135,10 +135,6 @@ def participant_pipeline(
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
 
-    # Save cleaned continuous data
-    if clean_dir is not None:
-        save_clean(filt, clean_dir, participant_id)
-
     # Determine events and the corresponding (selection of) triggers
     events, event_id = events_from_annotations(
         filt, regexp='Stimulus', verbose=False)
@@ -149,6 +145,14 @@ def participant_pipeline(
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
                     preload=True)
 
+    # Automatically detect bad channels and interpolate if necessary
+    if bad_channels == 'auto':
+        bad_channels = get_bad_channels(epochs)
+        if bad_channels != []:
+            print('Restarting with interpolation of bad channels')
+            config['bad_channels'] = bad_channels
+            return participant_pipeline(**config)
+
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
     print(epochs)
@@ -157,31 +161,27 @@ def participant_pipeline(
     epochs.metadata = read_log(log_file, skip_log_rows, skip_log_conditions)
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
-    # Get indices of bad epochs and channels
+    # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak, reject_flat)
 
-    # Start over, repairing any (automatically deteced) bad channels
-    if bad_channels == 'auto':
-        bad_channels = get_bad_channels(epochs)
-        if bad_channels != []:
-            print('Restarting with interpolation of bad channels')
-            config['bad_channels'] = bad_channels
-            return participant_pipeline(**config)
-
-    # Add single trial mean ERP amplitudes to metadata
+    # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
 
-    # Save epochs as data frame and/or MNE object
-    if epochs_dir is not None:
-        save_epochs(epochs, epochs_dir, participant_id, to_df)
+    # Compute evokeds
+    evokeds, evokeds_df = compute_evokeds(
+        epochs, average_by, bad_ixs, participant_id)
+
+    # Save cleaned continuous data
+    if clean_dir is not None:
+        save_clean(filt, clean_dir, participant_id)
 
     # Save channel locations
     if chanlocs_dir is not None:
         save_montage(epochs, chanlocs_dir)
 
-    # Compute evokeds
-    evokeds, evokeds_df = compute_evokeds(
-        epochs, average_by, bad_ixs, participant_id)
+    # Save epochs as data frame and/or MNE object
+    if epochs_dir is not None:
+        save_epochs(epochs, epochs_dir, participant_id, to_df)
 
     # Save evokeds as data frame and/or MNE object
     if evokeds_dir is not None:
