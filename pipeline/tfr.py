@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-
 from mne import concatenate_epochs
+
 
 def subtract_evoked_cols(epochs, evokeds, cols):
 
@@ -49,6 +49,10 @@ def compute_single_trials_tfr(epochs, components, bad_ixs=None):
 def compute_component_tfr(
         epochs, name, tmin, tmax, fmin, fmax, roi, bad_ixs=None):
     """Computes single trial power for a single component."""
+
+    # Check that requested region of interest channels are present in the data
+    for ch in roi:
+        assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 
     # Select region, time window, and frequencies of interest
     epochs_oi = epochs.copy().pick_channels(roi).crop(tmin, tmax, fmin, fmax)

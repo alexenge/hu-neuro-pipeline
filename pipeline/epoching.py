@@ -133,6 +133,10 @@ def compute_single_trials(epochs, components, bad_ixs=None):
 def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     """Computes single trial mean amplitudes for single component."""
 
+    # Check that requested region of interest channels are present in the data
+    for ch in roi:
+        assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
+
     # Create virtual channel for the average in the region of interest
     print(f'Computing single trial ERP amplitudes for {name}')
     roi_dict = {name: pick_channels(epochs.ch_names, roi)}
