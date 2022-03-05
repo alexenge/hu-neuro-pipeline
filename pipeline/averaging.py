@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from mne import Epochs, Evoked, combine_evoked
+from mne import Epochs, Evoked, grand_average
 
 
 def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
@@ -175,7 +175,7 @@ def compute_grands(evokeds_per_participant):
 
     # Average across participants for each condition
     evokeds_per_condition = list(map(list, zip(*evokeds_per_participant)))
-    grands = [combine_evoked(x, weights='nave') for x in evokeds_per_condition]
+    grands = [grand_average(x) for x in evokeds_per_condition]
 
     # Add meaningful comments
     comments = [x[0].comment for x in evokeds_per_condition]
