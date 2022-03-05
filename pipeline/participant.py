@@ -119,6 +119,7 @@ def participant_pipeline(
     if bad_channels is not None and bad_channels != 'auto':
         if isinstance(bad_channels, str):
             bad_channels = [bad_channels]
+        dirty.info['bads'] = dirty.info['bads'] + bad_channels  # For report
         raw.info['bads'] = raw.info['bads'] + bad_channels
         _ = raw.interpolate_bads()
 
