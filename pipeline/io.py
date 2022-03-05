@@ -2,7 +2,7 @@ import json
 from os import makedirs
 
 import pandas as pd
-from mne import Evoked, Report, write_evokeds
+from mne import Evoked, write_evokeds
 from mne.channels.layout import _find_topomap_coords
 from mne.time_frequency import AverageTFR, write_tfrs
 
@@ -167,33 +167,8 @@ def save_config(config, output_dir):
         json.dump(config, f)
 
 
-def save_report(raw, ica, clean, events, event_id, epochs, evokeds, output_dir,
-                participant_id):
+def save_report(report, output_dir, participant_id):
     """Saves HTML report."""
-
-    # Initialize HTML report
-    report = Report(title=f'Report for {participant_id}', verbose=False)
-
-    # Add raw data
-    report.add_raw(raw, title='Raw data')
-
-    # Add ICA
-    if ica is not None:
-        report.add_ica(ica, title='ICA', inst=raw)
-
-    # Add cleaned data
-    report.add_raw(clean, title='Cleaned data')
-
-    # Add events
-    sfreq = clean.info['sfreq']
-    report.add_events(
-        events, title='Event triggers', event_id=event_id, sfreq=sfreq)
-
-    # Add epochs
-    report.add_epochs(epochs, title='Epochs')
-
-    # Add evokeds
-    report.add_evokeds(evokeds)  # Automatically uses comments as titles
 
     # Create output directory
     makedirs(output_dir, exist_ok=True)

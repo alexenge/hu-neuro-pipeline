@@ -12,6 +12,7 @@ from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica)
+from .report import create_report
 from .tfr import compute_single_trials_tfr, subtract_evoked_cols
 
 
@@ -187,10 +188,11 @@ def participant_pipeline(
     if evokeds_dir is not None:
         save_evokeds(evokeds, evokeds_df, evokeds_dir, participant_id, to_df)
 
-    # Save HTML report
+    # Create and save HTML report
     if report_dir is not None:
-        save_report(dirty, ica, filt, events, event_id, epochs, evokeds,
-                    report_dir, participant_id)
+        report = create_report(participant_id, dirty, ica, filt, events,
+                               event_id, epochs, evokeds)
+        save_report(report, report_dir, participant_id)
 
     # Time-frequency analysis
     if perform_tfr:
