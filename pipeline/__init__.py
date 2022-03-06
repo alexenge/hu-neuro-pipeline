@@ -2,7 +2,7 @@
 Humboldt-Universität zu Berlin"""
 
 # Import submodules
-from . import tests
+from . import datasets
 
 # Make central functions available as top level imports
 from .group import group_pipeline
