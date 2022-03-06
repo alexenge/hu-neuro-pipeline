@@ -1,1 +1,1 @@
-from .ucap import fetch_ucap
+from . import ucap

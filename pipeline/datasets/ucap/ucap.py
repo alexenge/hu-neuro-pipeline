@@ -36,8 +36,8 @@ fetcher = pooch.create(
     urls={key: f'{base_url}{uuid}' for key, uuid in urls.items()},
 )
 
-def fetch_ucap():
-    """Downloads sample data from the UCAP study."""
+def paths():
+    """Downloads sample data from the UCAP study and returns the paths."""
 
     # Get local file paths and fetch if necessary
     files = [fetcher.fetch(f) for f in fetcher.registry.keys()]
