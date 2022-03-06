@@ -1,6 +1,9 @@
 """Single trial EEG pipeline at the Neurocognitive Psychology lab,
 Humboldt-Universität zu Berlin"""
 
+# Import submodules
+from . import tests
+
 # Make central functions available as top level imports
 from .group import group_pipeline
 from .participant import participant_pipeline
