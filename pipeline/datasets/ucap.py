@@ -36,16 +36,16 @@ fetcher = pooch.create(
     urls={key: f'{base_url}{uuid}' for key, uuid in urls.items()},
 )
 
-def paths():
+def get_paths():
     """Downloads sample data from the UCAP study and returns the paths."""
 
     # Get local file paths and fetch if necessary
-    files = [fetcher.fetch(f) for f in fetcher.registry.keys()]
+    paths = [fetcher.fetch(key) for key in fetcher.registry.keys()]
 
     # Sort by file type
-    files_dict = {
-        'vhdr_files': [f for f in files if f.endswith('.vhdr')],
-        'log_files': [f for f in files if f.endswith('.txt')],
-        'cali_files': [f for f in files if f.endswith('.matrix')]}
+    paths_dict = {
+        'vhdr_files': [p for p in paths if p.endswith('.vhdr')],
+        'log_files': [p for p in paths if p.endswith('.txt')],
+        'cali_files': [p for p in paths if p.endswith('.matrix')]}
 
-    return files_dict
+    return paths_dict
