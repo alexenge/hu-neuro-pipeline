@@ -1,7 +1,5 @@
 import pooch
 
-from .._version import version
-
 # Basic url for the UCAP study from the OSF API
 base_url='https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage/'
 
@@ -33,8 +31,6 @@ hashes = {'cali/09_cali.matrix': 'md5:af36707efa1ba6f40e51cc22f87f1bd8',
 fetcher = pooch.create(
     path=pooch.os_cache('hu-neuro-pipeline'), # Local cache
     base_url=base_url,
-    version=version,
-    version_dev='main', # Dev versions will stored under this version
     env='PIPELINE_DATA_DIR', # Environment variable to overwrite `path`
     registry=hashes,
     urls={key: f'{base_url}{uuid}' for key, uuid in urls.items()},
