@@ -1,5 +1,3 @@
-from collections import Counter
-
 import chardet
 import numpy as np
 import pandas as pd
@@ -58,6 +56,49 @@ def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
                 log = log[log[col] != values]
             else:
                 log = log[~log[col].isin(values)]
+
+    return log
+
+
+def match_log_to_epochs(epochs, log, triggers_column, depth=10):
+    """Auto-detects missing EEG trials and removes them from the log file."""
+
+    # Make sure that the requested column is available in the log file
+    assert triggers_column in log.columns, \
+        f'Column \'{triggers_column}\' is not in the log file'
+
+    # Read lists of triggers from log file and EEG epochs
+    events_log = log[triggers_column].tolist()
+    events_epochs = list(epochs.events[:, 2])
+
+    # Check for each row in the log file
+    previous_repaired = False
+    for ix in range(len(events_log)):
+
+        # Add `nan` in case trials are missing at the end of the EEG...
+        if len(events_epochs) <= ix:
+            print(f'Log file (row index {ix}): Found missing EEG epoch')
+            events_epochs.insert(ix, np.nan)
+
+        # ... or if the log and EEG trigers don't match up
+        elif events_log[ix] != events_epochs[ix]:
+            print(f'Log file (row index {ix}): Found missing EEG epoch')
+            events_epochs.insert(ix, np.nan)
+            previous_repaired = True
+
+        # If they do match up, we check that the next trials do match as well
+        elif previous_repaired: 
+            if events_log[ix:ix + depth] != events_epochs[ix:ix + depth]:
+                print(f'Log file (row index {ix}): Assuming missing EEG epoch')
+                events_epochs.insert(ix, np.nan)
+            else:
+                previous_repaired = False
+
+    # Remove trials with missing EEG epochs from the log file
+    missing_ixs = np.where(np.isnan(events_epochs))[0].tolist()
+    print(f'Dropping rows from the log file data: {missing_ixs}')
+    log = log.reset_index(drop=True)
+    log = log.drop(index=missing_ixs)
 
     return log
 

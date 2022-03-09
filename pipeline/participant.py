@@ -7,7 +7,7 @@ from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
-                       read_log, triggers_to_event_id)
+                       match_log_to_epochs, read_log, triggers_to_event_id)
 from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
@@ -30,6 +30,7 @@ def participant_pipeline(
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
+    triggers_column=None,
     epochs_tmin=-0.5,
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
@@ -162,8 +163,11 @@ def participant_pipeline(
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
     print(epochs)
 
-    # Read behavioral log file
-    epochs.metadata = read_log(log_file, skip_log_rows, skip_log_conditions)
+    # Read behavioral log file and match to the epochs
+    log = read_log(log_file, skip_log_rows, skip_log_conditions)
+    if triggers_column is not None:
+        log = match_log_to_epochs(epochs, log, triggers_column)
+    epochs.metadata = log
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # Get indices of bad epochs

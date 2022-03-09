@@ -216,6 +216,18 @@ Can also be `None`, in which case *all* the triggers present in the experiment a
 | `[201, 202]`    | `c(201, 202)` |
 | `None`          | `NULL`        |
 
+### **`triggers_column` (optional, default: `None`)**
+
+A column to automatically match the log file rows to the EEG epochs.
+This is useful to detect and exclude any trials that are present in the log file but not in the EEG data, e.g., because the recording was paused accidently.
+The column must contain the same numeric values as the relevant `triggers` in the EEG.
+If you don't already have such a column in your log files, you can add it (e.g., in R) based on your conditions, and pass the resulting data frames via `log_files` (see above) into the pipeline.
+
+| Python examples | R examples  |
+| --------------- | ----------- |
+| `None`          | `NULL`      |
+| `'trigger'`     | `"trigger"` |
+
 ### **`epochs_tmin` (optional, default: `-0.5`)**
 
 Start of the epoch relative to stimulus onset (in s).
