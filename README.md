@@ -37,11 +37,9 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 
 ## 2. Usage
 
-[**Pipeline inputs**](docs/inputs.md)
+[Pipeline inputs](docs/inputs.md) & [outputs](docs/outputs.md)
 
-[**Pipeline outputs**](docs/outputs.md)
-
-<img src="https://i.imgur.com/c4U3wxe.png" width="500">
+<img src="https://i.imgur.com/WSj9t4b.png" width="400">
 
 ## 3. Examples
 
