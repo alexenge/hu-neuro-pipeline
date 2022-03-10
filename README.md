@@ -41,11 +41,13 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
 
 [**Pipeline outputs**](docs/outputs.md)
 
+![](https://i.imgur.com/c4U3wxe.png | width=500)
+
 ## 3. Examples
 
 ### 3.1 For Python users
 
-This is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., `'related'` vs. `'unrelated'`) and emotional `context` (e.g., `'negative'` vs. `'neutral'`).
+Here is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., related versus unrelated words) and emotional `context` (e.g., emotionally negative versus neutral).
 
 ```python
 from pipeline import group_pipeline
@@ -65,15 +67,21 @@ trials, evokeds = group_pipeline(
     average_by=['semantics', 'context', 'semantics/context'])
 ```
 
-We need to specify the paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction (though we could also choose an ICA method like `'fastica'`).
-Four different EEG `triggers` correspond to each of the four different cells in the 2 × 2 design.
-The log files might contain additional trials from a `'filler'` condition which we want to skip because they don't have corresponding EEG triggers.
-We want to compute mean ERP amplitudes for pre-specified time windows and regions of interest corresponding to the N400 and P600 `components`.
-In addition, we want to obtain by-participant averages for each condition (for the main effects) and for each combination of conditions (for the interaction effect), as specified with `average_by`.
+In this example we have specified:
+
+* The paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction
+
+* Four different EEG `triggers` corresponding to each of the four cells in the 2 × 2 design
+
+* The fact that log files contain additional trials from a semantic `'filler'` condition (which we want to skip because they don't have corresponding EEG triggers)
+
+* The *a priori* defined time windows and regions of interest for the N400 and P600 `components`
+
+* The log file columns (`average_by`) for which we want to obtain by-participant averaged waveforms (i.e., for all main and interaction effects)
 
 ### 3.2 For R users
 
-Here's the same example as above but for using the pipeline from R:
+Here is the same example as above but for using the pipeline from R:
 
 ```R
 # Import Python module
