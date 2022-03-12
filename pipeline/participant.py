@@ -11,7 +11,7 @@ from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
 from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
                  save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
-                            correct_ica)
+                            correct_ica, interpolate_bad_channels)
 from .report import create_report
 from .tfr import compute_single_trials_tfr, subtract_evoked_cols
 
@@ -21,6 +21,7 @@ def participant_pipeline(
     log_file,
     ocular_correction='fastica',
     bad_channels=None,
+    auto_bad_channels=None,
     skip_log_rows=None,
     skip_log_conditions=None,
     downsample_sfreq=None,
@@ -116,16 +117,9 @@ def participant_pipeline(
     # Apply custom or standard montage
     apply_montage(raw, montage)
 
-    # Interpolate any bad channels
-    if bad_channels is not None and bad_channels != 'auto':
-        if isinstance(bad_channels, str):
-            bad_channels = [bad_channels]
-        raw.info['bads'] = raw.info['bads'] + bad_channels
-        _ = raw.interpolate_bads()
-
-        # Make sure bad channels are also marked in the report
-        if report_dir is not None:
-            dirty.info['bads'] = dirty.info['bads'] + bad_channels
+    # Handle any bad channels
+    raw, interpolated_channels = interpolate_bad_channels(
+        raw, bad_channels, auto_bad_channels)
 
     # Re-reference to common average
     _ = raw.set_eeg_reference('average')
@@ -152,11 +146,11 @@ def participant_pipeline(
                     preload=True)
 
     # Automatically detect bad channels and interpolate if necessary
-    if bad_channels == 'auto':
-        bad_channels = get_bad_channels(epochs)
-        if bad_channels != []:
-            print('Restarting with interpolation of bad channels')
-            config['bad_channels'] = bad_channels
+    if bad_channels == 'auto' and auto_bad_channels is None:
+        auto_bad_channels = get_bad_channels(epochs)
+        if auto_bad_channels != []:
+            print('Restarting with interpolation of bad channels\n')
+            config['auto_bad_channels'] = auto_bad_channels
             return participant_pipeline(**config)
 
     # Drop the last sample to produce a nice even number
@@ -198,6 +192,7 @@ def participant_pipeline(
 
     # Create and save HTML report
     if report_dir is not None:
+        dirty.info['bads'] = interpolated_channels
         report = create_report(participant_id, dirty, ica, filt, events,
                                event_id, epochs, evokeds)
         save_report(report, report_dir, participant_id)
