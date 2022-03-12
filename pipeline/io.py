@@ -164,7 +164,7 @@ def save_config(config, output_dir):
     # Save
     fname = f'{output_dir}/config.json'
     with open(fname, 'w') as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
 
 def save_report(report, output_dir, participant_id):

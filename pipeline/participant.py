@@ -90,8 +90,6 @@ def participant_pipeline(
 
     # Convert some input arguments so that MNE will handle them
     baseline = tuple(baseline)
-    tfr_freqs = list(tfr_freqs)
-    tfr_cycles = list(tfr_cycles)
     tfr_baseline = tuple(tfr_baseline)
 
     # Get participant ID from filename
@@ -166,6 +164,7 @@ def participant_pipeline(
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak, reject_flat)
+    config['rejected_epochs'] = bad_ixs
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
@@ -246,6 +245,6 @@ def participant_pipeline(
             save_evokeds(
                 tfr_evokeds, tfr_evokeds_df, tfr_dir, participant_id, to_df)
 
-        return trials, evokeds, evokeds_df, tfr_evokeds, tfr_evokeds_df
+        return trials, evokeds, evokeds_df, config, tfr_evokeds, tfr_evokeds_df
 
-    return trials, evokeds, evokeds_df
+    return trials, evokeds, evokeds_df, config

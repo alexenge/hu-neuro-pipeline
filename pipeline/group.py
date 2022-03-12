@@ -6,7 +6,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import check_participant_input, save_df, save_evokeds
+from .io import check_participant_input, save_config, save_df, save_evokeds
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
@@ -85,6 +85,13 @@ def group_pipeline(
     [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
     """
 
+    # Convert input types
+    tfr_freqs = list(tfr_freqs)
+    tfr_cycles = list(tfr_cycles)
+
+    # Backup input arguments for re-use
+    config = locals().copy()
+
     # Create partial function with arguments shared across participants
     partial_pipeline = partial(
         participant_pipeline,
@@ -153,7 +160,7 @@ def group_pipeline(
         delayed(partial_pipeline)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    trials, evokeds, evokeds_dfs = list(map(list, zip(*res)))[0:3]
+    trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
 
     # Combine trials and save
     trials = pd.concat(trials, ignore_index=True)
@@ -168,9 +175,19 @@ def group_pipeline(
     grands_df = compute_grands_df(evokeds_df)
     save_evokeds(
         grands, grands_df, output_dir, participant_id='grand', to_df=to_df)
+    
+    # Update config with participant-specific values and save
+    config['vhdr_files'] = vhdr_files
+    config['log_files'] = log_files
+    config['ocular_correction'] = ocular_correction
+    config['bad_channels'] = bad_channels
+    config['skip_log_rows'] = skip_log_rows
+    config['auto_bad_channels'] = [c['auto_bad_channels'] for c in configs]
+    config['rejected_epochs'] = [c['rejected_epochs'] for c in configs]
+    save_config(config, output_dir)
 
     # Define standard returns
-    returns = [trials, evokeds_df]
+    returns = [trials, evokeds_df, config]
 
     # Cluster based permutation tests for ERPs
     if perm_contrasts != []:
@@ -183,7 +200,7 @@ def group_pipeline(
     if perform_tfr:
 
         # Sort outputs into seperate lists
-        tfr_evokeds, tfr_evokeds_dfs = list(map(list, zip(*res)))[3:5]
+        tfr_evokeds, tfr_evokeds_dfs = list(map(list, zip(*res)))[4:6]
 
         # Combine evokeds_df for power and save
         tfr_evokeds_df = pd.concat(tfr_evokeds_dfs, ignore_index=True)
