@@ -74,7 +74,8 @@ It also lists the automatically detected bad channels (if `bad_channels == 'auto
 
 ```r
 > config <- res[[3]]
-> summary(config[["auto_bad_channels"]])     
+> rejected_epochs <- lengths(config[["rejected_epochs"]])
+> summary(rejected_epochs)  
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    0.00    7.25   14.00   14.33   22.75   30.00 
 ```
