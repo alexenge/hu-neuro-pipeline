@@ -81,6 +81,23 @@ def apply_montage(raw, montage):
     raw.set_montage(digmontage)
 
 
+def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):
+    """Interpolates any channels from the two lists."""
+
+    # Combine lists of bad channels
+    all_bad_channels = []
+    if bad_channels is not None and bad_channels != 'auto':
+        all_bad_channels += bad_channels
+    if auto_bad_channels is not None:
+        all_bad_channels += auto_bad_channels
+    
+    # Interpolate bad channels
+    if all_bad_channels != []:
+        raw = raw.interpolate_bads()
+
+    return raw, all_bad_channels
+
+
 def correct_ica(raw, n_components=15, random_seed=1234, method='fastica'):
     """Corrects ocular artifacts using ICA and automatic component removal."""
 

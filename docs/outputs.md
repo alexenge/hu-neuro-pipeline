@@ -67,6 +67,19 @@ This data frame can be used, for instance, to plot the time course of the differ
 +    stat_summary(geom = "line", fun = mean)    
 ```
 
+### **`config` (file: `output_dir/config.json`)**
+
+This file contains a dictionary-like representation of the input options that were used by the pipeline.
+It also lists the automatically detected bad channels (if `bad_channels == 'auto'`) and any rejected epochs (due to `rejected_peak_to_peak` and/or `reject_flat`).
+
+```r
+> config <- res[[3]]
+> rejected_epochs <- lengths(config[["rejected_epochs"]])
+> summary(rejected_epochs)  
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    7.25   14.00   14.33   22.75   30.00 
+```
+
 ## 2. Optional outputs
 
 ### **`clusters` (file: `output_dir/clusters.csv`)**
@@ -77,7 +90,7 @@ These are (a) the (uncorrected) cluster-forming *t* values (`t_obs`), (b) a labe
 Cluster labels differentiate between positive-going clusters (`'pos_'`) and negative-going (`'neg_'`) clusters, and are sorted by their cluster-level *p* value.
 
 ```r
-> clusters <- res[[3]]
+> clusters <- res[[4]]
 > head(clusters)  
              contrast time channel   t_obs cluster p_val
 1 related - unrelated    0     Fp1 -0.2529      NA     1

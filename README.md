@@ -50,7 +50,7 @@ Here is a fairly minimal example for a (fictional) N400/P600 experiment with two
 ```python
 from pipeline import group_pipeline
 
-trials, evokeds = group_pipeline(
+trials, evokeds, config = group_pipeline(
     vhdr_files='Results/EEG/raw',
     log_files='Results/RT',
     output_dir='Results/EEG/export',
@@ -108,4 +108,5 @@ res <- pipeline$group_pipeline(
 # Extract results
 trials <- res[[1]]
 evokeds <- res[[2]]
+config <- res[[3]]
 ```
