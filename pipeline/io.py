@@ -82,7 +82,7 @@ def save_epochs(epochs, output_dir, participant_id='', to_df=True):
     # Convert to DataFrame
     if to_df is True or to_df == 'both':
         scalings = {'eeg': 1e6, 'misc': 1e6}
-        epochs_df = epochs.to_data_frame(scalings=scalings)
+        epochs_df = epochs.to_data_frame(scalings=scalings, time_format=None)
 
         # Add metadata from log file
         metadata_df = epochs.metadata.copy()

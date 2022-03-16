@@ -141,7 +141,8 @@ def create_evokeds_df(evokeds, cols=None, trials=None, participant_id=None):
         if isinstance(evokeds[0], Evoked) else {}
 
     # Convert all evokeds to a single DataFrame
-    evokeds_dfs = [evoked.to_data_frame(**scalings_dict) for evoked in evokeds]
+    evokeds_dfs = [evoked.to_data_frame(**scalings_dict, time_format=None)
+                   for evoked in evokeds]
     evokeds_df = pd.concat(evokeds_dfs, ignore_index=True)
 
     # Optionally add columns from the metadata
