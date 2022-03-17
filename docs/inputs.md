@@ -293,15 +293,6 @@ If the peak-to-peak amplitude of any channel in the time window (defined by `epo
 | `200.`          | `200`      |
 | `None`          | `NULL`     |
 
-### **`reject_flat` (optional, default: `1.`)**
-
-Same as `reject_peak_to_peak` (see above), but excluding epochs for which the peak-to-peak amplitude is *below* (rather than above) the threshold value (a.k.a. epochs with "flat channels").
-
-| Python examples | R examples |
-| --------------- | ---------- |
-| `1.`            | `1`        |
-| `None`          | `NULL`     |
-
 ### **`components` (recommended, default: don't compute any components)**
 
 Time window and region of interest (ROI) for the ERP component(s) of interest.

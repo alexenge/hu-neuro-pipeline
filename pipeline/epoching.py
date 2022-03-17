@@ -103,17 +103,15 @@ def match_log_to_epochs(epochs, log, triggers_column, depth=10):
     return log
 
 
-def get_bad_epochs(epochs, reject_peak_to_peak=None, reject_flat=None):
-    """Detects bad epochs based on peak-to-peak and flat amplitude."""
+def get_bad_epochs(epochs, reject_peak_to_peak=None):
+    """Detects bad epochs based on peak-to-peak amplitude."""
 
     # Convert thresholds to volts
     if reject_peak_to_peak is not None:
         reject_peak_to_peak = {'eeg': reject_peak_to_peak * 1e-6}
-    if reject_flat is not None:
-        reject_flat = {'eeg': reject_flat * 1e-6}
 
     # Reject on a copy of the data
-    epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak, reject_flat)
+    epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak)
 
     # Get indices of bad epochs from the rejection log
     all_ixs = [elem for elem in epochs_rej.drop_log if elem != ('IGNORED',)]
