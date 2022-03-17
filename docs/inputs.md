@@ -368,27 +368,29 @@ The same string must also be present in `average_by`.
 | `'semantics'`         | `"semantics"`         |
 | `'semantics/context'` | `"semantics/context"` |
 
-### **`tfr_freqs` (optional, default: `range(4, 51, 2)`)**
+### **`tfr_freqs` (optional, default: `np.linspace(5, 35, num=16)`)**
 
 The frequencies for the family of [Morlet wavelets](https://neuroimage.usc.edu/brainstorm/Tutorials/TimeFrequency#Morlet_wavelets).
-More frequencies will take longer to compute and need larger amount of disk space.
+More frequency values will increase the sepctral resolution while decreasing the temopral resolution.
+More frequency values will also take longer to compute and need larger amount of disk space.
 Note that the time-frequency representation is computed on the *unfiltered* epochs so that frequencies larger than `lowpass_freq` are possible.
 
 | Python examples                       | R examples                             |
 | ------------------------------------- | -------------------------------------- |
-| `range(4, 51, 2)`                     | `seq(4, 50, 2)`                        |
+| `np.linspace(5, 35, num=16)`          | `seq(5, 35, length.out = 16)`          |
+| `range(4, 41, 2)`                     | `seq(4, 40, by = 2)`                   |
 | `[8, 12, 16, 20, 24, 28, 32, 36, 40]` | `c(8, 12, 16, 20, 24, 28, 32, 36, 40)` |
 
-### **`tfr_cycles` (optional, default: `range(2, 26, 1)`)**
+### **`tfr_cycles` (optional, default: `np.linspace(2.5, 10, num=16)`)**
 
 The number of cycles for the family of [Morlet wavelets](https://neuroimage.usc.edu/brainstorm/Tutorials/TimeFrequency#Morlet_wavelets).
-Should be increasing as the frequency of the wavelets is increasing.
-This is because at higher frequencies, more cycles will fit into the same time window, thus improving spatial resolution.
-A common choice would be the corresponding `tfr_freqs` divided by a factor of two.
+It is recommended to increase the number of cycles with each frequency because this will improve the temporal resolution at higher frequencies.
+Must have the same length as `tfr_freqs`.
 
 | Python examples                     | R examples                           |
 | ----------------------------------- | ------------------------------------ |
-| `range(2, 26, 1)`                   | `seq(2, 25, 1)`                      |
+| `np.linspace(2.5, 10, num=16)`      | `seq(2.5, 10, length.out = 16)`      |
+| `range(2, 21, 1)`                   | `2:20`                               |
 | `[4, 6, 8, 10, 12, 14, 16, 18, 20]` | `c(4, 6, 8, 10, 12, 14, 16, 18, 20)` |
 
 ### **`tfr_baseline` (optional, default: `(-0.3, 0.1)`)**

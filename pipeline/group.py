@@ -2,6 +2,7 @@ from functools import partial
 from glob import glob
 from os import path
 
+import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
@@ -40,8 +41,8 @@ def group_pipeline(
     average_by=None,
     perform_tfr=False,
     tfr_subtract_evoked=False,
-    tfr_freqs=range(4, 51, 2),
-    tfr_cycles=range(2, 26, 1),
+    tfr_freqs=np.linspace(5, 35, num=16),
+    tfr_cycles=np.linspace(2.5, 10, num=16),
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
