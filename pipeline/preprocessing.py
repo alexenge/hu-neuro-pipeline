@@ -90,9 +90,10 @@ def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):
         all_bad_channels += bad_channels
     if auto_bad_channels is not None:
         all_bad_channels += auto_bad_channels
-    
+
     # Interpolate bad channels
     if all_bad_channels != []:
+        raw.info['bads'] += auto_bad_channels
         raw = raw.interpolate_bads()
 
     return raw, all_bad_channels
