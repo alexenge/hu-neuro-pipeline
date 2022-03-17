@@ -36,13 +36,12 @@ def participant_pipeline(
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
     reject_peak_to_peak=200.0,
-    reject_flat=1.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
     tfr_subtract_evoked=False,
-    tfr_freqs=range(4, 51, 2),
-    tfr_cycles=range(2, 26, 1),
+    tfr_freqs=np.linspace(5, 35, num=16),
+    tfr_cycles=np.linspace(2.5, 10, num=16),
     tfr_baseline=(-0.3, -0.1),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
@@ -163,7 +162,7 @@ def participant_pipeline(
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # Get indices of bad epochs
-    bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak, reject_flat)
+    bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
     config['rejected_epochs'] = bad_ixs
 
     # Compute single trial mean ERP amplitudes and add to metadata
