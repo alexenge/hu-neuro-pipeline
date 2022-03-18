@@ -1,6 +1,24 @@
 import numpy as np
 import pandas as pd
-from mne import concatenate_epochs
+from mne import concatenate_epochs, set_log_level
+
+
+def subtract_evoked(epochs, evokeds=None, cols=None):
+    """Subtracts evoked activity (across or by conditions) from epochs."""
+
+    # If no columns were requested, subtract evoked activity across conditions
+    set_log_level('ERROR')
+    if cols is None:
+        print('Subtracting evoked activity')
+        epochs = epochs.subtract_evoked()
+    
+    # Otherwise subtract seperately for all (combinations of) conditions
+    else:
+        print(f'Subtracting evoked activity per condition in \'{cols}\'')
+        epochs = subtract_evoked_cols(epochs, evokeds, cols)
+    set_log_level('INFO')
+    
+    return epochs
 
 
 def subtract_evoked_cols(epochs, evokeds, cols):
