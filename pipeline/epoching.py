@@ -177,14 +177,12 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
         assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 
     # Create virtual channel for the average in the region of interest
-    print(f'Computing single trial ERP amplitudes for {name}')
+    print(f'Computing single trial ERP amplitudes for \'{name}\'')
+    epochs.verbose = 'ERROR'
     roi_dict = {name: pick_channels(epochs.ch_names, roi)}
-    backup_verbose = epochs.verbose
-    epochs.verbose = False
     epochs_roi = combine_channels(epochs, roi_dict)
     epochs.add_channels([epochs_roi], force_update_info=True)
     epochs.set_channel_types({name: 'misc'})
-    epochs.verbose = backup_verbose
 
     # Compute mean amplitudes by averaging across the relevant time window
     epochs_roi.crop(tmin, tmax)
@@ -200,3 +198,4 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     # Add as a new column to the original metadata
     epochs.metadata.reset_index(drop=True, inplace=True)
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
+    epochs.verbose = 'INFO'

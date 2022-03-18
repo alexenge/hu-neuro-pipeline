@@ -1,5 +1,5 @@
 import numpy as np
-from mne import Report
+from mne import Report, set_log_level
 
 
 def create_report(
@@ -7,6 +7,8 @@ def create_report(
     """Creates a HTML report for the processing steps of one participant."""
 
     # Initialize HTML report
+    print('Creating HTML report')
+    set_log_level('ERROR')
     report = Report(title=f'Report for {participant_id}', verbose=False)
 
     # Add raw data info
@@ -43,6 +45,7 @@ def create_report(
 
     # Add evokeds
     report.add_evokeds(evokeds)  # Automatically uses comments as titles
+    set_log_level('INFO')
 
     return report
 

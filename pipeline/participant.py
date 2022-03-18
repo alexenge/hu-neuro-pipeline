@@ -13,7 +13,7 @@ from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
 from .report import create_report
-from .tfr import compute_single_trials_tfr, subtract_evoked_cols
+from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
 def participant_pipeline(
@@ -95,6 +95,7 @@ def participant_pipeline(
     participant_id = path.basename(vhdr_file).split('.')[0]
 
     # Read raw data
+    print(f'\n\n=== PROCESSING PARTICIPANT LEVEL FOR \'{participant_id}\' ===')
     raw = read_raw_brainvision(vhdr_file, preload=True)
 
     # Create backup of the raw data for the HTML report
@@ -146,7 +147,7 @@ def participant_pipeline(
     if bad_channels == 'auto' and auto_bad_channels is None:
         auto_bad_channels = get_bad_channels(epochs)
         if auto_bad_channels != []:
-            print('Restarting with interpolation of bad channels\n')
+            print('Restarting with interpolation of bad channels')
             config['auto_bad_channels'] = auto_bad_channels
             return participant_pipeline(**config)
 
@@ -199,7 +200,6 @@ def participant_pipeline(
     if perform_tfr:
 
         # Epoching again without filtering
-        print('Computing time-frequency representation with Morlet wavelets')
         epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
                                tfr_baseline, preload=True, verbose=False)
 
@@ -212,13 +212,13 @@ def participant_pipeline(
         # Optionally subtract evoked activity
         # See, e.g., https://doi.org/10.1016/j.neuroimage.2006.02.034
         if tfr_subtract_evoked:
-            if tfr_subtract_evoked is True:
-                epochs_unfilt = epochs_unfilt.subtract_evoked()
-            else:
-                epochs_unfilt = subtract_evoked_cols(
-                    epochs_unfilt, evokeds, cols=tfr_subtract_evoked)
+            subtract_cols = None if tfr_subtract_evoked is True \
+                else tfr_subtract_evoked
+            epochs_unfilt = subtract_evoked(
+                epochs, evokeds, cols=subtract_cols)
 
         # Morlet wavelet convolution
+        print('Doing time-frequency transform with Morlet wavelets')
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
                          return_itc=False, average=False)
 

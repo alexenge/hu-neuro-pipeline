@@ -1,29 +1,48 @@
 import numpy as np
 import pandas as pd
-from mne import concatenate_epochs
+from mne import concatenate_epochs, set_log_level
+
+
+def subtract_evoked(epochs, evokeds=None, cols=None):
+    """Subtracts evoked activity (across or by conditions) from epochs."""
+
+    # If no columns were requested, subtract evoked activity across conditions
+    set_log_level('ERROR')
+    if cols is None:
+        print('Subtracting evoked activity')
+        epochs = epochs.subtract_evoked()
+    
+    # Otherwise subtract seperately for all (combinations of) conditions
+    else:
+        print(f'Subtracting evoked activity per condition in \'{cols}\'')
+        epochs = subtract_evoked_cols(epochs, evokeds, cols)
+    set_log_level('INFO')
+    
+    return epochs
 
 
 def subtract_evoked_cols(epochs, evokeds, cols):
+    """Subtracts evoked activity (separately by conditions) from epochs."""
 
-        # Combine relevant columns
-        cols = cols.split('/')
-        cols_df = pd.DataFrame(epochs.metadata[cols])
-        cols_df = cols_df.astype('str')
-        ids = cols_df.agg('/'.join, axis=1).reset_index(drop=True)
+    # Combine relevant columns
+    cols = cols.split('/')
+    cols_df = pd.DataFrame(epochs.metadata[cols])
+    cols_df = cols_df.astype('str')
+    ids = cols_df.agg('/'.join, axis=1).reset_index(drop=True)
 
-        # Loop over epochs
-        epochs_subtracted = []
-        for ix, id in enumerate(ids):
+    # Loop over epochs
+    epochs_subtracted = []
+    for ix, id in enumerate(ids):
 
-            # Subtract the relevant evoked from each epoch
-            evoked_id = [ev for ev in evokeds if ev.comment == id][0]
-            epoch_subtracted = epochs[ix].subtract_evoked(evoked_id)
-            epochs_subtracted.append(epoch_subtracted)
-        
-        # Combine list of subtracted epochs
-        epochs_subtracted = concatenate_epochs(epochs_subtracted)
-        
-        return epochs_subtracted
+        # Subtract the relevant evoked from each epoch
+        evoked_id = [ev for ev in evokeds if ev.comment == id][0]
+        epoch_subtracted = epochs[ix].subtract_evoked(evoked_id)
+        epochs_subtracted.append(epoch_subtracted)
+    
+    # Combine list of subtracted epochs
+    epochs_subtracted = concatenate_epochs(epochs_subtracted)
+    
+    return epochs_subtracted
 
 
 def compute_single_trials_tfr(epochs, components, bad_ixs=None):
@@ -55,6 +74,7 @@ def compute_component_tfr(
         assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 
     # Select region, time window, and frequencies of interest
+    print(f'Computing single trial power amplitudes for \'{name}\'')
     epochs_oi = epochs.copy().pick_channels(roi).crop(tmin, tmax, fmin, fmax)
 
     # Compute mean power per trial
