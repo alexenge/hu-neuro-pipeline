@@ -55,6 +55,7 @@ def compute_component_tfr(
         assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 
     # Select region, time window, and frequencies of interest
+    print(f'Computing single trial power amplitudes for \'{name}\'')
     epochs_oi = epochs.copy().pick_channels(roi).crop(tmin, tmax, fmin, fmax)
 
     # Compute mean power per trial
