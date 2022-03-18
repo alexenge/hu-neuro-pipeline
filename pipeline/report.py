@@ -6,12 +6,9 @@ def create_report(
     participant_id, raw, ica, clean, events, event_id, epochs, evokeds):
     """Creates a HTML report for the processing steps of one participant."""
 
-    # Hide away all the messy messages and warnings from `mne.report`
-    backup_log_level = set_log_level(return_old_level=True)
-    set_log_level('ERROR')
-
     # Initialize HTML report
     print('Creating HTML report')
+    set_log_level('ERROR')
     report = Report(title=f'Report for {participant_id}', verbose=False)
 
     # Add raw data info
@@ -48,9 +45,7 @@ def create_report(
 
     # Add evokeds
     report.add_evokeds(evokeds)  # Automatically uses comments as titles
-
-    # Enable logging again
-    set_log_level(backup_log_level)
+    set_log_level('INFO')
 
     return report
 
