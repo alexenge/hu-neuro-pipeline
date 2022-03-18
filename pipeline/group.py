@@ -159,6 +159,7 @@ def group_pipeline(
         delayed(partial_pipeline)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
+    print(f'\n\n=== PROCESSING GROUP LEVEL ===')
     trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
 
     # Combine trials and save
@@ -174,7 +175,7 @@ def group_pipeline(
     grands_df = compute_grands_df(evokeds_df)
     save_evokeds(
         grands, grands_df, output_dir, participant_id='grand', to_df=to_df)
-    
+
     # Update config with participant-specific values and save
     config['vhdr_files'] = vhdr_files
     config['log_files'] = log_files

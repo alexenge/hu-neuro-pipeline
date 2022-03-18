@@ -175,5 +175,5 @@ def save_report(report, output_dir, participant_id):
 
     # Save
     fname = f'{output_dir}/{participant_id}_report.html'
-    print(f'Saving HTML report to {fname}\n')
+    print(f'Saving HTML report to {fname}')
     _ = report.save(fname, open_browser=False, overwrite=True)

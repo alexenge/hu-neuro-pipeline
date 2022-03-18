@@ -95,6 +95,7 @@ def participant_pipeline(
     participant_id = path.basename(vhdr_file).split('.')[0]
 
     # Read raw data
+    print(f'\n\n=== PROCESSING PARTICIPANT LEVEL FOR \'{participant_id}\' ===')
     raw = read_raw_brainvision(vhdr_file, preload=True)
 
     # Create backup of the raw data for the HTML report
@@ -146,7 +147,7 @@ def participant_pipeline(
     if bad_channels == 'auto' and auto_bad_channels is None:
         auto_bad_channels = get_bad_channels(epochs)
         if auto_bad_channels != []:
-            print('Restarting with interpolation of bad channels\n')
+            print('Restarting with interpolation of bad channels')
             config['auto_bad_channels'] = auto_bad_channels
             return participant_pipeline(**config)
 
@@ -199,7 +200,6 @@ def participant_pipeline(
     if perform_tfr:
 
         # Epoching again without filtering
-        print('Computing time-frequency representation with Morlet wavelets')
         epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
                                tfr_baseline, preload=True, verbose=False)
 
@@ -219,6 +219,7 @@ def participant_pipeline(
                     epochs_unfilt, evokeds, cols=tfr_subtract_evoked)
 
         # Morlet wavelet convolution
+        print('Doing time-frequency transform with Morlet wavelets')
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
                          return_itc=False, average=False)
 
