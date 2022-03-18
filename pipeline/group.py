@@ -178,7 +178,7 @@ def group_pipeline(
 
     # Update config with participant-specific values and save
     config['vhdr_files'] = vhdr_files
-    config['log_files'] = log_files
+    config['log_files'] = [c['log_file'] for c in configs]
     config['ocular_correction'] = ocular_correction
     config['bad_channels'] = bad_channels
     config['skip_log_rows'] = skip_log_rows

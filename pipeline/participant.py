@@ -162,6 +162,9 @@ def participant_pipeline(
     epochs.metadata = log
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
+    # Convert log DataFrame to dict so it be stored in the config
+    config['log_file'] = log.to_dict(orient='list')
+
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
     config['rejected_epochs'] = bad_ixs
