@@ -1,3 +1,5 @@
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 from mne import Report, set_log_level
 
@@ -5,6 +7,10 @@ from mne import Report, set_log_level
 def create_report(
     participant_id, raw, ica, clean, events, event_id, epochs, evokeds):
     """Creates a HTML report for the processing steps of one participant."""
+
+    # Disable warnings about number of open figures
+    mpl.rcParams.update({'figure.max_open_warning': 0})
+    plt.ioff()
 
     # Initialize HTML report
     print('Creating HTML report')

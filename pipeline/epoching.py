@@ -1,7 +1,7 @@
 import chardet
 import numpy as np
 import pandas as pd
-from mne import combine_evoked, pick_channels
+from mne import combine_evoked, pick_channels, set_log_level
 from mne.channels import combine_channels
 from scipy.stats import zscore
 
@@ -178,7 +178,7 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
 
     # Create virtual channel for the average in the region of interest
     print(f'Computing single trial ERP amplitudes for \'{name}\'')
-    epochs.verbose = 'ERROR'
+    set_log_level('ERROR')
     roi_dict = {name: pick_channels(epochs.ch_names, roi)}
     epochs_roi = combine_channels(epochs, roi_dict)
     epochs.add_channels([epochs_roi], force_update_info=True)
@@ -198,4 +198,4 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     # Add as a new column to the original metadata
     epochs.metadata.reset_index(drop=True, inplace=True)
     epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
-    epochs.verbose = 'INFO'
+    set_log_level('INFO')
