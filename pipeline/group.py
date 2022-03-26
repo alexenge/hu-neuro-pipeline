@@ -134,8 +134,8 @@ def group_pipeline(
         log_files.sort()
 
     # Prepare ocular correction method
+    ica_methods = ['fastica', 'infomax', 'picard']
     if not isinstance(ocular_correction, list):
-        ica_methods = ['fastica', 'infomax', 'picard']
         if ocular_correction is None or ocular_correction in ica_methods:
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
@@ -191,6 +191,9 @@ def group_pipeline(
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})
+        if pconfig['ocular_correction'] in ica_methods:
+            config.setdefault('excl_ica_components', {}).update(
+                {pid: pconfig['excl_ica_components']})
 
     # Save config
     save_config(config, output_dir)

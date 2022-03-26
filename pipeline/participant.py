@@ -152,6 +152,11 @@ def participant_pipeline(
             print('Restarting with interpolation of bad channels')
             return participant_pipeline(**config)
 
+    # Add rejected ICA components to config
+    if ica is not None:
+        excl_ica_components = [int(x) for x in ica.exclude]
+        config['excl_ica_components'] = excl_ica_components
+
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
     print(epochs)
