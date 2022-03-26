@@ -4,6 +4,7 @@ import numpy as np
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
+import pandas as pd
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
@@ -162,8 +163,9 @@ def participant_pipeline(
     epochs.metadata = log
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
-    # Convert log DataFrame to dict so it be stored in the config
-    config['log_file'] = log.to_dict(orient='list')
+    # If log file was provided as a DataFrame, convert to dict for config
+    if isinstance(config['log_file'], pd.DataFrame):
+        config['log_file'] = config['log_file'].to_dict(orient='list')
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
