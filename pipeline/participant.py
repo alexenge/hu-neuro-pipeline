@@ -146,10 +146,10 @@ def participant_pipeline(
 
     # Automatically detect bad channels and interpolate if necessary
     if bad_channels == 'auto' and auto_bad_channels is None:
+        config['auto_bad_channels'] = auto_bad_channels
         auto_bad_channels = get_bad_channels(epochs)
         if auto_bad_channels != []:
             print('Restarting with interpolation of bad channels')
-            config['auto_bad_channels'] = auto_bad_channels
             return participant_pipeline(**config)
 
     # Drop the last sample to produce a nice even number

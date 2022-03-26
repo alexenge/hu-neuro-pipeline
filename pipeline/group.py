@@ -184,12 +184,13 @@ def group_pipeline(
 
     # ... and outputs that might have been created along the way
     config['log_files'] = []
-    config['auto_bad_channels'] = {}
     config['rejected_epochs'] = {}
     for pid, pconfig in zip(participant_ids, configs):
         config['log_files'].append(pconfig['log_file'])
-        config['auto_bad_channels'][pid] = pconfig['auto_bad_channels']
         config['rejected_epochs'][pid] = pconfig['rejected_epochs']
+        if pconfig['bad_channels'] == 'auto':
+            config.setdefault('auto_bad_channels', {}).update(
+                {pid: pconfig['auto_bad_channels']})
 
     # Save config
     save_config(config, output_dir)
