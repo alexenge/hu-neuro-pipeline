@@ -70,7 +70,7 @@ This data frame can be used, for instance, to plot the time course of the differ
 ### **`config` (file: `output_dir/config.json`)**
 
 This file contains a dictionary-like representation of the input options that were used by the pipeline.
-It also lists the automatically detected bad channels (if `bad_channels == 'auto'`) and any rejected epochs (due to `rejected_peak_to_peak`).
+It also lists rejected epochs per participant as well as automatically detected bad channels and ICA components (if applicable).
 
 ```r
 > config <- res[[3]]
