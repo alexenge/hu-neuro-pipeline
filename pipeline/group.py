@@ -134,8 +134,8 @@ def group_pipeline(
         log_files.sort()
 
     # Prepare ocular correction method
+    ica_methods = ['fastica', 'infomax', 'picard']
     if not isinstance(ocular_correction, list):
-        ica_methods = ['fastica', 'infomax', 'picard']
         if ocular_correction is None or ocular_correction in ica_methods:
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
@@ -176,14 +176,26 @@ def group_pipeline(
     save_evokeds(
         grands, grands_df, output_dir, participant_id='grand', to_df=to_df)
 
-    # Update config with participant-specific values and save
+    # Update config with participant-specific inputs...
     config['vhdr_files'] = vhdr_files
-    config['log_files'] = [c['log_file'] for c in configs]
     config['ocular_correction'] = ocular_correction
     config['bad_channels'] = bad_channels
     config['skip_log_rows'] = skip_log_rows
-    config['auto_bad_channels'] = [c['auto_bad_channels'] for c in configs]
-    config['rejected_epochs'] = [c['rejected_epochs'] for c in configs]
+
+    # ... and outputs that might have been created along the way
+    config['log_files'] = []
+    config['rejected_epochs'] = {}
+    for pid, pconfig in zip(participant_ids, configs):
+        config['log_files'].append(pconfig['log_file'])
+        config['rejected_epochs'][pid] = pconfig['rejected_epochs']
+        if pconfig['bad_channels'] == 'auto':
+            config.setdefault('auto_bad_channels', {}).update(
+                {pid: pconfig['auto_bad_channels']})
+        if pconfig['ocular_correction'] in ica_methods:
+            config.setdefault('excl_ica_components', {}).update(
+                {pid: pconfig['excl_ica_components']})
+
+    # Save config
     save_config(config, output_dir)
 
     # Define standard returns

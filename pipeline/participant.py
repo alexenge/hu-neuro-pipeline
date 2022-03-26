@@ -4,6 +4,7 @@ import numpy as np
 from mne import Epochs, events_from_annotations
 from mne.io import read_raw_brainvision
 from mne.time_frequency import tfr_morlet
+import pandas as pd
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
@@ -146,10 +147,15 @@ def participant_pipeline(
     # Automatically detect bad channels and interpolate if necessary
     if bad_channels == 'auto' and auto_bad_channels is None:
         auto_bad_channels = get_bad_channels(epochs)
+        config['auto_bad_channels'] = auto_bad_channels
         if auto_bad_channels != []:
             print('Restarting with interpolation of bad channels')
-            config['auto_bad_channels'] = auto_bad_channels
             return participant_pipeline(**config)
+
+    # Add rejected ICA components to config
+    if ica is not None:
+        excl_ica_components = [int(x) for x in ica.exclude]
+        config['excl_ica_components'] = excl_ica_components
 
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
@@ -162,8 +168,9 @@ def participant_pipeline(
     epochs.metadata = log
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
-    # Convert log DataFrame to dict so it be stored in the config
-    config['log_file'] = log.to_dict(orient='list')
+    # If log file was provided as a DataFrame, convert to dict for config
+    if isinstance(config['log_file'], pd.DataFrame):
+        config['log_file'] = config['log_file'].to_dict(orient='list')
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
