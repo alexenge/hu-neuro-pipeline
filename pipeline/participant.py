@@ -146,8 +146,8 @@ def participant_pipeline(
 
     # Automatically detect bad channels and interpolate if necessary
     if bad_channels == 'auto' and auto_bad_channels is None:
-        config['auto_bad_channels'] = auto_bad_channels
         auto_bad_channels = get_bad_channels(epochs)
+        config['auto_bad_channels'] = auto_bad_channels
         if auto_bad_channels != []:
             print('Restarting with interpolation of bad channels')
             return participant_pipeline(**config)
