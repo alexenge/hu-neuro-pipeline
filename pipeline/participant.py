@@ -35,7 +35,8 @@ def participant_pipeline(
     triggers_column=None,
     epochs_tmin=-0.5,
     epochs_tmax=1.5,
-    baseline=(-0.2, 0.0),
+    baseline_tmin=-0.2,
+    baseline_tmax=0.0,
     reject_peak_to_peak=200.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
@@ -43,7 +44,8 @@ def participant_pipeline(
     tfr_subtract_evoked=False,
     tfr_freqs=np.linspace(5, 35, num=16),
     tfr_cycles=np.linspace(2.5, 10, num=16),
-    tfr_baseline=(-0.3, -0.1),
+    tfr_baseline_tmin=-0.3,
+    tfr_baseline_tmax=-0.1,
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
@@ -87,10 +89,6 @@ def participant_pipeline(
 
     # Backup input arguments for re-use
     config = locals()
-
-    # Convert some input arguments so that MNE will handle them
-    baseline = tuple(baseline)
-    tfr_baseline = tuple(tfr_baseline)
 
     # Get participant ID from filename
     participant_id = path.basename(vhdr_file).split('.')[0]
@@ -141,6 +139,7 @@ def participant_pipeline(
         event_id = triggers_to_event_id(triggers)
 
     # Epoching including baseline correction
+    baseline = (baseline_tmin, baseline_tmax)
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
                     preload=True)
 
@@ -210,6 +209,7 @@ def participant_pipeline(
     if perform_tfr:
 
         # Epoching again without filtering
+        tfr_baseline = (tfr_baseline_tmin, tfr_baseline_tmax)
         epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
                                tfr_baseline, preload=True, verbose=False)
 

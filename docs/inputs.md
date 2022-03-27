@@ -244,16 +244,25 @@ End of the epoch relative to stimulus onset (in s).
 | --------------- | ---------- |
 | `1.5`           | `1.5`      |
 
-### **`baseline` (optional, default: `(-0.2, 0.0)`)**
+### **`baseline_tmin` (optional, default: `-0.2`)**
 
-Time period (in s relative to stimulus onset) for baseline correction.
-For each epoch and channel, the average voltage during this interval is being subtracted from all time points in the epoch, so as to correct for shifts in voltage level that had occured before stimulus onset.
-Setting the first or the second value to `None` will use the start or the end of epoch, respectively.
+Start of the baseline period relative to stimulus onset (in s).
+For each epoch and channel, the average voltage during the baseline interval is being subtracted from all time points in the epoch, so as to correct for shifts in voltage level that had occured before stimulus onset.
+Setting this option to `None` will use the start of the epoch.
 
-| Python examples | R examples     |
-| --------------- | -------------- |
-| `(-0.2, 0.0)`   | `c(-0.2, 0.0)` |
-| `(None, 0.0)`   | `c(NULL, 0.0)` |
+| Python examples | R examples |
+| --------------- | ---------- |
+| `-0.2`          | `-0.2`     |
+| `None`          | `NULL`     |
+
+### **`baseline_tmax` (optional, default: `0.0`)**
+
+End of the baseline period relative to stimulus onset (in s).
+Setting this option to `None` would use the end of the epoch, which does not make much sense.
+
+| Python examples | R examples |
+| --------------- | ---------- |
+| `0.0`           | `0.0`      |
 
 ### **`skip_log_rows` (optional, default: `None`)**
 
@@ -384,16 +393,24 @@ Must have the same length as `tfr_freqs`.
 | `range(2, 21, 1)`                   | `2:20`                               |
 | `[4, 6, 8, 10, 12, 14, 16, 18, 20]` | `c(4, 6, 8, 10, 12, 14, 16, 18, 20)` |
 
-### **`tfr_baseline` (optional, default: `(-0.3, 0.1)`)**
+### **`tfr_baseline_tmin` (optional, default: `-0.3`)**
 
-Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
-Unlike the `baseline` for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical *1/f* scaling of EEG frequencies.
-Furthermore, the baseline window should end *before* stimulus onset so that post-stimulus power at low frequencies doesn't get contaminated by pre-stimulus fluctuations.
+Start of the baseline period relative to stimulus onset (in s) for the time-frequency data.
+Unlike for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical *1/f* scaling of EEG frequencies.
 
-| Python examples | R examples      |
-| --------------- | --------------- |
-| `(-0.3, -0.1)`  | `c(-0.3, -0.1)` |
-| `(None, -0.1)`  | `c(NULL, -0.1)` |
+| Python examples | R examples |
+| --------------- | ---------- |
+| `-0.3`          | `-0.3`     |
+| `None`          | `NULL`     |
+
+### **`tfr_baseline_tmax` (optional, default: `-0.1`)**
+
+End of the baseline period relative to stimulus onset (in s).
+The baseline window should end *before* stimulus onset so that baseline power at low frequencies does not get contaminated by post-stimulus activity.
+
+| Python examples | R examples |
+| --------------- | ---------- |
+| `-0.1`          | `-0.1`     |
 
 ### **`tfr_components` (optional, default: no TFR components)**
 
