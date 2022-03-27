@@ -25,7 +25,7 @@ def group_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     bad_channels=None,
-    ocular_correction='fastica',
+    ocular_correction='auto',
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
@@ -138,9 +138,8 @@ def group_pipeline(
         log_files.sort()
 
     # Prepare ocular correction method
-    ica_methods = ['fastica', 'infomax', 'picard']
     if not isinstance(ocular_correction, list):
-        if ocular_correction is None or ocular_correction in ica_methods:
+        if ocular_correction is None or ocular_correction == 'auto':
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
             ocular_correction = glob(f'{ocular_correction}/*.matrix')
@@ -195,9 +194,9 @@ def group_pipeline(
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})
-        if pconfig['ocular_correction'] in ica_methods:
-            config.setdefault('excl_ica_components', {}).update(
-                {pid: pconfig['excl_ica_components']})
+        if pconfig['ocular_correction'] == 'auto':
+            config.setdefault('auto_bad_icas', {}).update(
+                {pid: pconfig['auto_bad_icas']})
 
     # Save config
     save_config(config, output_dir)

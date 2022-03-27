@@ -20,7 +20,7 @@ from .tfr import compute_single_trials_tfr, subtract_evoked
 def participant_pipeline(
     vhdr_file,
     log_file,
-    ocular_correction='fastica',
+    ocular_correction='auto',
     bad_channels=None,
     auto_bad_channels=None,
     skip_log_rows=None,
@@ -123,11 +123,11 @@ def participant_pipeline(
 
     # Do ocular correction
     if ocular_correction is not None:
-        if path.isfile(ocular_correction):
+        if ocular_correction == 'auto':
+            raw, ica = correct_ica(raw)
+        else:
             raw = correct_besa(raw, besa_file=ocular_correction)
             ica = None
-        else:
-            raw, ica = correct_ica(raw, method=ocular_correction)
 
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
@@ -151,10 +151,10 @@ def participant_pipeline(
             print('Restarting with interpolation of bad channels')
             return participant_pipeline(**config)
 
-    # Add rejected ICA components to config
+    # Add bad ICA components to config
     if ica is not None:
         excl_ica_components = [int(x) for x in ica.exclude]
-        config['excl_ica_components'] = excl_ica_components
+        config['auto_bad_icas'] = excl_ica_components
 
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)

@@ -169,15 +169,16 @@ Finally, there is an (experimental) `'auto'` option that automatically interpola
 | `{'Vp05': ['Cz', 'F10'], ...}`      | `list("Vp05" = c("Cz", "F10"), ...)`       |
 | `'auto'`                            | `"auto"`                                   |
 
-### **`ocular_correction` (optional, default: `'fastica'`)**
+### **`ocular_correction` (optional, default: `'auto'`)**
 
-Method for performing the correction of eye movement artifacts.
-Can be either the name of an algorithm for Independent Component Analysis (`'fastica'`, `'infomax'`, or `'picard'`) or a list (or parent directory) of BESA matrix files for Multiple Source Eye Correction (MSEC).
+Method for correcting for eye movement artifacts.
+If `'auto'`, perform fully automatic ocular artifact correction that (a) performs an ICA decomposition (FastICA) on the low-pass filtered data and (b) removes ICA components that correlate substantially with VEOG and/or HEOG.
+Otherweise, must be a list (or parent directory) of BESA matrix files for Multiple Source Eye Correction (MSEC).
 Can also be `None` for skipping ocular correction altogether.
 
 | Python examples                         | R examples                               |
 | --------------------------------------- | ---------------------------------------- |
-| `'fastica'`                             | `"fastica"`                              |
+| `'auto'`                                | `"auto"`                                 |
 | `['Results/EEG/cali/Vp01.matrix', ...]` | `c("Results/EEG/cali/Vp01.matrix", ...)` |
 | `'Results/EEG/cali'`                    | `"Results/EEG/cali"`                     |
 | `None`                                  | `NULL`                                   |
