@@ -25,14 +25,15 @@ def group_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     bad_channels=None,
-    ocular_correction='fastica',
+    ocular_correction='auto',
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
     triggers_column=None,
     epochs_tmin=-0.5,
     epochs_tmax=1.5,
-    baseline=(-0.2, 0.0),
+    baseline_tmin=-0.2,
+    baseline_tmax=0.0,
     skip_log_rows=None,
     skip_log_conditions=None,
     reject_peak_to_peak=200.,
@@ -42,7 +43,8 @@ def group_pipeline(
     tfr_subtract_evoked=False,
     tfr_freqs=np.linspace(5, 35, num=16),
     tfr_cycles=np.linspace(2.5, 10, num=16),
-    tfr_baseline=(-0.3, -0.1),
+    tfr_baseline_tmin=-0.3,
+    tfr_baseline_tmax=-0.1,
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     perm_contrasts=[],
@@ -106,7 +108,8 @@ def group_pipeline(
         triggers_column=triggers_column,
         epochs_tmin=epochs_tmin,
         epochs_tmax=epochs_tmax,
-        baseline=baseline,
+        baseline_tmin=baseline_tmin,
+        baseline_tmax=baseline_tmax,
         reject_peak_to_peak=reject_peak_to_peak,
         components=components,
         average_by=average_by,
@@ -114,7 +117,8 @@ def group_pipeline(
         tfr_subtract_evoked=tfr_subtract_evoked,
         tfr_freqs=tfr_freqs,
         tfr_cycles=tfr_cycles,
-        tfr_baseline=tfr_baseline,
+        tfr_baseline_tmin=tfr_baseline_tmin,
+        tfr_baseline_tmax=tfr_baseline_tmax,
         tfr_components=tfr_components,
         clean_dir=clean_dir,
         epochs_dir=epochs_dir,
@@ -134,9 +138,8 @@ def group_pipeline(
         log_files.sort()
 
     # Prepare ocular correction method
-    ica_methods = ['fastica', 'infomax', 'picard']
     if not isinstance(ocular_correction, list):
-        if ocular_correction is None or ocular_correction in ica_methods:
+        if ocular_correction is None or ocular_correction == 'auto':
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
             ocular_correction = glob(f'{ocular_correction}/*.matrix')
@@ -191,9 +194,9 @@ def group_pipeline(
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})
-        if pconfig['ocular_correction'] in ica_methods:
-            config.setdefault('excl_ica_components', {}).update(
-                {pid: pconfig['excl_ica_components']})
+        if pconfig['ocular_correction'] == 'auto':
+            config.setdefault('auto_bad_icas', {}).update(
+                {pid: pconfig['auto_bad_icas']})
 
     # Save config
     save_config(config, output_dir)
