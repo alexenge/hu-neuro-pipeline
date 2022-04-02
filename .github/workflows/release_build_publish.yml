@@ -1,6 +1,9 @@
 name: Release, build, publish
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   release:
@@ -17,9 +20,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag_name: ${{ github.ref }}
-          prerelease: false
-          name: ${{ github.ref }}
           generate_release_notes: true
 
   build:
