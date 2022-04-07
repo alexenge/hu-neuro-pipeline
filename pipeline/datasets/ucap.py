@@ -54,7 +54,8 @@ def get_paths(n_participants=40):
 
     # Get raw EEG files - note that there are 3 files per participant
     eeg_fetcher = construct_fetcher('59cf07fa6c613b02958f3364/', 'raw/')
-    eeg_paths = list(eeg_fetcher.registry.keys())[:n_participants * 3]
+    n_files = int(n_participants) * 3
+    eeg_paths = list(eeg_fetcher.registry.keys())[:n_files]
     eeg_paths = [eeg_fetcher.fetch(path) for path in eeg_paths]
     vhdr_paths = [path for path in eeg_paths if path.endswith('.vhdr')]
     paths['vhdr_files'] = vhdr_paths
