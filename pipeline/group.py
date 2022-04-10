@@ -7,7 +7,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import check_participant_input, save_config, save_df, save_evokeds
+from .io import (convert_participant_input, files_from_dir, save_config,
+                 save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
@@ -128,29 +129,24 @@ def group_pipeline(
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
-        assert path.isdir(vhdr_files), 'Path of `vhdr_files` doesn\'t exist!'
-        vhdr_files = glob(f'{vhdr_files}/*.vhdr')
-        vhdr_files.sort()
+        vhdr_files = files_from_dir(vhdr_files, extensions=['vhdr'])
     if isinstance(log_files, str):
-        assert path.isdir(log_files), 'Path of `log_files` doesn\'t exist!'
-        log_files = glob(f'{log_files}/*.csv') + \
-            glob(f'{log_files}/*.txt') + glob(f'{log_files}/*.tsv')
-        log_files.sort()
+        log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
 
     # Prepare ocular correction method
     if not isinstance(ocular_correction, list):
         if ocular_correction is None or ocular_correction == 'auto':
             ocular_correction = [ocular_correction] * len(vhdr_files)
         elif path.isdir(ocular_correction):
-            ocular_correction = glob(f'{ocular_correction}/*.matrix')
-            ocular_correction.sort()
+            ocular_correction = files_from_dir(
+                ocular_correction, extensions=['matrix'])
 
     # Extract participant IDs from filenames
     participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
 
     # Construct lists of bad_channels and skip_log_rows per participant
-    bad_channels = check_participant_input(bad_channels, participant_ids)
-    skip_log_rows = check_participant_input(skip_log_rows, participant_ids)
+    bad_channels = convert_participant_input(bad_channels, participant_ids)
+    skip_log_rows = convert_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
     participant_args = zip(vhdr_files, log_files, ocular_correction,
