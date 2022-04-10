@@ -158,7 +158,7 @@ def participant_pipeline(
 
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
-    print(epochs)
+    print(epochs.__str__().replace(u"\u2013", "-"))
 
     # Read behavioral log file and match to the epochs
     log = read_log(log_file, skip_log_rows, skip_log_conditions)
