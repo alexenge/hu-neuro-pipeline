@@ -1,10 +1,30 @@
 import json
-from os import makedirs
+import re
+from glob import glob
+from os import makedirs, path
 
 import pandas as pd
 from mne import Evoked, write_evokeds
 from mne.channels.layout import _find_topomap_coords
 from mne.time_frequency import AverageTFR, write_tfrs
+
+
+def files_from_dir(dir_path, extensions, natsort_files=True):
+    """Retrieves files matching pattern(s) from a given parent directory."""
+
+    # Find all files with one of the right extensions
+    assert path.isdir(dir_path), f'Didn\'t find directory `{dir_path}`!'
+    files = []
+    for extension in extensions:
+        files += glob(f'{dir_path}/*.{extension}')
+
+    # Sort naturally because some files might not have leading zeros
+    if natsort_files:
+        natsort = lambda s: [
+            int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
+        files = sorted(files, key=natsort)
+
+    return files
 
 
 def check_participant_input(input, participant_ids):
