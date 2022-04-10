@@ -27,7 +27,7 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
     return files
 
 
-def check_participant_input(input, participant_ids):
+def convert_participant_input(input, participant_ids):
     """Converts different inputs (e.g., dict) into a per-participant list."""
 
     # If it's a dict, convert to list

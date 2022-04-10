@@ -7,8 +7,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import (check_participant_input, files_from_dir, save_config, save_df,
-                 save_evokeds)
+from .io import (convert_participant_input, files_from_dir, save_config,
+                 save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
@@ -145,8 +145,8 @@ def group_pipeline(
     participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
 
     # Construct lists of bad_channels and skip_log_rows per participant
-    bad_channels = check_participant_input(bad_channels, participant_ids)
-    skip_log_rows = check_participant_input(skip_log_rows, participant_ids)
+    bad_channels = convert_participant_input(bad_channels, participant_ids)
+    skip_log_rows = convert_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
     participant_args = zip(vhdr_files, log_files, ocular_correction,
