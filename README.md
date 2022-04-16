@@ -94,9 +94,9 @@ res <- pipeline$group_pipeline(
     triggers = c(201, 202, 211, 212),
     skip_log_conditions = list("semantics" = "filler"),
     components = list(
-        "name" = c("N400", "P600"),
-        "tmin" = c(0.3, 0.5),
-        "tmax" = c(0.5, 0.9),
+        "name" = list("N400", "P600"),
+        "tmin" = list(0.3, 0.5),
+        "tmax" = list(0.5, 0.9),
         "roi" = list(
             c("C1", "Cz", "C2", "CP1", "CPz", "CP2"),
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
