@@ -1,0 +1,8 @@
+[submodule "workshop"]
+	path = workshop
+	url = https://github.com/alexenge/hu-neuro-pipeline-workshop.git
+	branch = main
+[submodule "ucap_example"]
+	path = ucap_example
+	url = https://github.com/alexenge/hu-neuro-pipeline-ucap.git
+	branch = main
