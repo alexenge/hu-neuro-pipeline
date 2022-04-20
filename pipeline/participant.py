@@ -122,12 +122,11 @@ def participant_pipeline(
     _ = raw.set_eeg_reference('average')
 
     # Do ocular correction
-    if ocular_correction is not None:
-        if ocular_correction == 'auto':
-            raw, ica = correct_ica(raw)
-        else:
-            raw = correct_besa(raw, besa_file=ocular_correction)
-            ica = None
+    ica = None
+    if ocular_correction == 'auto':
+        raw, ica = correct_ica(raw)
+    elif ocular_correction is not None:
+        raw = correct_besa(raw, besa_file=ocular_correction)
 
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
