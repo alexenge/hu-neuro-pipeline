@@ -143,7 +143,7 @@ def save_evokeds(
         # Save evokeds for ERPs
         if isinstance(evokeds[0], Evoked):
             fname = f'{output_dir}/{participant_id_}{suffix}.fif'
-            write_evokeds(fname, evokeds, verbose=False)
+            write_evokeds(fname, evokeds, overwrite=True, verbose=False)
 
         # Save vokeds for TFR
         elif isinstance(evokeds[0], AverageTFR):
