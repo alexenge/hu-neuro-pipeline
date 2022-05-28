@@ -394,24 +394,25 @@ Must have the same length as `tfr_freqs`.
 | `np.arange(2., 20.5, step=0.5)`              | `seq(2, 20, by = 0.5)`               |
 | `[4., 6., 8., 10., 12., 14., 16., 18., 20.]` | `c(4, 6, 8, 10, 12, 14, 16, 18, 20)` |
 
-### **`tfr_baseline_tmin` (optional, default: `-0.3`)**
+### **`tfr_baseline_tmin` (optional, default: `-0.45`)**
 
 Start of the baseline period relative to stimulus onset (in s) for the time-frequency data.
-Unlike for EPRs (see above), the baseline correction for TFR will transform the data into percent signal change as to correct for the typical *1/f* scaling of EEG frequencies.
+Unlike for EPRs, the baseline correction for TFR will transform the data into percent signal change as to correct for the typical $1/f$ scaling of EEG frequencies.
+The baseline window should be long enough to fit at least one full cycle at the lowest frequency of interest (e.g., 250 ms at 4 Hz).
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `-0.3`          | `-0.3`     |
+| `-0.45`         | `-0.45`    |
 | `None`          | `NULL`     |
 
-### **`tfr_baseline_tmax` (optional, default: `-0.1`)**
+### **`tfr_baseline_tmax` (optional, default: `-0.05`)**
 
 End of the baseline period relative to stimulus onset (in s).
-The baseline window should end *before* stimulus onset so that baseline power at low frequencies does not get contaminated by post-stimulus activity.
+The window should end *before* rather than *at* stimulus onset so that baseline power at low frequencies does not get contaminated by post-stimulus activity.
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `-0.1`          | `-0.1`     |
+| `-0.05`         | `-0.05`    |
 
 ### **`tfr_components` (optional, default: no TFR components)**
 

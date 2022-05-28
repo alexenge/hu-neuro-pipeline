@@ -44,8 +44,8 @@ def participant_pipeline(
     tfr_subtract_evoked=False,
     tfr_freqs=np.linspace(4., 40., num=37),
     tfr_cycles=np.linspace(2., 20., num=37),
-    tfr_baseline_tmin=-0.3,
-    tfr_baseline_tmax=-0.1,
+    tfr_baseline_tmin=-0.45,
+    tfr_baseline_tmax=-0.05,
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
@@ -208,9 +208,8 @@ def participant_pipeline(
     if perform_tfr:
 
         # Epoching again without filtering
-        tfr_baseline = (tfr_baseline_tmin, tfr_baseline_tmax)
         epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
-                               tfr_baseline, preload=True, verbose=False)
+                               baseline, preload=True, verbose=False)
 
         # Drop the last sample to produce a nice even number
         _ = epochs_unfilt.crop(epochs_tmin, epochs_tmax, include_tmax=False)
@@ -231,8 +230,13 @@ def participant_pipeline(
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
                          return_itc=False, average=False)
 
-        # Baseline correction
-        tfr.apply_baseline(tfr_baseline, mode='percent')
+        # First, divisive baseline correction using the full epoch
+        # See https://doi.org/10.3389/fpsyg.2011.00236
+        tfr.apply_baseline(baseline=(None, None), mode='percent')
+
+        # Second, additive baseline correction using the prestimulus interval
+        tfr_baseline = (tfr_baseline_tmin, tfr_baseline_tmax)
+        tfr.apply_baseline(baseline=tfr_baseline, mode='mean')
 
         # Reduce numerical precision to reduce object size
         tfr.data = np.float32(tfr.data)
