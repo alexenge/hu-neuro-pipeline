@@ -46,6 +46,7 @@ def participant_pipeline(
     tfr_cycles=np.linspace(2., 20., num=37),
     tfr_baseline_tmin=-0.45,
     tfr_baseline_tmax=-0.05,
+    tfr_baseline_mode='percent',
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
@@ -232,7 +233,11 @@ def participant_pipeline(
 
         # First, divisive baseline correction using the full epoch
         # See https://doi.org/10.3389/fpsyg.2011.00236
-        tfr.apply_baseline(baseline=(None, None), mode='percent')
+        tfr_baseline_modes = \
+            ['ratio', 'logratio', 'percent', 'zscore', 'zlogratio']
+        assert tfr_baseline_mode in tfr_baseline_modes, \
+            f'`tfr_baseline_mode` must be one of {tfr_baseline_modes}'
+        tfr.apply_baseline(baseline=(None, None), mode=tfr_baseline_mode)
 
         # Second, additive baseline correction using the prestimulus interval
         tfr_baseline = (tfr_baseline_tmin, tfr_baseline_tmax)
