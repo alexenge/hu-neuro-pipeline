@@ -224,7 +224,7 @@ def participant_pipeline(
             subtract_cols = None if tfr_subtract_evoked is True \
                 else tfr_subtract_evoked
             epochs_unfilt = subtract_evoked(
-                epochs, evokeds, cols=subtract_cols)
+                epochs_unfilt, evokeds, cols=subtract_cols)
 
         # Morlet wavelet convolution
         print('Doing time-frequency transform with Morlet wavelets')
