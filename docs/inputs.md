@@ -414,6 +414,22 @@ The window should end *before* rather than *at* stimulus onset so that baseline 
 | --------------- | ---------- |
 | `-0.05`         | `-0.05`    |
 
+### **`tfr_baseline_mode` (optional, default: `'percent'`)**
+
+The main baseline correction method applied to the time-frequency data.
+In contrast to the *subtractive* baseline method used for ERPs, this should be a *divisive* method to account for the $1/f$ scaling of EEG frequencies.
+See the [MNE documentation](https://mne.tools/stable/generated/mne.time_frequency.EpochsTFR.html#mne.time_frequency.EpochsTFR.apply_baseline) for information about the possible methods.
+Note that this method will be applied using the entire epoch as the baseline window because it was shown that using the pre-stimulus interval for single trial divisive baseline correction leads to positively biased post-stimulus power ([Grandchamp & Delorme, 2011](https://doi.org/10.3389/fpsyg.2011.00236)).
+After applying this method, a second, *subtractive* baseline will be applied using the pre-stimulus interval only (defined via `tfr_baseline_tmin` and `tfr_baseline_tmax` above).
+
+| Python examples | R examples    |
+| --------------- | ------------- |
+| `'percent'`     | `"percent"`   |
+| `'ratio'`       | `"ratio"`     |
+| `'logratio'`    | `"logratio"`  |
+| `'zscore'`      | `"zscore"`    |
+| `'zlogratio'`   | `"zlogratio"` |
+
 ### **`tfr_components` (optional, default: no TFR components)**
 
 Similar to `components` for ERPs, i.e., the time windows, frequency bands, and channels for the time-frequency bands of interest.

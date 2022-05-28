@@ -46,6 +46,7 @@ def group_pipeline(
     tfr_cycles=np.linspace(2., 20., num=37),
     tfr_baseline_tmin=-0.45,
     tfr_baseline_tmax=-0.05,
+    tfr_baseline_mode='percent',
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     perm_contrasts=[],
@@ -120,6 +121,7 @@ def group_pipeline(
         tfr_cycles=tfr_cycles,
         tfr_baseline_tmin=tfr_baseline_tmin,
         tfr_baseline_tmax=tfr_baseline_tmax,
+        tfr_baseline_mode=tfr_baseline_mode,
         tfr_components=tfr_components,
         clean_dir=clean_dir,
         epochs_dir=epochs_dir,
