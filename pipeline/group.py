@@ -26,7 +26,9 @@ def group_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     bad_channels=None,
-    ocular_correction='auto',
+    besa_files=None,
+    ica_method=None,
+    ica_n_components=15,
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
@@ -104,6 +106,8 @@ def group_pipeline(
         veog_channels=veog_channels,
         heog_channels=heog_channels,
         montage=montage,
+        ica_method=ica_method,
+        ica_n_components=ica_n_components,
         highpass_freq=highpass_freq,
         lowpass_freq=lowpass_freq,
         triggers=triggers,
@@ -135,13 +139,14 @@ def group_pipeline(
     if isinstance(log_files, str):
         log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
 
-    # Prepare ocular correction method
-    if not isinstance(ocular_correction, list):
-        if ocular_correction is None or ocular_correction == 'auto':
-            ocular_correction = [ocular_correction] * len(vhdr_files)
-        elif path.isdir(ocular_correction):
-            ocular_correction = files_from_dir(
-                ocular_correction, extensions=['matrix'])
+    # Get input BESA matrix files if necessary
+    if isinstance(besa_files, str):
+        besa_files = files_from_dir(besa_files, extensions=['matrix'])
+    elif isinstance(besa_files, list):
+        assert len(besa_files) == len(vhdr_files), \
+            '`vhdr_files` and `besa_files` must have the same length'
+    elif besa_files is None:
+        besa_files = [None] * len(vhdr_files)
 
     # Extract participant IDs from filenames
     participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
@@ -151,7 +156,7 @@ def group_pipeline(
     skip_log_rows = convert_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
-    participant_args = zip(vhdr_files, log_files, ocular_correction,
+    participant_args = zip(vhdr_files, log_files, besa_files,
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
@@ -179,8 +184,8 @@ def group_pipeline(
 
     # Update config with participant-specific inputs...
     config['vhdr_files'] = vhdr_files
-    config['ocular_correction'] = ocular_correction
     config['bad_channels'] = bad_channels
+    config['besa_files'] = besa_files
     config['skip_log_rows'] = skip_log_rows
 
     # ... and outputs that might have been created along the way
@@ -192,7 +197,7 @@ def group_pipeline(
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})
-        if pconfig['ocular_correction'] == 'auto':
+        if pconfig['ica_method'] is not None:
             config.setdefault('auto_bad_icas', {}).update(
                 {pid: pconfig['auto_bad_icas']})
 

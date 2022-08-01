@@ -120,7 +120,7 @@ Moderate downsampling (e.g., to 250 Hz) will significantly speed up the processi
 ### **`veog_channels` (optional, default `'auto'`)**
 
 Two EEG or EOG channel labels from which to create a new vertical electrooculography (VEOG) channel.
-This virtual channel will then be used during `ocular_correction` (see below; only relevant for independent component analysis [ICA]).
+This virtual channel will then be used during Independent Component Analysis (ICA; see below).
 Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for VEOG (`['Fp1', 'FP1', 'Auge_u', 'IO1']`).
 If `None`, don't construct a new VEOG channel (which is okay if using BESA and/or if a channel named `VEOG` is already present in the raw data).
 
@@ -133,7 +133,7 @@ If `None`, don't construct a new VEOG channel (which is okay if using BESA and/o
 ### **`heog_channels` (optional, default `'auto'`)**
 
 Two EEG or EOG channel labels from which to create a new horizontal electrooculography (HEOG) channel.
-This virtual channel will then be used during `ocular_correction` (see below; only relevant for independent component analysis [ICA]).
+This virtual channel will then be used during Independent Component Analysis (ICA; see below).
 Can also be `'auto'`, in which case the pipeline will check if it can find two channel labels typically used for HEOG (`['F9', 'F10', 'Afp9', 'Afp10']`).
 If `None`, don't construct a new HEOG channel (which is okay if using BESA and/or if a channel named `HEOG` is already present in the raw data).
 
@@ -169,19 +169,42 @@ Finally, there is an (experimental) `'auto'` option that automatically interpola
 | `{'Vp05': ['Cz', 'F10'], ...}`      | `list("Vp05" = c("Cz", "F10"), ...)`       |
 | `'auto'`                            | `"auto"`                                   |
 
-### **`ocular_correction` (optional, default: `'auto'`)**
+### **`besa_files` (optional, default: `None`)**
 
-Method for correcting for eye movement artifacts.
-If `'auto'`, perform fully automatic ocular artifact correction that (a) performs an ICA decomposition (FastICA) on the low-pass filtered data and (b) removes ICA components that correlate substantially with VEOG and/or HEOG.
-Otherweise, must be a list (or parent directory) of BESA matrix files for Multiple Source Eye Correction (MSEC).
-Can also be `None` for skipping ocular correction altogether.
+Output files from the BESA software for ocular correction using Multiple Source Eye Correction (MSEC).
+Either a list of `.matrix` file paths or a single path pointing to their parent directory.
+If `None`, no ocular correction using MSEC will be performed.
 
 | Python examples                         | R examples                               |
 | --------------------------------------- | ---------------------------------------- |
-| `'auto'`                                | `"auto"`                                 |
+| `None`                                  | `NULL`                                   |
 | `['Results/EEG/cali/Vp01.matrix', ...]` | `c("Results/EEG/cali/Vp01.matrix", ...)` |
 | `'Results/EEG/cali'`                    | `"Results/EEG/cali"`                     |
-| `None`                                  | `NULL`                                   |
+
+### **`ica_method` (optional, default: `None`)**
+
+Method for Indepedent Component Analysis (ICA) to correct for eye movement artifacts.
+For valid methods, see [`mne.preprocessing.ICA`](https://mne.tools/stable/generated/mne.preprocessing.ICA.html).
+If set, an ICA decomposition will be performed on the low-pass filtered data and any ICA components that correlate substantially with VEOG and/or HEOG will be removed in a fully automatic fashion.
+If `None`, no ocular correction using ICA will be performed.
+
+| Python examples | R examples  |
+| --------------- | ----------- |
+| `None`          | `NULL`      |
+| `'fastica'`     | `"fastica"` |
+| `'infomax'`     | `"infomax"` |
+| `'picard'`      | `"picard"`  |
+
+### **`ica_n_components` (optional, default: `15`)**
+
+Number of principal components (from the pre-whitening PCA step) that are passed to the ICA algorithm during fitting.
+Can either be an integer (greater than `1`) that specifies the number of components, or a floating point number (between `0.0` and `1.0`, exclusive) that specifies the desired amount of variance explained (potentially leading to a different number of extracted components for each participant).
+This option is only used if `ica_method` is not `None`.
+
+| Python examples | R examples |
+| --------------- | ---------- |
+| `15`            | `15`       |
+| `0.99`          | `0.99`     |
 
 ### **`highpass_freq` (optional, default: `0.1`)**
 
