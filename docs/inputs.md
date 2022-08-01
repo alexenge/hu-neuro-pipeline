@@ -195,7 +195,7 @@ If `None`, no ocular correction using ICA will be performed.
 | `'infomax'`     | `"infomax"` |
 | `'picard'`      | `"picard"`  |
 
-### **`ica_n_components` (optional, default: `15`)**
+### **`ica_n_components` (optional, default: `.99`)**
 
 Number of principal components (from the pre-whitening PCA step) that are passed to the ICA algorithm during fitting.
 Can either be an integer (greater than `1`) that specifies the number of components, or a floating point number (between `0.0` and `1.0`, exclusive) that specifies the desired amount of variance explained (potentially leading to a different number of extracted components for each participant).
@@ -203,8 +203,8 @@ This option is only used if `ica_method` is not `None`.
 
 | Python examples | R examples |
 | --------------- | ---------- |
+| `.99`           | `.99`      |
 | `15`            | `15`       |
-| `0.99`          | `0.99`     |
 
 ### **`highpass_freq` (optional, default: `0.1`)**
 

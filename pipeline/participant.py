@@ -30,7 +30,7 @@ def participant_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     ica_method=None,
-    ica_n_components=15,
+    ica_n_components=.99,
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
