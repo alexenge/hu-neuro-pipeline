@@ -74,6 +74,6 @@ def get_paths(n_participants=40):
     cali_fetcher = construct_fetcher('59cf089e6c613b02968f5724/', 'cali/')
     cali_paths = [f'cali/{p_id}_cali.matrix' for p_id in participant_ids]
     cali_paths = [cali_fetcher.fetch(path) for path in cali_paths]
-    paths['ocular_correction'] = cali_paths
+    paths['besa_files'] = cali_paths
 
     return paths

@@ -101,7 +101,7 @@ def boilerplate(config):
     )
 
     # Ocular correction
-    if config['ocular_correction'] == 'auto':
+    if config['ica_method'] is not None:
         boilerplate.append(
             'Artifacts resulting from blinks and eye movements were corrected '
             'using independent component analysis (ICA). For this, we '

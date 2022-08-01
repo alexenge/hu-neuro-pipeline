@@ -20,7 +20,7 @@ from .tfr import compute_single_trials_tfr, subtract_evoked
 def participant_pipeline(
     vhdr_file,
     log_file,
-    ocular_correction='auto',
+    besa_file=None,
     bad_channels=None,
     auto_bad_channels=None,
     skip_log_rows=None,
@@ -29,6 +29,8 @@ def participant_pipeline(
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
+    ica_method=None,
+    ica_n_components=.99,
     highpass_freq=0.1,
     lowpass_freq=40.,
     triggers=None,
@@ -122,12 +124,13 @@ def participant_pipeline(
     # Re-reference to common average
     _ = raw.set_eeg_reference('average')
 
-    # Do ocular correction
-    ica = None
-    if ocular_correction == 'auto':
-        raw, ica = correct_ica(raw)
-    elif ocular_correction is not None:
-        raw = correct_besa(raw, besa_file=ocular_correction)
+    # Do ocular correction with BESA and/or ICA
+    if besa_file is not None:
+        raw = correct_besa(raw, besa_file)
+    if ica_method is not None:
+        raw, ica = correct_ica(raw, ica_method, ica_n_components)
+    else:
+        ica = None
 
     # Filtering
     filt = raw.copy().filter(highpass_freq, lowpass_freq)
@@ -153,8 +156,9 @@ def participant_pipeline(
 
     # Add bad ICA components to config
     if ica is not None:
-        excl_ica_components = [int(x) for x in ica.exclude]
-        config['auto_bad_icas'] = excl_ica_components
+        if ica_n_components < 1.0:
+            config['auto_ica_n_components'] = int(ica.n_components_)
+        config['auto_ica_bad_components'] = [int(x) for x in ica.exclude]
 
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
