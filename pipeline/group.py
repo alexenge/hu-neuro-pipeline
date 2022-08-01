@@ -191,6 +191,8 @@ def group_pipeline(
     # ... and outputs that might have been created along the way
     config['log_files'] = []
     config['rejected_epochs'] = {}
+    if ica_method is not None and ica_n_components < 1.0:
+        config['auto_ica_n_components'] = {}
     for pid, pconfig in zip(participant_ids, configs):
         config['log_files'].append(pconfig['log_file'])
         config['rejected_epochs'][pid] = pconfig['rejected_epochs']
@@ -198,8 +200,11 @@ def group_pipeline(
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})
         if pconfig['ica_method'] is not None:
-            config.setdefault('auto_bad_icas', {}).update(
-                {pid: pconfig['auto_bad_icas']})
+            if ica_n_components < 1.0:
+                config['auto_ica_n_components'][pid] = \
+                    pconfig['auto_ica_n_components']
+            config.setdefault('auto_ica_bad_components', {}).update(
+                {pid: pconfig['auto_ica_bad_components']})
 
     # Save config
     save_config(config, output_dir)

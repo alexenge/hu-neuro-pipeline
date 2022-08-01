@@ -156,8 +156,9 @@ def participant_pipeline(
 
     # Add bad ICA components to config
     if ica is not None:
-        excl_ica_components = [int(x) for x in ica.exclude]
-        config['auto_bad_icas'] = excl_ica_components
+        if ica_n_components < 1.0:
+            config['auto_ica_n_components'] = int(ica.n_components_)
+        config['auto_ica_bad_components'] = [int(x) for x in ica.exclude]
 
     # Drop the last sample to produce a nice even number
     _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
