@@ -30,9 +30,9 @@ def participant_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     ica_method=None,
-    ica_n_components=.99,
+    ica_n_components=0.99,
     highpass_freq=0.1,
-    lowpass_freq=40.,
+    lowpass_freq=40.0,
     triggers=None,
     triggers_column=None,
     epochs_tmin=-0.5,
@@ -44,8 +44,8 @@ def participant_pipeline(
     average_by=None,
     perform_tfr=False,
     tfr_subtract_evoked=False,
-    tfr_freqs=np.linspace(4., 40., num=37),
-    tfr_cycles=np.linspace(2., 20., num=37),
+    tfr_freqs=np.linspace(4.0, 40.0, num=37),
+    tfr_cycles=np.linspace(2.0, 20.0, num=37),
     tfr_baseline_tmin=-0.45,
     tfr_baseline_tmax=-0.05,
     tfr_baseline_mode='percent',
@@ -177,7 +177,7 @@ def participant_pipeline(
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
-    config['rejected_epochs'] = bad_ixs
+    config['auto_rejected_epochs'] = bad_ixs
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)

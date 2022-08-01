@@ -74,7 +74,7 @@ It also lists rejected epochs per participant as well as automatically detected 
 
 ```r
 > config <- res[[3]]
-> rejected_epochs <- lengths(config[["rejected_epochs"]])
+> rejected_epochs <- lengths(config[["auto_rejected_epochs"]])
 > summary(rejected_epochs)  
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    0.00    7.25   14.00   14.33   22.75   30.00 

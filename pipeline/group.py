@@ -28,9 +28,9 @@ def group_pipeline(
     bad_channels=None,
     besa_files=None,
     ica_method=None,
-    ica_n_components=.99,
+    ica_n_components=0.99,
     highpass_freq=0.1,
-    lowpass_freq=40.,
+    lowpass_freq=40.0,
     triggers=None,
     triggers_column=None,
     epochs_tmin=-0.5,
@@ -39,21 +39,21 @@ def group_pipeline(
     baseline_tmax=0.0,
     skip_log_rows=None,
     skip_log_conditions=None,
-    reject_peak_to_peak=200.,
+    reject_peak_to_peak=200.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
     tfr_subtract_evoked=False,
-    tfr_freqs=np.linspace(4., 40., num=37),
-    tfr_cycles=np.linspace(2., 20., num=37),
+    tfr_freqs=np.linspace(4.0, 40.0, num=37),
+    tfr_cycles=np.linspace(2.0, 20.0, num=37),
     tfr_baseline_tmin=-0.45,
     tfr_baseline_tmax=-0.05,
     tfr_baseline_mode='percent',
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     perm_contrasts=[],
-    perm_tmin=0.,
-    perm_tmax=1.,
+    perm_tmin=0.0,
+    perm_tmax=1.0,
     perm_channels=None,
     perm_fmin=None,
     perm_fmax=None,
@@ -190,12 +190,15 @@ def group_pipeline(
 
     # ... and outputs that might have been created along the way
     config['log_files'] = []
-    config['rejected_epochs'] = {}
+    if reject_peak_to_peak is not None:
+        config['auto_rejected_epochs'] = {}
     if ica_method is not None and ica_n_components < 1.0:
         config['auto_ica_n_components'] = {}
     for pid, pconfig in zip(participant_ids, configs):
         config['log_files'].append(pconfig['log_file'])
-        config['rejected_epochs'][pid] = pconfig['rejected_epochs']
+        if reject_peak_to_peak is not None:
+            config['auto_rejected_epochs'][pid] = \
+                pconfig['auto_rejected_epochs']
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})

@@ -115,7 +115,7 @@ Moderate downsampling (e.g., to 250 Hz) will significantly speed up the processi
 | Python examples | R examples |
 | --------------- | ---------- |
 | `None`          | `NULL`     |
-| `250.`          | `250`      |
+| `250.0`         | `250.0`    |
 
 ### **`veog_channels` (optional, default `'auto'`)**
 
@@ -195,7 +195,7 @@ If `None`, no ocular correction using ICA will be performed.
 | `'infomax'`     | `"infomax"` |
 | `'picard'`      | `"picard"`  |
 
-### **`ica_n_components` (optional, default: `.99`)**
+### **`ica_n_components` (optional, default: `0.99`)**
 
 Number of principal components (from the pre-whitening PCA step) that are passed to the ICA algorithm during fitting.
 Can either be an integer (greater than `1`) that specifies the number of components, or a floating point number (between `0.0` and `1.0`, exclusive) that specifies the desired amount of variance explained (potentially leading to a different number of extracted components for each participant).
@@ -203,7 +203,7 @@ This option is only used if `ica_method` is not `None`.
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `.99`           | `.99`      |
+| `0.99`          | `0.99`     |
 | `15`            | `15`       |
 
 ### **`highpass_freq` (optional, default: `0.1`)**
@@ -216,14 +216,14 @@ Can also be `None` to disable highpass filtering.
 | `0.1`           | `0.1`      |
 | `None`          | `NULL`     |
 
-### **`lowpass_freq` (optional, default: `40.`)**
+### **`lowpass_freq` (optional, default: `40.0`)**
 
 The upper passband edge of the frequency domain filter (in Hz).
 Can also be `None` to disable lowpass filtering.
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `40.`           | `40`       |
+| `40.0`          | `40.0`     |
 | `None`          | `NULL`     |
 
 ## 4. Epoching options
@@ -323,7 +323,7 @@ If the peak-to-peak amplitude of any channel in the time window (defined by `epo
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `200.`          | `200`      |
+| `200.0`         | `200.0`    |
 | `None`          | `NULL`     |
 
 ### **`components` (recommended, default: don't compute any components)**
@@ -392,30 +392,30 @@ The same string must also be present in `average_by`.
 | `'semantics'`         | `"semantics"`         |
 | `'semantics/context'` | `"semantics/context"` |
 
-### **`tfr_freqs` (optional, default: `np.linspace(4., 40., num=37)`)**
+### **`tfr_freqs` (optional, default: `np.linspace(4.0, 40.0, num=37)`)**
 
 The frequencies for the family of [Morlet wavelets](https://neuroimage.usc.edu/brainstorm/Tutorials/TimeFrequency#Morlet_wavelets).
 A larger number of frequencies will create smoother plots at the expense of taking longer to compute and needing more disk space.
 Note that the time-frequency representation is computed on the *unfiltered* epochs so that frequencies larger than `lowpass_freq` are possible.
 
-| Python examples                                | R examples                             |
-| ---------------------------------------------- | -------------------------------------- |
-| `np.linspace(4., 40., num=37)`                 | `seq(4, 40, length.out = 37)`          |
-| `np.arange(4., 41., step=1.)`                  | `seq(4, 40, by = 1)`                   |
-| `[8., 12., 16., 20., 24., 28., 32., 36., 40.]` | `c(8, 12, 16, 20, 24, 28, 32, 36, 40)` |
+| Python examples                                         | R examples                                               |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| `np.linspace(4.0, 40.0, num=37)`                        | `seq(4.0, 40.0, length.out = 37)`                        |
+| `np.arange(4.0, 41.0, step=1.)`                         | `seq(4.0, 40.0, by = 1)`                                 |
+| `[8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0, 40.0]` | `c(8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0, 40.0)` |
 
-### **`tfr_cycles` (optional, default: `np.linspace(2., 20., num=37)`)**
+### **`tfr_cycles` (optional, default: `np.linspace(2.0, 20.0, num=37)`)**
 
 The number of cycles for the family of [Morlet wavelets](https://neuroimage.usc.edu/brainstorm/Tutorials/TimeFrequency#Morlet_wavelets).
 These values will control the time-frequency tradeoff: More cycles offer better spectral resolution at the cost of worse temporal resolution.
 Choosing cycles that increase in a linear fashion with `tfr_freqs` is recommended to keep the temporal resolution constant across frequencies.
 Must have the same length as `tfr_freqs`.
 
-| Python examples                              | R examples                           |
-| -------------------------------------------- | ------------------------------------ |
-| `np.linspace(2., 20., num=37)`               | `seq(2, 20, length.out = 37)`        |
-| `np.arange(2., 20.5, step=0.5)`              | `seq(2, 20, by = 0.5)`               |
-| `[4., 6., 8., 10., 12., 14., 16., 18., 20.]` | `c(4, 6, 8, 10, 12, 14, 16, 18, 20)` |
+| Python examples                                      | R examples                                           |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `np.linspace(2.0, 20.0, num=37)`                     | `seq(2.0, 20.0, length.out = 37)`                    |
+| `np.arange(2.0, 20.5, step=0.5)`                     | `seq(2.0, 20.0, by = 0.5)`                           |
+| `[4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.]` | `c(4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20)` |
 
 ### **`tfr_baseline_tmin` (optional, default: `-0.45`)**
 
@@ -459,13 +459,13 @@ Similar to `components` for ERPs, i.e., the time windows, frequency bands, and c
 The structure is the same as for `components`, but adding new dict entries for the lower (`'fmin'`) and upper (`'fmax'`) bounds for the frequencies of interest (e.g., 8–13 Hz for alpha band activity).
 Note that the term "component" is specific to ERPs and is used here solely to highlight the correspondence between the two options.
 
-| Python example                                                                                          |
-| ------------------------------------------------------------------------------------------------------- |
-| `{'name': ['alpha'], 'tmin': [0.05], 'tmax': [0.25], 'fmin': [8], 'fmax': [13], 'roi': [['PO9', ...]]}` |
+| Python example                                                                                              |
+| ----------------------------------------------------------------------------------------------------------- |
+| `{'name': ['alpha'], 'tmin': [0.05], 'tmax': [0.25], 'fmin': [8.0], 'fmax': [13.0], 'roi': [['PO9', ...]]}` |
 
-| R example                                                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `list("name" = list("alpha"), "tmin" = list(0.05), "tmax" = list(0.25), "fmin" = list(8), "fmax" = list(13), "roi" = list(c("PO9", ...)))` |
+| R example                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list("name" = list("alpha"), "tmin" = list(0.05), "tmax" = list(0.25), "fmin" = list(8.0), "fmax" = list(13.0), "roi" = list(c("PO9", ...)))` |
 
 ## 7. Options for cluster-based permutation tests
 
@@ -490,7 +490,7 @@ Cropping the time window (based on *a priori* knowledge about plausible effects)
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `0.`            | `0`        |
+| `0.0`           | `0.0`      |
 | `None`          | `NULL`     |
 
 ### **`perm_tmax` (optional, default: `1.`)**
@@ -501,7 +501,7 @@ Cropping the time window (based on *a priori* knowledge about plausible effects)
 
 | Python examples | R examples |
 | --------------- | ---------- |
-| `1.`            | `1`        |
+| `1.0`           | `1.0`      |
 | `None`          | `NULL`     |
 
 ### **`perm_channels` (optional, default: `None`)**
@@ -525,7 +525,7 @@ Cropping the frequency range (based on *a priori* knowledge about plausible effe
 | Python examples | R examples |
 | --------------- | ---------- |
 | `None`          | `NULL`     |
-| `8.`            | `8`        |
+| `8.0`           | `8.0`      |
 
 ### **`perm_fmax` (optional, default: `None`)**
 
@@ -537,7 +537,7 @@ Cropping the frequency range (based on *a priori* knowledge about plausible effe
 | Python examples | R examples |
 | --------------- | ---------- |
 | `None`          | `NULL`     |
-| `30.`           | `30`       |
+| `30.0`          | `30.0`     |
 
 ## 8. Performance options
 
