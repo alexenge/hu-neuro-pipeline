@@ -190,12 +190,15 @@ def group_pipeline(
 
     # ... and outputs that might have been created along the way
     config['log_files'] = []
-    config['rejected_epochs'] = {}
+    if reject_peak_to_peak is not None:
+        config['auto_rejected_epochs'] = {}
     if ica_method is not None and ica_n_components < 1.0:
         config['auto_ica_n_components'] = {}
     for pid, pconfig in zip(participant_ids, configs):
         config['log_files'].append(pconfig['log_file'])
-        config['rejected_epochs'][pid] = pconfig['rejected_epochs']
+        if reject_peak_to_peak is not None:
+            config['auto_rejected_epochs'][pid] = \
+                pconfig['auto_rejected_epochs']
         if pconfig['bad_channels'] == 'auto':
             config.setdefault('auto_bad_channels', {}).update(
                 {pid: pconfig['auto_bad_channels']})

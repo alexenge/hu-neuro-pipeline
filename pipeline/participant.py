@@ -177,7 +177,7 @@ def participant_pipeline(
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
-    config['rejected_epochs'] = bad_ixs
+    config['auto_rejected_epochs'] = bad_ixs
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
