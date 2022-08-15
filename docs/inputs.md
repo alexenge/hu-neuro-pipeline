@@ -410,26 +410,13 @@ Must have the same length as `tfr_freqs`.
 | `np.arange(2.0, 20.5, step=0.5)`                     | `seq(2.0, 20.0, by = 0.5)`                           |
 | `[4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.]` | `c(4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20)` |
 
-### **`tfr_baseline` (optional, default: `(-0.45, -0.15)`)**
+### **`tfr_mode` (optional, default: `'percent'`)**
 
-Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
-For each epoch and channel, the average power during this interval is subtracted from all time points in the epoch, so as to correct for shifts in power that had occured before stimulus onset.
-In addition to this *subtractive* baseline correction, another *divisive* baseline correction is being applied using the full duration of the epoch (see `tfr_baseline_mode` below).
-It is a good idea to have the baseline period end *before* stimulus onset so that post-stimulus power at low frequencies doesn't get contaminated by pre-stimulus fluctuations.
-
-| Python examples  | R examples        |
-| ---------------- | ----------------- |
-| `(-0.45, -0.05)` | `c(-0.45, -0.05)` |
-| `(None, 0.0)`    | `c(NULL, 0.0)`    |
-| `None`           | `NULL`            |
-
-### **`tfr_baseline_mode` (optional, default: `'percent'`)**
-
-The main baseline correction method applied to the time-frequency data.
-In contrast to the *subtractive* baseline method used for ERPs, this should be a *divisive* method to account for the $1/f$ scaling of EEG frequencies.
+The "baseline" correction method to adjust the time-frequency data for the $1/f$ scaling of the human EEG.
 See the [MNE documentation](https://mne.tools/stable/generated/mne.time_frequency.EpochsTFR.html#mne.time_frequency.EpochsTFR.apply_baseline) for information about the possible methods.
-Note that this method will be applied using the entire epoch as the baseline window because it was shown that using the pre-stimulus interval for single trial divisive baseline correction leads to positively biased post-stimulus power ([Grandchamp & Delorme, 2011](https://doi.org/10.3389/fpsyg.2011.00236)).
-After applying this method, a second, *subtractive* baseline will be applied using the pre-stimulus interval only (defined via `tfr_baseline` above).
+Note that this method will be applied using the entire epoch as the "baseline" window.
+This is because it was shown that using the pre-stimulus interval for single trial divisive baseline correction leads to positively biased post-stimulus power ([Grandchamp & Delorme, 2011](https://doi.org/10.3389/fpsyg.2011.00236)).
+After applying this method, a second, *subtractive* baseline will be applied using the pre-stimulus interval only (defined via `tfr_baseline` below).
 
 | Python examples | R examples    |
 | --------------- | ------------- |
@@ -438,6 +425,18 @@ After applying this method, a second, *subtractive* baseline will be applied usi
 | `'logratio'`    | `"logratio"`  |
 | `'zscore'`      | `"zscore"`    |
 | `'zlogratio'`   | `"zlogratio"` |
+
+### **`tfr_baseline` (optional, default: `(-0.45, -0.15)`)**
+
+Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
+For each epoch and channel, the average power during this interval is subtracted from all time points in the epoch, so as to correct for shifts in power that had occured before stimulus onset.
+It is a good idea to have the baseline period end *before* stimulus onset so that post-stimulus power at low frequencies doesn't get contaminated by pre-stimulus fluctuations.
+
+| Python examples  | R examples        |
+| ---------------- | ----------------- |
+| `(-0.45, -0.05)` | `c(-0.45, -0.05)` |
+| `(None, 0.0)`    | `c(NULL, 0.0)`    |
+| `None`           | `NULL`            |
 
 ### **`tfr_components` (optional, default: no TFR components)**
 
