@@ -417,6 +417,7 @@ See the [MNE documentation](https://mne.tools/stable/generated/mne.time_frequenc
 Note that this method will be applied using the entire epoch as the "baseline" window.
 This is because it was shown that using the pre-stimulus interval for single trial divisive baseline correction leads to positively biased post-stimulus power ([Grandchamp & Delorme, 2011](https://doi.org/10.3389/fpsyg.2011.00236)).
 After applying this method, a second, *subtractive* baseline will be applied using the pre-stimulus interval only (defined via `tfr_baseline` below).
+If `None`, no divisive "baseline" correction will be applied.
 
 | Python examples | R examples    |
 | --------------- | ------------- |
@@ -425,6 +426,7 @@ After applying this method, a second, *subtractive* baseline will be applied usi
 | `'logratio'`    | `"logratio"`  |
 | `'zscore'`      | `"zscore"`    |
 | `'zlogratio'`   | `"zlogratio"` |
+| `None`          | `NULL`        |
 
 ### **`tfr_baseline` (optional, default: `(-0.45, -0.15)`)**
 

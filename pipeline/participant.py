@@ -236,11 +236,12 @@ def participant_pipeline(
 
         # First, divisive baseline correction using the full epoch
         # See https://doi.org/10.3389/fpsyg.2011.00236
-        tfr_modes = \
-            ['ratio', 'logratio', 'percent', 'zscore', 'zlogratio']
-        assert tfr_mode in tfr_modes, \
-            f'`tfr_baseline_mode` must be one of {tfr_modes}'
-        tfr.apply_baseline(baseline=(None, None), mode=tfr_mode)
+        if tfr_mode is not None:
+            tfr_modes = \
+                ['ratio', 'logratio', 'percent', 'zscore', 'zlogratio']
+            assert tfr_mode in tfr_modes, \
+                f'`tfr_baseline_mode` must be one of {tfr_modes}'
+            tfr.apply_baseline(baseline=(None, None), mode=tfr_mode)
 
         # Second, additive baseline correction using the prestimulus interval
         if tfr_baseline is not None:
