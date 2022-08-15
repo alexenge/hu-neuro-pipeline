@@ -37,8 +37,7 @@ def participant_pipeline(
     triggers_column=None,
     epochs_tmin=-0.5,
     epochs_tmax=1.5,
-    baseline_tmin=-0.2,
-    baseline_tmax=0.0,
+    baseline=(-0.2, 0.0),
     reject_peak_to_peak=200.0,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
@@ -46,9 +45,8 @@ def participant_pipeline(
     tfr_subtract_evoked=False,
     tfr_freqs=np.linspace(4.0, 40.0, num=37),
     tfr_cycles=np.linspace(2.0, 20.0, num=37),
-    tfr_baseline_tmin=-0.45,
-    tfr_baseline_tmax=-0.05,
-    tfr_baseline_mode='percent',
+    tfr_mode='percent',
+    tfr_baseline=(-0.45, -0.05),
     tfr_components={
         'name': [], 'tmin': [], 'tmax': [], 'fmin': [], 'fmax': [], 'roi': []},
     clean_dir=None,
@@ -142,7 +140,8 @@ def participant_pipeline(
         event_id = triggers_to_event_id(triggers)
 
     # Epoching including baseline correction
-    baseline = (baseline_tmin, baseline_tmax)
+    if baseline is not None:
+        baseline = tuple(baseline)
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
                     preload=True)
 
@@ -237,14 +236,16 @@ def participant_pipeline(
 
         # First, divisive baseline correction using the full epoch
         # See https://doi.org/10.3389/fpsyg.2011.00236
-        tfr_baseline_modes = \
-            ['ratio', 'logratio', 'percent', 'zscore', 'zlogratio']
-        assert tfr_baseline_mode in tfr_baseline_modes, \
-            f'`tfr_baseline_mode` must be one of {tfr_baseline_modes}'
-        tfr.apply_baseline(baseline=(None, None), mode=tfr_baseline_mode)
+        if tfr_mode is not None:
+            tfr_modes = \
+                ['ratio', 'logratio', 'percent', 'zscore', 'zlogratio']
+            assert tfr_mode in tfr_modes, \
+                f'`tfr_baseline_mode` must be one of {tfr_modes}'
+            tfr.apply_baseline(baseline=(None, None), mode=tfr_mode)
 
         # Second, additive baseline correction using the prestimulus interval
-        tfr_baseline = (tfr_baseline_tmin, tfr_baseline_tmax)
+        if tfr_baseline is not None:
+            tfr_baseline = tuple(tfr_baseline)
         tfr.apply_baseline(baseline=tfr_baseline, mode='mean')
 
         # Reduce numerical precision to reduce object size
