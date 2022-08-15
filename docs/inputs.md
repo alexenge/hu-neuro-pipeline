@@ -428,7 +428,7 @@ If `None`, no divisive "baseline" correction will be applied.
 | `'zlogratio'`   | `"zlogratio"` |
 | `None`          | `NULL`        |
 
-### **`tfr_baseline` (optional, default: `(-0.45, -0.15)`)**
+### **`tfr_baseline` (optional, default: `(-0.45, -0.05)`)**
 
 Time period (in s relative to stimulus onset) for baseline correction of the time-frequency data.
 For each epoch and channel, the average power during this interval is subtracted from all time points in the epoch, so as to correct for shifts in power that had occured before stimulus onset.
