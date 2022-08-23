@@ -1,14 +1,12 @@
 from functools import partial
-from glob import glob
-from os import path
 
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import (convert_participant_input, files_from_dir, save_config,
-                 save_df, save_evokeds)
+from .io import (convert_participant_input, files_from_dir, get_participant_id,
+                 save_config, save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
@@ -134,18 +132,21 @@ def group_pipeline(
         vhdr_files = files_from_dir(vhdr_files, extensions=['vhdr'])
     if isinstance(log_files, str):
         log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
+    assert len(log_files) == len(vhdr_files), \
+        f'Number of `log_files` ({len(log_files)}) does not match ' + \
+        f'number of `vhdr_files` ({len(vhdr_files)})'
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
         besa_files = files_from_dir(besa_files, extensions=['matrix'])
-    elif isinstance(besa_files, list):
-        assert len(besa_files) == len(vhdr_files), \
-            '`vhdr_files` and `besa_files` must have the same length'
     elif besa_files is None:
         besa_files = [None] * len(vhdr_files)
+    assert len(besa_files) == len(vhdr_files), \
+        f'Number of `besa_files` ({len(besa_files)}) does not match ' + \
+        f'number of `vhdr_files` ({len(vhdr_files)})'
 
     # Extract participant IDs from filenames
-    participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
+    participant_ids = [get_participant_id(f) for f in vhdr_files]
 
     # Construct lists of bad_channels and skip_log_rows per participant
     bad_channels = convert_participant_input(bad_channels, participant_ids)
@@ -161,7 +162,7 @@ def group_pipeline(
         delayed(partial_pipeline)(*args) for args in participant_args)
 
     # Sort outputs into seperate lists
-    print(f'\n\n=== PROCESSING GROUP LEVEL ===')
+    print(f'\n\n=== Processing group level ===')
     trials, evokeds, evokeds_dfs, configs = list(map(list, zip(*res)))[0:4]
 
     # Combine trials and save
