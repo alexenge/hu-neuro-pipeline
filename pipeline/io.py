@@ -6,7 +6,44 @@ from os import makedirs, path
 import pandas as pd
 from mne import Evoked, write_evokeds
 from mne.channels.layout import _find_topomap_coords
+from mne.io import concatenate_raws, read_raw_brainvision
 from mne.time_frequency import AverageTFR, write_tfrs
+
+
+def read_raw(vhdr_file_or_files):
+    """Reads one or more raw EEG datasets from the same participant."""
+
+    # Read raw datasets and combine if a list was provided
+    if isinstance(vhdr_file_or_files, list):
+        vhdr_files = vhdr_file_or_files
+        print(f'\n=== Reading and combining raw data from {vhdr_files} ===')
+        raw_list = [read_raw_brainvision(f) for f in vhdr_files]
+        raw = concatenate_raws(raw_list)
+        participant_id = get_participant_id(vhdr_files)
+
+    # Read raw dataset if only a single one was provided
+    else:
+        vhdr_file = vhdr_file_or_files
+        print(f'\n=== Reading raw data from {vhdr_file} ===')
+        raw = read_raw_brainvision(vhdr_file, preload=True)
+        participant_id = get_participant_id(vhdr_file)
+
+    return raw, participant_id
+
+
+def get_participant_id(vhdr_file_or_files):
+    """Extracts the basename of an input file to use as participant ID."""
+
+    # Extract participant ID from raw data file name(s)
+    if isinstance(vhdr_file_or_files, list):
+        vhdr_files = vhdr_file_or_files
+        participant_id = [path.basename(f).split('.')[0] for f in vhdr_files]
+        participant_id = '_'.join(participant_id)
+    else:
+        vhdr_file = vhdr_file_or_files
+        participant_id = path.basename(vhdr_file).split('.')[0]
+
+    return participant_id
 
 
 def files_from_dir(dir_path, extensions, natsort_files=True):

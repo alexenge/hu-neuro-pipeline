@@ -1,16 +1,13 @@
-from os import path
-
 import numpy as np
-from mne import Epochs, events_from_annotations
-from mne.io import read_raw_brainvision
-from mne.time_frequency import tfr_morlet
 import pandas as pd
+from mne import Epochs, events_from_annotations
+from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
                        match_log_to_epochs, read_log, triggers_to_event_id)
-from .io import (save_clean, save_df, save_epochs, save_evokeds, save_montage,
-                 save_report)
+from .io import (read_raw, save_clean, save_df, save_epochs, save_evokeds,
+                 save_montage, save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
 from .report import create_report
@@ -91,12 +88,8 @@ def participant_pipeline(
     # Backup input arguments for re-use
     config = locals()
 
-    # Get participant ID from filename
-    participant_id = path.basename(vhdr_file).split('.')[0]
-
     # Read raw data
-    print(f'\n\n=== PROCESSING PARTICIPANT LEVEL FOR \'{participant_id}\' ===')
-    raw = read_raw_brainvision(vhdr_file, preload=True)
+    raw, participant_id = read_raw(vhdr_file)
 
     # Create backup of the raw data for the HTML report
     if report_dir is not None:

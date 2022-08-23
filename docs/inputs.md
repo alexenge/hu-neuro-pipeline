@@ -28,11 +28,19 @@ This page lists all input options for the `group_pipeline()` function as well as
 
 Input BrainVision EEG header files.
 Either a list of `.vhdr` file paths or a single path pointing to their parent directory.
+You can also specify a nested list in case that some or all participants have multiple EEG data sets that need to be concatenated.
 
-| Python examples                      | R examples                            |
-| ------------------------------------ | ------------------------------------- |
-| `['Results/EEG/raw/Vp01.vhdr', ...]` | `c("Results/EEG/raw/Vp01.vhdr", ...)` |
-| `'Results/EEG/raw'`                  | `"Results/EEG/raw"`                   |
+| Python examples                                                                                      |
+| ---------------------------------------------------------------------------------------------------- |
+| `'Results/EEG/raw'`                                                                                  |
+| `['Results/EEG/raw/Vp01.vhdr', 'Results/EEG/raw/Vp02.vhdr', ...]`                                    |
+| `['Results/EEG/raw/Vp01.vhdr', ['Results/EEG/raw/Vp02_a.vhdr', 'Results/EEG/raw/Vp02_b.vhdr'], ...]` |
+
+| R examples                                                                                                |
+| --------------------------------------------------------------------------------------------------------- |
+| `"Results/EEG/raw"`                                                                                       |
+| `c("Results/EEG/raw/Vp01.vhdr", "Results/EEG/raw/Vp02.vhdr"...)`                                          |
+| `list("Results/EEG/raw/Vp01.vhdr", c("Results/EEG/raw/Vp02_a.vhdr", "Results/EEG/raw/Vp02_b.vhdr"), ...)` |
 
 ### **`log_files` (required)**
 
