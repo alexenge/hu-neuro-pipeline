@@ -134,15 +134,18 @@ def group_pipeline(
         vhdr_files = files_from_dir(vhdr_files, extensions=['vhdr'])
     if isinstance(log_files, str):
         log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
+    assert len(log_files) == len(vhdr_files), \
+        f'Number of `log_files` ({len(log_files)}) does not match ' + \
+        f'number of `vhdr_files` ({len(vhdr_files)})'
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
         besa_files = files_from_dir(besa_files, extensions=['matrix'])
-    elif isinstance(besa_files, list):
-        assert len(besa_files) == len(vhdr_files), \
-            '`vhdr_files` and `besa_files` must have the same length'
     elif besa_files is None:
         besa_files = [None] * len(vhdr_files)
+    assert len(besa_files) == len(vhdr_files), \
+        f'Number of `besa_files` ({len(besa_files)}) does not match ' + \
+        f'number of `vhdr_files` ({len(vhdr_files)})'
 
     # Extract participant IDs from filenames
     participant_ids = [path.basename(f).split('.')[0] for f in vhdr_files]
