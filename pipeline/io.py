@@ -17,7 +17,7 @@ def read_raw(vhdr_file_or_files):
     if isinstance(vhdr_file_or_files, list):
         vhdr_files = vhdr_file_or_files
         print(f'\n=== Reading and combining raw data from {vhdr_files} ===')
-        raw_list = [read_raw_brainvision(f) for f in vhdr_files]
+        raw_list = [read_raw_brainvision(f, preload=True) for f in vhdr_files]
         raw = concatenate_raws(raw_list)
         participant_id = get_participant_id(vhdr_files)
 
