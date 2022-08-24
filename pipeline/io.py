@@ -107,7 +107,7 @@ def save_clean(raw, output_dir, participant_id=''):
     # Create output folder and save
     makedirs(output_dir, exist_ok=True)
     fname = f'{output_dir}/{participant_id_}{suffix}.fif'
-    raw.save(fname)
+    raw.save(fname, overwrite=True)
 
 
 def save_df(df, output_dir, participant_id='', suffix=''):
