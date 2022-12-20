@@ -74,7 +74,7 @@ def convert_participant_input(input, participant_ids):
             assert id in participant_ids, \
                 f'Participant ID {id} is not in vhdr_files'
             participant_dict[id] = values
-        return participant_dict.values()
+        return list(participant_dict.values())
 
     # If it's a list of list, it must have the same length as participant_ids
     elif is_nested_list(input):
