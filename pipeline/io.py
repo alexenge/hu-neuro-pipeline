@@ -73,6 +73,7 @@ def convert_participant_input(input, participant_ids):
         for id, values in input.items():
             assert id in participant_ids, \
                 f'Participant ID {id} is not in vhdr_files'
+            values = [values] if not isinstance(values, list) else values
             participant_dict[id] = values
         return list(participant_dict.values())
 
