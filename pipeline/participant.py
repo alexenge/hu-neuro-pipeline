@@ -136,7 +136,7 @@ def participant_pipeline(
     if baseline is not None:
         baseline = tuple(baseline)
     epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
-                    preload=True)
+                    preload=True, on_missing='warn')
 
     # Automatically detect bad channels and interpolate if necessary
     if bad_channels == 'auto' and auto_bad_channels is None:
@@ -206,7 +206,8 @@ def participant_pipeline(
 
         # Epoching again without filtering
         epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
-                               baseline, preload=True, verbose=False)
+                               baseline, preload=True, on_missing='warn',
+                               verbose=False)
 
         # Drop the last sample to produce a nice even number
         _ = epochs_unfilt.crop(epochs_tmin, epochs_tmax, include_tmax=False)
