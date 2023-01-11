@@ -100,7 +100,7 @@ def match_log_to_epochs(epochs, log, triggers_column, depth=10):
     log = log.reset_index(drop=True)
     log = log.drop(index=missing_ixs)
 
-    return log
+    return log, missing_ixs
 
 
 def get_bad_epochs(epochs, reject_peak_to_peak=None):

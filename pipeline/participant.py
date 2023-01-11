@@ -159,7 +159,8 @@ def participant_pipeline(
     # Read behavioral log file and match to the epochs
     log = read_log(log_file, skip_log_rows, skip_log_conditions)
     if triggers_column is not None:
-        log = match_log_to_epochs(epochs, log, triggers_column)
+        log, missing_ixs = match_log_to_epochs(epochs, log, triggers_column)
+        config['auto_missing_epochs'] = missing_ixs
     epochs.metadata = log
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
