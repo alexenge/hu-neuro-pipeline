@@ -6,7 +6,7 @@ from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
 from .io import (convert_participant_input, files_from_dir, get_participant_id,
-                 save_config, save_df, save_evokeds)
+                 package_versions, save_config, save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
@@ -212,6 +212,7 @@ def group_pipeline(
                 {pid: pconfig['auto_ica_bad_components']})
 
     # Save config
+    config['package_versions'] = package_versions()
     save_config(config, output_dir)
 
     # Define standard returns

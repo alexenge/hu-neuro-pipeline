@@ -4,10 +4,17 @@ from glob import glob
 from os import makedirs, path
 
 import pandas as pd
-from mne import Evoked, write_evokeds
+from mne import Evoked
+from mne import __version__ as mne_version
+from mne import write_evokeds
 from mne.channels.layout import _find_topomap_coords
 from mne.io import concatenate_raws, read_raw_brainvision
 from mne.time_frequency import AverageTFR, write_tfrs
+from numpy import __version__ as numpy_version
+from pandas import __version__ as pandas_version
+from sklearn import __version__ as sk_version
+
+from ._version import version as pipeline_version
 
 
 def read_raw(vhdr_file_or_files):
@@ -235,3 +242,13 @@ def save_report(report, output_dir, participant_id):
     fname = f'{output_dir}/{participant_id}_report.html'
     print(f'Saving HTML report to {fname}')
     _ = report.save(fname, open_browser=False, overwrite=True)
+
+
+def package_versions():
+    """Returns pipeline version and important dependency package versions."""
+
+    return({'pipeline': pipeline_version,
+            'mne': mne_version,
+            'numpy': numpy_version,
+            'pandas': pandas_version,
+            'scikit-learn': sk_version})
