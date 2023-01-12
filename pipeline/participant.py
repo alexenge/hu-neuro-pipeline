@@ -124,7 +124,7 @@ def participant_pipeline(
         ica = None
 
     # Filtering
-    filt = raw.copy().filter(highpass_freq, lowpass_freq)
+    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
 
     # Determine events and the corresponding (selection of) triggers
     events, event_id = events_from_annotations(
@@ -153,7 +153,7 @@ def participant_pipeline(
         config['auto_ica_bad_components'] = [int(x) for x in ica.exclude]
 
     # Drop the last sample to produce a nice even number
-    _ = epochs.crop(epochs_tmin, epochs_tmax, include_tmax=False)
+    _ = epochs.crop(tmin=None, tmax=epochs_tmax, include_tmax=False)
     print(epochs.__str__().replace(u"\u2013", "-"))
 
     # Read behavioral log file and match to the epochs
@@ -211,7 +211,7 @@ def participant_pipeline(
                                verbose=False)
 
         # Drop the last sample to produce a nice even number
-        _ = epochs_unfilt.crop(epochs_tmin, epochs_tmax, include_tmax=False)
+        _ = epochs_unfilt.crop(tmin=None, tmax=epochs_tmax, include_tmax=False)
 
         # Copy original metadata
         epochs_unfilt.metadata = epochs.metadata.copy()
@@ -227,7 +227,7 @@ def participant_pipeline(
         # Morlet wavelet convolution
         print('Doing time-frequency transform with Morlet wavelets')
         tfr = tfr_morlet(epochs_unfilt, tfr_freqs, tfr_cycles, use_fft=True,
-                         return_itc=False, average=False)
+                         return_itc=False, n_jobs=1, average=False)
 
         # First, divisive baseline correction using the full epoch
         # See https://doi.org/10.3389/fpsyg.2011.00236
