@@ -2,6 +2,7 @@ import json
 import re
 from glob import glob
 from os import makedirs, path
+from platform import python_version
 
 import pandas as pd
 from mne import Evoked
@@ -247,7 +248,8 @@ def save_report(report, output_dir, participant_id):
 def package_versions():
     """Returns pipeline version and important dependency package versions."""
 
-    return({'pipeline': pipeline_version,
+    return({'python': python_version(),
+            'pipeline': pipeline_version,
             'mne': mne_version,
             'numpy': numpy_version,
             'pandas': pandas_version,
