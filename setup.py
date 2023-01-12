@@ -48,7 +48,7 @@ if __name__ == "__main__":
             'joblib',
             'matplotlib',
             'mne >= 0.24.0',
-            'pandas >= 1.1.0, <= 1.3.5',
+            'pandas != 1.4.0',
             'pooch >= 1.5',
             'scikit-learn'
         ],
