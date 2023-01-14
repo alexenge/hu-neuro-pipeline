@@ -165,8 +165,10 @@ def participant_pipeline(
     epochs.metadata.insert(0, column='participant_id', value=participant_id)
 
     # If log file was provided as a DataFrame, convert to dict for config
-    if isinstance(config['log_file'], pd.DataFrame):
-        config['log_file'] = config['log_file'].to_dict(orient='list')
+    if isinstance(log_file, pd.DataFrame):
+        log_file = log_file.astype(object)  # Convert NaNs to null for JSON
+        log_file = log_file.where(pd.notnull(log_file), None)
+        config['log_file'] = log_file.to_dict(orient='list')
 
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
