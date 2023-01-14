@@ -65,11 +65,15 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
 
     # Sort naturally because some files might not have leading zeros
     if natsort_files:
-        natsort = lambda s: [
-            int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
         files = sorted(files, key=natsort)
 
     return files
+
+
+def natsort(s):
+    """Natural-sort list of strings to handle (non-)leading zeros."""
+
+    return [int(t) if t.isdigit() else t.lower() for t in re.split('(\d+)', s)]
 
 
 def convert_participant_input(input, participant_ids):
@@ -248,9 +252,9 @@ def save_report(report, output_dir, participant_id):
 def package_versions():
     """Returns pipeline version and important dependency package versions."""
 
-    return({'python': python_version(),
-            'pipeline': pipeline_version,
-            'mne': mne_version,
-            'numpy': numpy_version,
-            'pandas': pandas_version,
-            'scikit-learn': sk_version})
+    return ({'python': python_version(),
+             'pipeline': pipeline_version,
+             'mne': mne_version,
+             'numpy': numpy_version,
+             'pandas': pandas_version,
+             'scikit-learn': sk_version})
