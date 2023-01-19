@@ -43,7 +43,7 @@ reticulate::py_install("hu-neuro-pipeline", pip = TRUE)
 
 To install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
 
-```bash
+```r
 reticulate::py_install("git+https://github.com/alexenge/hu-neuro-pipeline.git", pip = TRUE)
 ```
 
