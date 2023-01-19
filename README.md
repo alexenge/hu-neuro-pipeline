@@ -20,6 +20,12 @@ Install the pipeline via `pip` from the [Python Package Index](https://pypi.org/
 python3 -m pip install hu-neuro-pipeline
 ```
 
+To install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
+
+```bash
+python3 -m pip install git+https://github.com/alexenge/hu-neuro-pipeline.git
+```
+
 ### 1.2 For R users
 
 First install [reticulate](https://rstudio.github.io/reticulate/) and [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for being able to import Python packages into R:
@@ -33,6 +39,12 @@ Then install the pipeline via `pip` from the [Python Package Index](https://pypi
 
 ```r
 reticulate::py_install("hu-neuro-pipeline", pip = TRUE)
+```
+
+To install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
+
+```bash
+reticulate::py_install("git+https://github.com/alexenge/hu-neuro-pipeline.git", pip = TRUE)
 ```
 
 ## 2. Usage
