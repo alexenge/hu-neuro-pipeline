@@ -17,8 +17,7 @@ def triggers_to_event_id(triggers):
             '`triggers` must be either list or dict'
 
     # Make sure that trigger values are integers (R would pass them as floats)
-    triggers = {key: int(value) for key, value in triggers.items()}
-    event_id = triggers
+    event_id = {key: int(value) for key, value in triggers.items()}
 
     return event_id
 
@@ -87,7 +86,7 @@ def match_log_to_epochs(epochs, log, triggers_column, depth=10):
             previous_repaired = True
 
         # If they do match up, we check that the next trials do match as well
-        elif previous_repaired: 
+        elif previous_repaired:
             if events_log[ix:ix + depth] != events_epochs[ix:ix + depth]:
                 print(f'Log file (row index {ix}): Assuming missing EEG epoch')
                 events_epochs.insert(ix, np.nan)
@@ -127,7 +126,7 @@ def get_bad_channels(epochs, threshold=3., by_event_type=True):
     if by_event_type:
         ses = epochs.standard_error(by_event_type=True)
         ses = combine_evoked(ses, weights='nave')
-    
+
     # ... or directly compute standard error across all epochs
     else:
         ses = epochs.standard_error()
