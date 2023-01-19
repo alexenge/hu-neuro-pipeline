@@ -32,7 +32,7 @@ reticulate::install_miniconda()
 Then install the pipeline via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
 
 ```r
-reticulate::py_install("hu-neuro-pipeline", pip = TRUE, python_version = "3.8")
+reticulate::py_install("hu-neuro-pipeline", pip = TRUE)
 ```
 
 ## 2. Usage
