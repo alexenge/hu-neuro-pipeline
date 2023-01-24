@@ -74,7 +74,8 @@ trials, evokeds, config = group_pipeline(
                 'tmax': [0.5, 0.9],
                 'roi': [['C1', 'Cz', 'C2', 'CP1', 'CPz', 'CP2'],
                         ['Fz', 'FC1', 'FC2', 'C1', 'Cz', 'C2']]},
-    average_by=['semantics', 'context', 'semantics/context'])
+    average_by={'related': 'semantics == "related"',
+                'unrelated': 'semantics == "unrelated"'})
 ```
 
 In this example we have specified:
@@ -114,7 +115,10 @@ res <- pipeline$group_pipeline(
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
         )
     ),
-    average_by = c("semantics", "context", "semantics/context")
+    average_by = list(
+        related = "semantics == 'related'",
+        unrelated = "semantics == 'unrelated'"
+    )
 )
 
 # Extract results
