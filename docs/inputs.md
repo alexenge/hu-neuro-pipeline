@@ -379,16 +379,12 @@ Whether or not to perform time-frequency analysis in addition to ERPs.
 Whether or not to subtract evoked activity from epochs before computing the time-frequency representation.
 If `False`, the resulting spectral power will not just reflect induced activity but also evoked activity from the ERP.
 If `True`, the average ERP *across all epochs* is removed before computing spectral power.
-If a string, the average ERP *per condition* is removed before computing spectral power.
-This string can either be a single column name or a combination of column names seperated by `/`.
-The same string must also be present in `average_by`.
+Subtracting the average ERP *separately for each condition* is currently not supported.
 
-| Python examples       | R examples            |
-| --------------------- | --------------------- |
-| `False`               | `FALSE`               |
-| `True`                | `TRUE`                |
-| `'semantics'`         | `"semantics"`         |
-| `'semantics/context'` | `"semantics/context"` |
+| Python examples | R examples |
+| --------------- | ---------- |
+| `False`         | `FALSE`    |
+| `True`          | `TRUE`     |
 
 ### **`tfr_freqs` (optional, default: `np.linspace(4.0, 40.0, num=37)`)**
 
