@@ -193,7 +193,7 @@ If `None`, no ocular correction using MSEC will be performed.
 
 Method for Indepedent Component Analysis (ICA) to correct for eye movement artifacts.
 For valid methods, see [`mne.preprocessing.ICA`](https://mne.tools/stable/generated/mne.preprocessing.ICA.html).
-If set, an ICA decomposition will be performed on the low-pass filtered data and any ICA components that correlate substantially with VEOG and/or HEOG will be removed in a fully automatic fashion.
+If set, an ICA decomposition will be performed on a high-pass filtered copy of the data (cutoff = 1.0 Hz) and any ICA components that correlate substantially with VEOG and/or HEOG will be removed in a fully automatic fashion.
 If `None`, no ocular correction using ICA will be performed.
 
 | Python examples | R examples  |
