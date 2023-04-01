@@ -55,36 +55,44 @@ def group_pipeline(
     perm_fmax=None,
     n_jobs=1
 ):
-    """Processes EEG data for all participants of an experiment.
+    """Process EEG data for a group of participants from the same experiment.
 
-    For each participant, the raw data is read and cleaned using standard steps
-    (downsampling, bad channel interpolation, ocular correction, frequency
-    domain filtering). Epochs are created around the `triggers`. Bad epochs are
-    removed based on peak-to-peak amplitude. Single trial mean ERP amplitudes
-    for ERP `components` of interest are computed and matched to the single
-    trial behavioral data from the `log_files`.
+    For each participant, the raw data is read and cleaned using a series of
+    customizable steps (e.g., downsampling, bad channel interpolation, ocular
+    correction, frequency domain filtering).
 
-    Optionally, this last step is repeated on a time-frequency representation
-    (TFR) of the data obtained via Morlet wavelet convolution.
+    Epochs are created based on the relevant EEG triggers (e.g., coding
+    stimulus onset). Bad epochs are optionally removed based on their
+    peak-to-peak amplitude. Single trial mean ERP amplitudes for the ERP
+    components of interest are computed by averaging across the relevant time
+    window and sensor region of interest. Amplitudes are matched to the single
+    trial behavioral data from the experimental log files.
 
-    The result is a single trial data frame which can be used for fitting
-    linear mixed-effects models on the mean ERP amplitudes (and power).
+    Optionally, the time domain data are transformed into the time-frequency
+    domain using Morlet wavelet convolution. This makes it possible to extract
+    single trial changes in event-related power by averaging across the
+    relevant time window, frequency range, and sensor region of interest. 
 
-    Additionally, by-participant condition averages (`evokeds`) for the ERPs
-    (and power) are computed to facilitate plotting. Optionally, these can also
-    be tested for condition differences in an exploratory fashion using
-    cluster-based permutation tests.
+    The resulting single trial data frame is exported and can be used for
+    fitting linear mixed-effects models on the mean ERP amplitudes and/or
+    power.
 
-    For details about the pipeline, see Frömer et al. (2018)[1].
+    Additionally, trials belonging to the same participant and to the same
+    experimental conditions are averaged. These evoked potentials and/or
+    average power data frames can be used, e.g., for creating time course
+    plots or scalp topographic plots.
 
-    Parameters & returns
-    --------------------
+    Optionally, differences between pairs of these averaged potentials or
+    power can be tested in an exploratory fashion using cluster-based
+    permutation tests.
+
+    Parameters
+    ----------
     See the README[2] in the GitHub repository for the pipeline.
 
     Notes
     -----
     [1] https://doi.org/10.3389/fnins.2018.00048
-    [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
     """
 
     # Convert input types
