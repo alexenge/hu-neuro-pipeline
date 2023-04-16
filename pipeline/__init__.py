@@ -1,5 +1,5 @@
-"""Single trial EEG pipeline at the Neurocognitive Psychology lab,
-Humboldt-Universität zu Berlin"""
+"""Single trial EEG pipeline at the Abdel Rahman Lab for Neurocognitive
+Psychology, Humboldt-Universität zu Berlin"""
 
 # Import submodules
 from . import datasets
