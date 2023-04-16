@@ -11,7 +11,7 @@ from .io import (read_raw, save_clean, save_df, save_epochs, save_evokeds,
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
 from .report import create_report
-from .tfr import compute_single_trials_tfr
+from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
 def participant_pipeline(
@@ -221,7 +221,7 @@ def participant_pipeline(
         # Optionally subtract evoked activity
         # See, e.g., https://doi.org/10.1016/j.neuroimage.2006.02.034
         if tfr_subtract_evoked:
-            epochs_unfilt = epochs_unfilt.subtract_evoked()
+            epochs_unfilt = subtract_evoked(epochs_unfilt, average_by, evokeds)
 
         # Morlet wavelet convolution
         print('Doing time-frequency transform with Morlet wavelets')
