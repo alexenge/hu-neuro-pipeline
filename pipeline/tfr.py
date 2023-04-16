@@ -3,46 +3,36 @@ import pandas as pd
 from mne import concatenate_epochs, set_log_level
 
 
-def subtract_evoked(epochs, evokeds=None, cols=None):
+def subtract_evoked(epochs, average_by=None, evokeds=None):
     """Subtracts evoked activity (across or by conditions) from epochs."""
 
     # If no columns were requested, subtract evoked activity across conditions
     set_log_level('ERROR')
-    if cols is None:
+    if average_by is None:
         print('Subtracting evoked activity')
         epochs = epochs.subtract_evoked()
-    
+
     # Otherwise subtract seperately for all (combinations of) conditions
     else:
-        print(f'Subtracting evoked activity per condition in \'{cols}\'')
-        epochs = subtract_evoked_cols(epochs, evokeds, cols)
+        print('Subtracting evoked activity per condition in `average_by`')
+        epochs = subtract_evoked_conditions(epochs, average_by, evokeds)
     set_log_level('INFO')
-    
+
     return epochs
 
 
-def subtract_evoked_cols(epochs, evokeds, cols):
+def subtract_evoked_conditions(epochs, average_by, evokeds):
     """Subtracts evoked activity (separately by conditions) from epochs."""
 
-    # Combine relevant columns
-    cols = cols.split('/')
-    cols_df = pd.DataFrame(epochs.metadata[cols])
-    cols_df = cols_df.astype('str')
-    ids = cols_df.agg('/'.join, axis=1).reset_index(drop=True)
-
-    # Loop over epochs
+    # Loop over epochs (painfully slow)
     epochs_subtracted = []
-    for ix, id in enumerate(ids):
+    for ix, _ in enumerate(epochs):
+        for query, evoked in zip(average_by.values(), evokeds):
+            if len(epochs[ix][query]) > 0:
+                epoch_subtracted = epochs[ix].subtract_evoked(evoked)
+                epochs_subtracted.append(epoch_subtracted)
 
-        # Subtract the relevant evoked from each epoch
-        evoked_id = [ev for ev in evokeds if ev.comment == id][0]
-        epoch_subtracted = epochs[ix].subtract_evoked(evoked_id)
-        epochs_subtracted.append(epoch_subtracted)
-    
-    # Combine list of subtracted epochs
-    epochs_subtracted = concatenate_epochs(epochs_subtracted)
-    
-    return epochs_subtracted
+    return concatenate_epochs(epochs_subtracted)
 
 
 def compute_single_trials_tfr(epochs, components, bad_ixs=None):

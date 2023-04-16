@@ -221,10 +221,7 @@ def participant_pipeline(
         # Optionally subtract evoked activity
         # See, e.g., https://doi.org/10.1016/j.neuroimage.2006.02.034
         if tfr_subtract_evoked:
-            subtract_cols = None if tfr_subtract_evoked is True \
-                else tfr_subtract_evoked
-            epochs_unfilt = subtract_evoked(
-                epochs_unfilt, evokeds, cols=subtract_cols)
+            epochs_unfilt = subtract_evoked(epochs_unfilt, average_by, evokeds)
 
         # Morlet wavelet convolution
         print('Doing time-frequency transform with Morlet wavelets')

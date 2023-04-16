@@ -352,19 +352,16 @@ Must be a dict with the following entries:
 
 ### **`average_by` (recommended, default: `None`)**
 
-Column names from the log file for averaging.
-Can be a single column name, in which case by-participant condition averages (a.k.a. "evokeds") will be computed for each condition in this column.
-The resulting evokeds are useful for plotting and for running permutation tests (see the `perm_*` arguments below).
-If a list of column names, evokeds will be computed for each condition in each of these column (i.e., for all main effects).
-Interaction effects can be added by combining two or more column names with a `/` character.
-If `None`, do not use columns in the log file for averaging and use the `triggers` instead.
+(Combinations of) conditions to create per-participant averages for.
+These per-participant condition averages (a.k.a. ["evokeds"](https://mne.tools/stable/auto_tutorials/evoked/10_evoked_overview.html)) are useful for plotting and for running permutation tests (see the `perm_*` arguments below).
+Must be a dict where each key is a custom condition label of your choice and each value is a string expression that will be used to select the relevant trials for this condition based on columns in the log file (see examples below and the [pandas documentation on querying](https://pandas.pydata.org/docs/user_guide/indexing.html#indexing-query)).
+If `None`, the pipeline will not create any custom averages but will instead create averages for each value in `triggers`.
 
-| Python examples                                 | R examples                                       |
-| ----------------------------------------------- | ------------------------------------------------ |
-| `None`                                          | `NULL`                                           |
-| `'semantics'`                                   | `"semantics"`                                    |
-| `['semantics', 'context']`                      | `c("semantics", "context")`                      |
-| `['semantics', 'context', 'semantics/context']` | `c("semantics", "context", "semantics/context")` |
+| Python examples                                                                      | R examples                                                                              |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `None`                                                                               | `NULL`                                                                                  |
+| `{'related': 'semantics == "related"', 'unrelated': 'semantics == "unrelated"}`      | `list(related = "semantics == 'related'", unrelated = "semantics == 'unrelated'")`      |
+| `{'neg_unrel': 'context == "negative" & semantics == "unrelated" & rt < 3000', ...}` | `list(neg_unrel = "context == 'negative' & semantics == 'unrelated' & rt < 3000", ...)` |
 
 ## 6. Options for time-frequency analysis
 
@@ -381,17 +378,14 @@ Whether or not to perform time-frequency analysis in addition to ERPs.
 
 Whether or not to subtract evoked activity from epochs before computing the time-frequency representation.
 If `False`, the resulting spectral power will not just reflect induced activity but also evoked activity from the ERP.
-If `True`, the average ERP *across all epochs* is removed before computing spectral power.
-If a string, the average ERP *per condition* is removed before computing spectral power.
-This string can either be a single column name or a combination of column names seperated by `/`.
-The same string must also be present in `average_by`.
+If `True`, the average ERP is removed before computing spectral power.
+The average ERP is computed separately for each condition in `average_by`.
+If `average_by` is `None`, the average ERP is computed across all epochs.
 
-| Python examples       | R examples            |
-| --------------------- | --------------------- |
-| `False`               | `FALSE`               |
-| `True`                | `TRUE`                |
-| `'semantics'`         | `"semantics"`         |
-| `'semantics/context'` | `"semantics/context"` |
+| Python examples | R examples |
+| --------------- | ---------- |
+| `False`         | `FALSE`    |
+| `True`          | `TRUE`     |
 
 ### **`tfr_freqs` (optional, default: `np.linspace(4.0, 40.0, num=37)`)**
 
@@ -468,14 +462,12 @@ Note that the term "component" is specific to ERPs and is used here solely to hi
 
 Contrasts between conditions to test using cluster-based permutation tests (CBPTs).
 Must be one or multiple tuples, each containing exactly two condition labels.
-Each of these labels must be corresponding to one condition which can be found in one of the `condition_cols` (see above).
-Single condition labels can be used to test main effects (e.g., semantically related vs. unrelated) and multiple hierarchical labels (seperated by `'/'`) can be used to test nested effects (e.g., semantically related vs. unrelated *within* the emotionally negative context).
-In this case, the order of the levels must correspond to the order of the column names in `condition_cols`.
+Each condition label must correspond to one of the dictionary keys specified in `average_by` or, if `average_by=None`, to one of the EEG triggers specified in `triggers`.
 
-| Python examples                                  | R examples                                             |
-| ------------------------------------------------ | ------------------------------------------------------ |
-| `[('related', 'unrelated')]`                     | `list(c("related", "unrelated"))`                      |
-| `[('related/negative'), ('unrelated/negative')]` | `list(c("related/negative"), c("unrelated/negative"))` |
+| Python examples                | R examples                           |
+| ------------------------------ | ------------------------------------ |
+| `[('related', 'unrelated')]`   | `list(c("related", "unrelated"))`    |
+| `[('neg_unrel'), ('neg_rel')]` | `list(c("neg_unrel"), c("neg_rel"))` |
 
 ### **`perm_tmin` (optional, default: `0.`)**
 
