@@ -1,6 +1,9 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 from mne import Epochs, Evoked, grand_average
+from mne.time_frequency import AverageTFR, EpochsTFR
 
 
 def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
@@ -10,7 +13,15 @@ def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
     if average_by is None:
         all_evokeds, all_evokeds_df = compute_evokeds_triggers(
             epochs, bad_ixs, participant_id)
+    elif isinstance(average_by, dict):
+        all_evokeds, all_evokeds_df = compute_evokeds_queries(
+            epochs, average_by, bad_ixs, participant_id)
     else:
+        warnings.warn(
+            'Passing a list of column names to `average_by` will ' +
+            'be deprecated in a future version of the pipeline. ' +
+            'Please use a dict of  labels and log file queries ' +
+            'instead (see https://github.com/alexenge/hu-neuro-pipeline/blob/main/docs/inputs.md#average_by-recommended-default-none)')
         all_evokeds, all_evokeds_df = compute_evokeds_cols(
             epochs, average_by, bad_ixs, participant_id)
 
@@ -40,6 +51,66 @@ def compute_evokeds_triggers(epochs, bad_ixs=[], participant_id=None):
     all_evokeds_df = pd.concat(all_evokeds_dfs, ignore_index=True)
 
     return all_evokeds, all_evokeds_df
+
+
+def compute_evokeds_queries(epochs, queries, bad_ixs=[], participant_id=None):
+    """Computes condition averages (evokeds) based on log file queries."""
+
+    # Get indices of good epochs
+    good_ixs = [ix for ix in range(len(epochs)) if ix not in bad_ixs]
+
+    # Reset index so that trials start at 0
+    epochs.metadata.reset_index(drop=True, inplace=True)
+
+    # Create evokeds for each query
+    evokeds = []
+    evoked_dfs = []
+    for label, query in queries.items():
+
+        # Compute evokeds for trials that match the current query
+        evoked = compute_evoked_query(epochs[good_ixs], query, label)
+        evokeds.append(evoked)
+
+        # Convert to data frame
+        extra_cols = \
+            {'participant_id': participant_id, 'label': label, 'query': query}
+        evoked_df = evoked_to_df(evoked, extra_cols)
+        evoked_dfs.append(evoked_df)
+
+    # Combine data frames
+    evokeds_df = pd.concat(evoked_dfs, ignore_index=True)
+
+    return evokeds, evokeds_df
+
+
+def compute_evoked_query(epochs, query, label):
+    """Computes one condition average (evoked) based on a log file query."""
+
+    # Compute evokeds based on ERP or TFR epochs
+    if isinstance(epochs, EpochsTFR):
+        evoked = epochs[query].average()
+    else:  # `EpochsTFR.average()` has no `picks` argument
+        evoked = epochs[query].average(picks=['eeg', 'misc'])
+    evoked.comment = label
+
+    return evoked
+
+
+def evoked_to_df(evoked, extra_cols={}):
+    """Converts MNE's Evoked or AverageTFR to a pandas data frame."""
+
+    # Convert to data frame
+    if isinstance(evoked, AverageTFR):
+        evoked_df = evoked.to_data_frame()
+    else:  # `AverageTFR.to_data_frame()` has no `scalings` argument
+        evoked_df = \
+            evoked.to_data_frame(scalings={'eeg': 1e6, 'misc': 1e6})
+
+    # Optionally add extra columns
+    for column, value in reversed(extra_cols.items()):
+        evoked_df.insert(0, column, value)
+
+    return evoked_df
 
 
 def compute_evokeds_cols(

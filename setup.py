@@ -27,8 +27,8 @@ if __name__ == "__main__":
         name='hu-neuro-pipeline',
         author='Alexander Enge',
         author_email='alexander.enge@hu-berlin.de',
-        description='Single trial EEG pipeline at the Neurocognitive '
-                    'Psychology Lab, Humboldt-Universität zu Berlin',
+        description='Single trial EEG pipeline at the Abdel Rahman Lab for '
+                    'Neurocognitive Psychology, Humboldt-Universität zu Berlin',
         long_description=long_description,
         long_description_content_type='text/markdown',
         url='https://github.com/alexenge/hu-neuro-pipeline',

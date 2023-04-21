@@ -41,30 +41,47 @@ This data frame can be used, for instance, to fit a linear mixed-effects model p
 
 ### **`evokeds` (file: `output_dir/ave.csv`)**
 
-This data frame contains the by-participant averaged ERPs at each time point, at each channel, and for each experimental condition (or combination of conditions) as specified via the `average_by` option.
+This data frame contains the per-participant and averaged ERPs at each time point, at each channel, and for each experimental condition (or combination of conditions) as specified via the `average_by` option.
 
 ```r
 > evokeds <- res[[2]]
 > head(evokeds)     
-  participant_id average_by semantics   time    Fp1    Fpz    Fp2 ...
-1         Vp0001  semantics   related -0.500 0.5549 0.9599 1.3789 ...
-2         Vp0001  semantics   related -0.496 0.4824 0.7980 1.2616 ...
-3         Vp0001  semantics   related -0.492 0.5179 0.6926 1.1960 ...
-4         Vp0001  semantics   related -0.488 0.5798 0.6537 1.1883 ...
-5         Vp0001  semantics   related -0.484 0.5479 0.6327 1.1621 ...
-6         Vp0001  semantics   related -0.480 0.3763 0.5591 1.0230 ...
+  participant_id   label                  query   time    Fp1    Fpz    Fp2 ...
+1         Vp0001 related semantics == "related" -0.500 0.5549 0.9599 1.3789 ...
+2         Vp0001 related semantics == "related" -0.496 0.4824 0.7980 1.2616 ...
+3         Vp0001 related semantics == "related" -0.492 0.5179 0.6926 1.1960 ...
+4         Vp0001 related semantics == "related" -0.488 0.5798 0.6537 1.1883 ...
+5         Vp0001 related semantics == "related" -0.484 0.5479 0.6327 1.1621 ...
+6         Vp0001 related semantics == "related" -0.480 0.3763 0.5591 1.0230 ...
 ```
 
-This data frame can be used, for instance, to plot the time course of the different semantic conditions as grand averages (together with their standard errors across participants):
+This data frame can be used, for instance, to plot the time course of the different semantic conditions as grand averages:
 
 ```r
 > library(dplyr)
 > library(ggplot2)
 > evokeds %>%
-+    filter(average_by == "semantics") %>%
-+    ggplot(aes(x = time, y = N400, color = semantics) +
-+    stat_summary(geom = "linerange", fun.data = mean_se, alpha = 0.1) +
-+    stat_summary(geom = "line", fun = mean)    
++   filter(label %in% c("related", "unrelated")) %>%
++   ggplot(aes(x = time, y = N400, color = label)) +
++   stat_summary(geom = "line", fun = mean)    
+```
+
+To add [within-participant standard errors](http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/#error-bars-for-within-subjects-variables) as shaded regions around the waveforms:
+
+```r
+> evokeds %>%
++   Rmisc::summarySEwithin(
++     measurevar = "N400",
++     withinvars = c("label", "time"),
++     idvar = "participant_id"
++   ) %>%
++   mutate(time = as.numeric(as.character(time))) %>%
++   ggplot(aes(x = time, y = N400)) +
++   geom_ribbon(
++     aes(ymin = N400 - se, ymax = N400 + se, fill = label),
++     alpha = 0.2
++   ) +
++   geom_line(aes(color = label))
 ```
 
 ### **`config` (file: `output_dir/config.json`)**

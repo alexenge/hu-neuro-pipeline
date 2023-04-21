@@ -4,7 +4,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hu-neuro-pipeline)
 ![GitHub](https://img.shields.io/github/license/alexenge/hu-neuro-pipeline)
 
-Single trial EEG pipeline at the [Neurocognitive Psychology lab](https://www.psychology.hu-berlin.de/en/profship/nk), Humboldt-Universität zu Berlin
+Single trial EEG pipeline at the [Abdel Rahman Lab for Neurocognitive Psychology](https://abdelrahmanlab.com), Humboldt-Universität zu Berlin
 
 Based on Frömer, R., Maier, M., & Abdel Rahman, R. (2018).
 Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models.
@@ -74,7 +74,8 @@ trials, evokeds, config = group_pipeline(
                 'tmax': [0.5, 0.9],
                 'roi': [['C1', 'Cz', 'C2', 'CP1', 'CPz', 'CP2'],
                         ['Fz', 'FC1', 'FC2', 'C1', 'Cz', 'C2']]},
-    average_by=['semantics', 'context', 'semantics/context'])
+    average_by={'related': 'semantics == "related"',
+                'unrelated': 'semantics == "unrelated"'})
 ```
 
 In this example we have specified:
@@ -114,7 +115,10 @@ res <- pipeline$group_pipeline(
             c("Fz", "FC1", "FC2", "C1", "Cz", "C2")
         )
     ),
-    average_by = c("semantics", "context", "semantics/context")
+    average_by = list(
+        related = "semantics == 'related'",
+        unrelated = "semantics == 'unrelated'"
+    )
 )
 
 # Extract results
