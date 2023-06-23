@@ -268,7 +268,7 @@ def compute_grands_df(evokeds_df):
 
     # Average by grouping columns
     group_cols = list(evokeds_df.columns[grouping_ixs])
-    grands_df = evokeds_df.groupby(group_cols, dropna=False).mean()
+    grands_df = evokeds_df.groupby(group_cols, dropna=False).mean(numeric_only=True)
 
     # Convert conditions from index back to columns
     grands_df = grands_df.reset_index()
