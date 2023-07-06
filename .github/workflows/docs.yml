@@ -5,7 +5,7 @@ on:
 
 jobs:
   setup:
-    name: Ex6 Mamba
+    name: Setup Conda/Mamba environment 🐍
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v2
@@ -15,10 +15,11 @@ jobs:
           mamba-version: "*"
           channels: conda-forge,defaults
           channel-priority: true
-          activate-environment: anaconda-client-env
+          activate-environment: hu-neuro-pipeline-docs
           environment-file: doc/environment.yml
 
   build:
+    name: Build Sphinx docs 📄
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

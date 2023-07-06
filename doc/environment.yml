@@ -1,5 +1,8 @@
-irkernel
-jupytext
-nbsphinx
-sphinx-copybutton
-sphinx-gallery
+name: hu-neuro-pipeline-docs
+
+dependencies:
+  - jupytext
+  - nbsphinx
+  - r-irkernel
+  - sphinx-copybutton
+  - sphinx-gallery
