@@ -9,7 +9,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v2
-      - uses: cascode-labs/build-sphinx-action/action.yml@v0
+      - uses: cascode-labs/build-sphinx-action/action.yml@v0.1.0
         with:
           docs_path: doc/
           conda_build_env_filepath: doc/environment.yml
