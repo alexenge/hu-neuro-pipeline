@@ -4,12 +4,9 @@ on:
   push
 
 jobs:
-  docs:
-    name: Build Sphinx docs 📄
-    runs-on: 'ubuntu-latest'
-    steps:
-      - uses: actions/checkout@v2
-      - uses: cascode-labs/build-sphinx-action/action.yml@v0.2.3
-        with:
-          docs_path: doc/
-          conda_build_env_filepath: doc/environment.yml
+    job-name:
+        runs-on: 'ubuntu-latest'
+        steps:
+          - uses: actions/checkout@v2
+          # Builds the documentation package using the standard configuration
+          - uses: cascode-labs/build-sphinx-action/action.yml@v0
