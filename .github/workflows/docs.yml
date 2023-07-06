@@ -1,12 +1,38 @@
-name: Build Sphinx docs 📄
+name: Sphinx docs to gh-pages
 
 on:
-  push
+  push:
+  workflow_dispatch:
 
 jobs:
-    job-name:
-        runs-on: 'ubuntu-latest'
-        steps:
-          - uses: actions/checkout@v2
-          # Builds the documentation package using the standard configuration
-          - uses: cascode-labs/build-sphinx-action/action.yml@v0
+  sphinx_docs_to_gh-pages:
+    runs-on: ubuntu-latest
+    name: Sphinx docs to gh-pages
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Make conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.9
+          environment-file: doc/environment.yml
+          auto-update-conda: false
+          auto-activate-base: false
+          show-channel-urls: true
+      - name: Installing the library
+        shell: bash -l {0}
+        run: |
+          python setup.py install
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+      - name: Running the Sphinx to gh-pages Action
+        uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.1.0
+        with:
+          branch: ${{ steps.extract_branch.outputs.branch }}
+          dir_docs: doc
+          sphinxapiopts: '--separate -o . ../'
+          sphinxapiexclude: '../*setup* ../*.ipynb'
+          sphinxopts: ''
