@@ -4,47 +4,12 @@ on:
   push
 
 jobs:
-  setup:
-    name: Setup Conda/Mamba environment 🐍
-    runs-on: "ubuntu-latest"
+  docs:
+    name: Build Sphinx docs 📄
+    runs-on: 'ubuntu-latest'
     steps:
       - uses: actions/checkout@v2
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: cascode-labs/build-sphinx-action/action.yml@v0
         with:
-          python-version: 3.8
-          mamba-version: "*"
-          channels: conda-forge,defaults
-          channel-priority: true
-          activate-environment: hu-neuro-pipeline-docs
-          environment-file: doc/environment.yml
-
-  build:
-    name: Build Sphinx docs 📄
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: ammaraskar/sphinx-action@master
-        with:
-          docs-folder: "doc/"
-      - uses: actions/upload-artifact@v1
-        with:
-          name: DocumentationHTML
-          path: docs/_build/html/
-      - name: Commit documentation changes
-        run: |
-          git clone https://github.com/ammaraskar/sphinx-action-test.git --branch gh-pages  --single-branch gh-pages
-          cp -r docs/_build/html/* gh-pages/
-          cd gh-pages
-          touch .nojekyll
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Update documentation" -a || true
-          # The above command will fail if no changes were present, so we ignore
-          # that.
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: gh-pages
-          directory: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          docs_path: doc/
+          conda_build_env_filepath: doc/environment.yml
