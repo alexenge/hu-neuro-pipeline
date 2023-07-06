@@ -55,34 +55,14 @@ def participant_pipeline(
     report_dir=None,
     to_df=True,
 ):
-    """Processes EEG data for a single participant.
+    """Process EEG data for a single participant.
 
-    The raw data is read and cleaned using standard steps (downsampling, bad
-    channel interpolation, ocular correction, frequency domain filtering).
-    Epochs are created around the `triggers`. Bad epochs are removed based on
-    peak-to-peak amplitude. Single trial mean ERP amplitudes for ERP
-    `components` of interest are computed and matched to the single trial
-    behavioral data from the `log_file`.
-
-    Optionally, this last step is repeated on a time-frequency representation
-    (TFR) of the data obtained via Morlet wavelet convolution.
-
-    The result is a single trial data frame which can be used for fitting
-    linear mixed-effects models on the mean ERP amplitudes (and power).
-
-    Additionally, condition averages (`evokeds`) for the ERPs (and power) are
-    computed to facilitate plotting.
-
-    For details about the pipeline, see Frömer et al. (2018)[1].
+    Performs preprocessing and computes single trial mean amplitudes for ERP
+    components of interest as well as averaged waveforms.
 
     Parameters & returns
     --------------------
-    See the README[2] in the GitHub repository for the pipeline.
-
-    Notes
-    -----
-    [1] https://doi.org/10.3389/fnins.2018.00048
-    [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
+    See `Usage <../usage.html>`_ for the pipeline input arguments and outputs.
     """
 
     # Backup input arguments for re-use

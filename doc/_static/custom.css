@@ -2,3 +2,8 @@
     --pst-color-link: 38, 98, 157;
     --pst-color-inline-code: 73, 143, 37;
 }
+
+a.footnote-reference {
+    vertical-align: baseline;
+    font-size: 100%;
+}

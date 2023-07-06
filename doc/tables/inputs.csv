@@ -1,0 +1,7 @@
+Argument,Description,Python example,R example
+``perm_contrasts`` (default: ``None``),Contrast(s) between condition labels (see ``average_by``) to compute `cluster-based permutation tests <https://doi.org/10.1016/j.jneumeth.2007.03.024>`_ for,"``[('related', 'unrelated')]``","``list(c(""related"", ""unrelated""))``"
+``perm_tmin`` (default: ``0.0``),Start of time window (in s relative to stimulus onset) for restricting the permutation test,"``0.0`` or ``None`` (i.e., use entire epoch)","``0.0`` or ``NULL`` (i.e., use entire epoch)"
+``perm_tmax`` (default: ``1.0``),End of time window (in s relative to stimulus onset) for restricting the permutation test,"``1.0`` or ``None`` (i.e., use entire epoch)","``1.0`` or ``NULL`` (i.e., use entire epoch)"
+``perm_channels`` (default: ``None``),Selection of channels for restricting the permutation test,"``['C1', 'Cz', 'C2', ...]`` or ``None`` (i.e., use all channels)","``c(""C1"", ""Cz"", ""C2"", ...)`` or ``NULL`` (i.e., use all channels)"
+``perm_fmin`` (default: ``None``),Lowest frequency (in Hz) for restricting the permutation test (event-related power only),"``8.0`` or ``None`` (i.e., use all frequencies)","``8.0`` or ``NULL`` (i.e., use all frequencies)"
+``perm_fmax`` (default: ``None``),Highest frequency (in Hz) for restricting the permutation test (event-related power only),"``30.0`` or ``None`` (i.e., use all frequencies)","``30.0`` or ``NULL`` (i.e., use all frequencies)"

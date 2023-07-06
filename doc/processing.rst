@@ -1,8 +1,14 @@
 Processing details
 ==================
 
-Flowchart
----------
+.. toctree::
+   :maxdepth: 2
 
-.. image:: https://i.imgur.com/WSj9t4b.png
+   participant
+
+Overview
+--------
+
+.. image:: _static/flowchart.svg
    :alt: Flow diagram of the pipeline steps
+   :align: center

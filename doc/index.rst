@@ -33,3 +33,5 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
    installation
    usage
    processing
+   examples
+   reference
