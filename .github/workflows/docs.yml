@@ -31,7 +31,7 @@ jobs:
       - name: Running the Sphinx to gh-pages Action
         uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.1.0
         with:
-          branch: ${{ steps.extract_branch.outputs.branch }}
+          branch: ${{steps.extract_branch.outputs.branch}}
           dir_docs: doc
           sphinxapiopts: '--separate -o . ../'
           sphinxapiexclude: '../*setup* ../*.ipynb'

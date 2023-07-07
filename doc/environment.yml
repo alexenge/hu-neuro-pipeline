@@ -1,5 +1,9 @@
 name: hu-neuro-pipeline-docs
 
+channels:
+  - conda-forge
+  - defaults
+
 dependencies:
   - jupytext
   - nbsphinx
