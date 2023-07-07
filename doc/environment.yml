@@ -8,5 +8,6 @@ dependencies:
   - jupytext
   - nbsphinx
   - r-irkernel
+  - sphinx-book-theme
   - sphinx-copybutton
   - sphinx-gallery
