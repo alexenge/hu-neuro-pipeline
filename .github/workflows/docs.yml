@@ -17,17 +17,23 @@ jobs:
         with:
           python-version: 3.9
           environment-file: doc/environment.yml
-          auto-update-conda: false
-          auto-activate-base: false
-          show-channel-urls: true
+          clean-patched-environment-file: false
+          miniforge-variant: Mambaforge
       - name: Installing the library
         shell: bash -l {0}
         run: |
-          python setup.py install
+          pip install build
+          python -m build
+          pip install dist/*.whl
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
+      - name: Retrive Python path
+        shell: bash -l {0}
+        id: python_path
+        run: |
+          echo "PYTHON=$(conda activate test && which python3)" >> $GITHUB_OUTPUT
       - name: Running the Sphinx to gh-pages Action
         uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.1.0
         with:
@@ -36,3 +42,5 @@ jobs:
           sphinxapiopts: '--separate -o . ../'
           sphinxapiexclude: '../*setup* ../*.ipynb'
           sphinxopts: ''
+        env:
+          RETICULATE_PYTHON: ${{steps.python_path.outputs.PYTHON}}
