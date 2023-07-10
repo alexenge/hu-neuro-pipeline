@@ -11,14 +11,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-      - name: Make conda environment
-        uses: conda-incubator/setup-miniconda@v2
+          fetch-depth: 0      
+      - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: 3.9
-          environment-file: doc/environment.yml
-          clean-patched-environment-file: false
+          activate-environment: hu-neuro-pipeline
           miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
+          use-only-tar-bz2: true # (for caching support)
+      - name: Update environment
+        run: mamba env update -n hu-neuro-pipeline -f doc/environment.yml
       - name: Installing the library
         shell: bash -l {0}
         run: |
@@ -33,7 +36,8 @@ jobs:
         shell: bash -l {0}
         id: python_path
         run: |
-          echo "PYTHON=$(conda activate test && which python3)" >> $GITHUB_OUTPUT
+          conda activate hu-neuro-pipeline
+          echo "PYTHON=$(which python3)" >> $GITHUB_OUTPUT
       - name: Running the Sphinx to gh-pages Action
         uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.1.0
         with:
