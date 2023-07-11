@@ -5,6 +5,7 @@ channels:
 dependencies:
   - jupytext
   - nbsphinx
+  - pip
   - python=3.11
   - r-base
   - r-dplyr
@@ -13,6 +14,6 @@ dependencies:
   - r-lme4
   - r-reticulate
   - r-rmisc
-  - sphinx-book-theme
+  - sphinx-book-theme=0.3.3
   - sphinx-copybutton
-  - sphinx-gallery
+  - sphinx-gallery=0.7.0
