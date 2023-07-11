@@ -49,13 +49,7 @@ reticulate::py_install("git+https://github.com/alexenge/hu-neuro-pipeline.git", 
 
 ## 2. Usage
 
-[Pipeline inputs](docs/inputs.md) & [outputs](docs/outputs.md)
-
-<img src="https://i.imgur.com/WSj9t4b.png" width="400">
-
-## 3. Examples
-
-### 3.1 For Python users
+### 2.1 For Python users
 
 Here is a fairly minimal example for a (fictional) N400/P600 experiment with two experimental factors: `semantics` (e.g., related versus unrelated words) and emotional `context` (e.g., emotionally negative versus neutral).
 
@@ -90,7 +84,7 @@ In this example we have specified:
 
 * The log file columns (`average_by`) for which we want to obtain by-participant averaged waveforms (i.e., for all main and interaction effects)
 
-### 3.2 For R users
+### 2.2 For R users
 
 Here is the same example as above but for using the pipeline from R:
 
@@ -126,3 +120,9 @@ trials <- res[[1]]
 evokeds <- res[[2]]
 config <- res[[3]]
 ```
+
+## 3. Processing details
+
+<img src="https://github.com/alexenge/hu-neuro-pipeline/blob/main/doc/_static/flowchart.svg" width="400">
+
+See the [documentation](https://hu-neuro-pipeline.readthedocs.io/en/latest/) for more details about how to use the pipeline and how it works under the hood.
