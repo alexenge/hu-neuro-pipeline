@@ -78,7 +78,7 @@ def linkcode_resolve(domain, info):
         filename = 'pipeline/%s#L%d-L%d' % find_source()
     except Exception:
         filename = info['module'].replace('.', '/') + '.py'
-    tag = 'master' if 'dev' in release else ('v' + release)
+    tag = 'main' if 'dev' in release else ('v' + release)
 
     return "https://github.com/alexenge/hu-neuro-pipeline/blob/%s/%s" % (tag, filename)
 
