@@ -1,0 +1,199 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.1.1
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+# ERP analysis (in R)
+
+## Loading the pipeline
+
+After following the [installation instructions for R users](../installation.html#for-r-users), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
+
+```{r}
+pipeline <- reticulate::import("pipeline")
+```
+
+## Downloading example data
+
+The pipeline comes with a function to download example data from the Abdel Rahman Lab's UCAP study.
+In this EEG experiment, participants performed a visual search task with visual objects that were either presented visually intact (factor `n_b == "normal"`) or blurred (factor `n_b == "blurr"`).
+
+The raw data are stored in the [Open Science Framework](https://osf.io/hdxvb) and more details about the study are in [Frömer et al. (2018)](https://doi.org/10.3389/fnins.2018.00048).
+
+```{r}
+ucap_paths <- pipeline$datasets$ucap$get_paths(n_participants = 2)
+print(ucap_paths)
+```
+
+To save time, we only download and process data from the first two participants.
+Feel free to re-run the example with more participants by increasing or removing the `n_participants` argument.
+
+The paths of the downloaded EEG header files (`.vhdr`), behavioral log files (`.txt`), and ocular correction files (`.matrix`) can now be fed into pipeline.
+
+## Running the pipeline
+
+We run a simple pipeline for single-trial ERP analysis with the following steps:
+
+- Downsampling to 250 Hz
+- Re-referecing to common average (not shown)
+- Ocular correction with BESA/MSEC matrices
+- Bandpass filtering between 0.1 and 40 Hz
+- Segmentation to epochs around stimulus triggers
+- Baseline correction (not shown)
+- Computing single trial N2 and P3b amplitudes by averaging across time windows and channels of interest
+- Creating by-participant averages for the blurred and normal conditions
+
+```{r}
+res <- pipeline$group_pipeline(
+
+  # Input/output paths
+  vhdr_files = ucap_paths$vhdr_files,
+  log_files = ucap_paths$log_files,
+  output_dir = "output",
+
+  # Preprocessing options
+  downsample_sfreq = 250.0,
+  besa_files = ucap_paths$besa_files,
+  highpass_freq = 0.1,
+  lowpass_freq = 40.0,
+
+  # Epoching options
+  triggers = c(201:208, 211:218),
+  components = list(
+    "name" = list("N2", "P3b"),
+    "tmin" = list(0.25, 0.4),
+    "tmax" = list(0.35, 0.55),
+    "roi" = list(
+      c("FC1", "FC2", "C1", "C2", "Cz"),
+      c("CP3", "CP1", "CPz", "CP2", "CP4", "P3", "Pz", "P4", "PO3", "POz", "PO4")
+    )
+  ),
+
+  # Averaging options
+  average_by = list(
+    blurr = "n_b == 'blurr'",
+    normal = "n_b == 'normal'"
+  )
+)
+```
+
+## Checking the results
+
+The resulting object (`res`) is a list with three components: A dataframe of single trial ERP amplitudes, a dataframe of by-participant condition averages, and a dictionary of pipeline metadata.
+
+### Single-trial ERP amplitudes
+
+These are basically just the log files, concatenated for all participants, with two added columns for the two ERP components of interest.
+Each value in these columns reflects the single trial ERP amplitude, averaged across time points and channels of interest.
+
+Here are the first couple of lines of the dataframe:
+
+```{r}
+trials <- res[[1]]
+head(trials)
+```
+
+We can plot the single trial ERP amplitudes (here for the N2 component), separately for the blurred and normal conditions, e.g., as a kernel density plot:
+
+```{r, tags=c("nbsphinx-thumbnail")}
+library(ggplot2)
+trials |>
+  ggplot(aes(x = N2, fill = n_b)) +
+  geom_density(color = NA, alpha = 0.5) +
+  labs(x = "N2 amplitude (µV)", y = "Density", fill = "Condition") +
+  theme_minimal(base_size = 25.0) +
+  theme(legend.position = "top")
+```
+
+Raincloud plots ([Allen et al., 2021](https://doi.org/10.12688/wellcomeopenres.15191.2)) would be a fancier alternative (e.g., using the [ggrain](https://github.com/njudd/ggrain) package).
+
+Note that these kinds of plots do not take into account the fact that the single trial amplitudes are nested within participants (and/or items).
+To do this, and to quantify if any descriptive differences between conditions are statistically reliable, we can run a linear mixed-effects model:
+
+```{r}
+library(lme4)
+mod <- lmer(N2 ~ n_b + (1 | participant_id), data = trials)
+summary(mod)
+```
+
+Here we predict the single trial N2 amplitude based on the fixed effect of blurred vs. normal, and we allow for random variation in the intercept between participants.
+
+Note that for sound inference on the full dataset, we would want to (a) apply proper contrast coding to the `n_b` factor (e.g., [Schad et al., 2020](https://doi.org/10.1016/j.jml.2019.104038)), (b) include random effects not just for participants, but also for items (e.g., [Judd et al., 2012](https://doi.org/10.1037/a0028347)), and (c) include not just random intercepts, but also random slopes (e.g., [Barr et al., 2013](https://doi.org/10.1016/j.jml.2012.11.001)).
+
+### By-participant condition averages
+
+This is one big data frame which, unlike `trials`, is averaged across trials (i.e., losing any single trial information) but *not* averaged across time points or channels (i.e., retaining the millisecond-wise ERP waveform at all electrodes).
+
+```{r}
+evokeds <- res[[2]]
+head(evokeds)
+```
+
+We can use it to display the grand-averaged ERP waveforms for different conditions as a timecourse plot at a single channel or ROI (here for the N2 ROI):
+
+```{r}
+evokeds |>
+  ggplot(aes(x = time, y = N2, color = label)) +
+  stat_summary(geom = "line", fun = mean) +
+  labs(x = "Time (s)", y = "N2 amplitude (µV)", color = "Condition") +
+  theme_minimal(base_size = 25.0) +
+  theme(legend.position = "top")
+```
+
+We can add error bars to the waveforms using the appropriate [standard error for whin-participant variables](http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/#error-bars-for-within-subjects-variables):
+
+```{r, message=FALSE}
+library(Rmisc)
+library(dplyr)
+evokeds |>
+  summarySEwithin(
+    measurevar = "N2",
+    withinvars = c("label", "time"),
+    idvar = "participant_id"
+  ) |>
+  mutate(time = as.numeric(as.character(time))) |>
+  ggplot(aes(x = time, y = N2)) +
+  geom_ribbon(aes(ymin = N2 - se, ymax = N2 + se, fill = label), alpha = 0.2) +
+  geom_line(aes(color = label)) +
+  labs(
+    x = "Time (s)",
+    y = "N2 amplitude (µV)",
+    color = "Condition",
+    fill = "Condition"
+  ) +
+  theme_minimal(base_size = 25.0) +
+  theme(legend.position = "top")
+```
+
+Note that (a) these error bars do not necessarily have to agree with the mixed model inference above, since one is performed on data averaged across trials and the other on data averaged across time, and (b) that the error bars in this example are very large and noisy because they are based on only two participants.
+
+### Pipeline metadata
+
+This is a dictionary (i.e., a named list) with various metadata about the pipeline run.
+
+```{r}
+config <- res[[3]]
+names(config)
+```
+
+It includes any input arguments that were used by the pipeline (either user-specified or default values).
+Additionally, it contains some statistics that were automatically computed by the pipeline along the way, such as the number of rejected epochs (based on a peak-to-peak amplitude threshold) per participant:
+
+```{r}
+lengths(config$auto_rejected_epochs)
+```
+
+Finally, it records the Python version and the versions of the most important Python packages that were used by the pipeline:
+
+```{r}
+config$package_versions
+```

@@ -1,7 +1,6 @@
 # General
 .DS_Store
 .Rhistory
-*.png
 __pycache__/
 /scratch/
 
@@ -9,3 +8,10 @@ __pycache__/
 *.egg-info/
 _version.py
 /dist/
+
+# Documentation
+doc/_build/
+doc/generated/
+doc/modules/
+doc/auto_examples/
+output/

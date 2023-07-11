@@ -1,0 +1,20 @@
+name: hu-neuro-pipeline-docs
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - jupytext
+  - nbsphinx
+  - pip
+  - poetry
+  - python=3.11
+  - r-base
+  - r-dplyr
+  - r-ggplot2
+  - r-irkernel
+  - r-lme4
+  - r-reticulate
+  - r-rmisc
+  - sphinx-book-theme=0.3.3
+  - sphinx-copybutton
+  - sphinx-gallery=0.7.0

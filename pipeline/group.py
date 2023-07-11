@@ -55,36 +55,16 @@ def group_pipeline(
     perm_fmax=None,
     n_jobs=1
 ):
-    """Processes EEG data for all participants of an experiment.
+    """Process EEG data for a group of participants.
 
-    For each participant, the raw data is read and cleaned using standard steps
-    (downsampling, bad channel interpolation, ocular correction, frequency
-    domain filtering). Epochs are created around the `triggers`. Bad epochs are
-    removed based on peak-to-peak amplitude. Single trial mean ERP amplitudes
-    for ERP `components` of interest are computed and matched to the single
-    trial behavioral data from the `log_files`.
-
-    Optionally, this last step is repeated on a time-frequency representation
-    (TFR) of the data obtained via Morlet wavelet convolution.
-
-    The result is a single trial data frame which can be used for fitting
-    linear mixed-effects models on the mean ERP amplitudes (and power).
-
-    Additionally, by-participant condition averages (`evokeds`) for the ERPs
-    (and power) are computed to facilitate plotting. Optionally, these can also
-    be tested for condition differences in an exploratory fashion using
-    cluster-based permutation tests.
-
-    For details about the pipeline, see Frömer et al. (2018)[1].
+    Performs preprocessing and computes single trial mean amplitudes for ERP
+    components of interest as well as by-participant averaged waveforms.
+    Optionally, performs time-frequency analysis and/or cluster-based
+    permutation tests.
 
     Parameters & returns
     --------------------
-    See the README[2] in the GitHub repository for the pipeline.
-
-    Notes
-    -----
-    [1] https://doi.org/10.3389/fnins.2018.00048
-    [2] https://github.com/alexenge/hu-neuro-pipeline/blob/dev/README.md
+    See `Usage <../usage.html>`_ for the pipeline input arguments and outputs.
     """
 
     # Convert input types
