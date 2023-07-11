@@ -22,35 +22,9 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
               'sphinx.ext.napoleon',
-              'sphinx.ext.viewcode',
               'nbsphinx',
               'sphinx_copybutton',
               'sphinx_gallery.load_style']
-
-
-from urllib.parse import quote
-
-def linkcode_resolve(domain, info):
-    # print(f"domain={domain}, info={info}")
-    if domain != 'py':
-        return None
-    if not info['module']:
-        return None
-    filename = quote(info['module'].replace('.', '/'))
-    if not filename.startswith("tests"):
-        filename = "src/" + filename
-    if "fullname" in info:
-        anchor = info["fullname"]
-        anchor = "#:~:text=" + quote(anchor.split(".")[-1])
-    else:
-        anchor = ""
-
-    # github
-    result = "https://github.com/alexenge/hu-neuro-pipeline/blob/master/%s.py%s" % (filename, anchor)
-    # print(result)
-    return result
-
-
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
@@ -75,6 +49,80 @@ html_static_path = ['_static']
 html_css_files = ['custom.css']
 
 pygments_style = 'tango'
+
+# -- Options for sphinx.linkscode --------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
+
+# Adapted from https://gist.github.com/nlgranger/55ff2e7ff10c280731348a16d569cb73
+
+import sys
+import os
+import subprocess
+import inspect
+import pkg_resources
+
+linkcode_revision = 'main'
+try:
+    # lock to commit number
+    cmd = 'git log -n1 --pretty=%H'
+    head = subprocess.check_output(cmd.split()).strip().decode('utf-8')
+    linkcode_revision = head
+
+    # if we are on main's HEAD, use main as reference
+    cmd = 'git log --first-parent main -n1 --pretty=%H'
+    main = subprocess.check_output(cmd.split()).strip().decode('utf-8')
+    if head == main:
+        linkcode_revision = 'main'
+
+    # if we have a tag, use tag as reference
+    cmd = 'git describe --exact-match --tags ' + head
+    tag = subprocess.check_output(cmd.split(' ')).strip().decode('utf-8')
+    linkcode_revision = tag
+
+except subprocess.CalledProcessError:
+    pass
+
+linkcode_url = 'https://github.com/alexenge/hu-neuro-pipeline/blob/' + \
+    linkcode_revision + '/{filepath}#L{linestart}-L{linestop}'
+
+
+def linkcode_resolve(domain, info):
+    if domain != 'py' or not info['module']:
+        return None
+
+    modname = info['module']
+    topmodulename = modname.split('.')[0]
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except Exception:
+            return None
+
+    try:
+        modpath = pkg_resources.require(topmodulename)[0].location
+        filepath = os.path.relpath(inspect.getsourcefile(obj), modpath)
+        if filepath is None:
+            return
+    except Exception:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except OSError:
+        return None
+    else:
+        linestart, linestop = lineno, lineno + len(source) - 1
+
+    return linkcode_url.format(filepath=filepath, linestart=linestart,
+                               linestop=linestop)
+
 
 # -- InterSphinx options -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
