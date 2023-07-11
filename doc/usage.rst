@@ -4,5 +4,6 @@ Usage
 .. toctree::
    :maxdepth: 2
 
-   quickstart
-   inputs
+   usage_quickstart
+   usage_inputs
+   usage_outputs

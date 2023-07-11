@@ -4,11 +4,7 @@ Processing details
 .. toctree::
    :maxdepth: 2
 
-   participant
-
-Overview
---------
-
-.. image:: _static/flowchart.svg
-   :alt: Flow diagram of the pipeline steps
-   :align: center
+   processing_overview
+   processing_participant
+   processing_group
+   processing_tfr

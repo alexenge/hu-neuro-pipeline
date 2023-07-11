@@ -1,6 +1,10 @@
 Quickstart
 ==========
 
+.. contents::
+    :depth: 2
+    :backlinks: none
+
 For Python users
 ----------------
 

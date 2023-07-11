@@ -1,6 +1,10 @@
 Participant level
 =================
 
+.. contents::
+    :depth: 2
+    :backlinks: none
+
 Read raw data
 -------------
 
@@ -80,7 +84,22 @@ Compute single trial amplitudes
 
 For each ERP component of interest, the pipeline computes one value per trial.
 This value reflects the mean ERP amplitude for this component (in µV) averaged across (a) the time window of interest (e.g., 300--500 ms for the N400 component) and (b) the channels in the region of interest (e.g., channels C1, Cz, C2, CP1, CPz, and CP2 for the N400 component).
-Performing this step on the single trial level is the main advantage of the Frömer et al. (2018) pipeline compared to more traditional ERP analysis approach, where the amplitudes are additionally averaged across trials from the same condition, thereby losing any information available on the single trial level (e.g., item-level confounds or random effects). [#]_
+Performing this step on the single trial level is the main advantage of the Frömer et al. (2018) [#]_ pipeline compared to more traditional ERP analysis approach, where the amplitudes are additionally averaged across trials from the same condition, thereby losing any information available on the single trial level (e.g., item-level confounds or random effects).
+
+Compute by-participant condition averages
+-----------------------------------------
+
+In addition to the single trial amplitudes (usually used for statistical modeling), the pipeline computes average waveforms for each participant and experimental condition.
+Unlike the single trial amplitudes, these averages are computed by averaging across trials from the same condition, but they retain the temporal information (all time points in the epoch) and spatial information (all channels) of the epoched data.
+These averages are typically used for visualization as time course plots or scalp topographies or for cluster-based permutation tests.
+They could also be used for "traditional" statistical modeling such as repeated measures ANOVAs, but this is not recommended because it discards the single trial information and makes more questionable assumptions than the single trial mixed modeling approach.
+
+Create quality control reports
+------------------------------
+
+Optionally, the pipeline creates one quality control (QC) report file in HTML format for each participant.
+This contains plots of the data before and after preprocessing as well as some summary statistics and metadata.
+It is especially recommended to check these reports when using ICA for artifact correction, to confirm that the automatic component detection algorithm has indeed indentified plausible eye blink and eye movement components.
 
 Notes
 -----

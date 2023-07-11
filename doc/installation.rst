@@ -1,6 +1,10 @@
 Installation
 ============
 
+.. contents::
+    :depth: 2
+    :backlinks: none
+
 For Python users
 ----------------
 
@@ -16,8 +20,7 @@ Alternatively, to install the latest development version directly from `GitHub <
 
     pip install git+https://github.com/alexenge/hu-neuro-pipeline.git
 
-The pipeline requires Python Version ≥ 3.8 and a number of dependency packages, which will get installed automatically when running the commands above.
-For a complete list, see the ``install_requires`` section in ``setup.py``.
+The pipeline requires Python Version ≥ 3.8 and a number of `dependency packages <https://github.com/alexenge/hu-neuro-pipeline/blob/doc/add-sphinx/setup.py#L47-L55>`_, which will get installed automatically when running the commands above.
 
 For R users
 -----------
