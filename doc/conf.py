@@ -5,7 +5,10 @@
 
 import pathlib
 import sys
+
 sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
+
+import pipeline
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -13,6 +16,8 @@ sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
 project = 'hu-neuro-pipeline'
 copyright = '2023, Alexander Enge'
 author = 'Alexander Enge'
+version = '.'.join(pipeline.__version__.split('.', 2)[:2])
+release = pipeline.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -53,76 +58,29 @@ pygments_style = 'tango'
 # -- Options for sphinx.linkscode --------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/linkcode.html
 
-# Adapted from https://gist.github.com/nlgranger/55ff2e7ff10c280731348a16d569cb73
-
-import sys
-import os
-import subprocess
-import inspect
-import pkg_resources
-
-linkcode_revision = 'main'
-try:
-    # lock to commit number
-    cmd = 'git log -n1 --pretty=%H'
-    head = subprocess.check_output(cmd.split()).strip().decode('utf-8')
-    linkcode_revision = head
-
-    # if we are on main's HEAD, use main as reference
-    cmd = 'git log --first-parent main -n1 --pretty=%H'
-    main = subprocess.check_output(cmd.split()).strip().decode('utf-8')
-    if head == main:
-        linkcode_revision = 'main'
-
-    # if we have a tag, use tag as reference
-    cmd = 'git describe --exact-match --tags ' + head
-    tag = subprocess.check_output(cmd.split(' ')).strip().decode('utf-8')
-    linkcode_revision = tag
-
-except subprocess.CalledProcessError:
-    pass
-
-linkcode_url = 'https://github.com/alexenge/hu-neuro-pipeline/blob/' + \
-    linkcode_revision + '/{filepath}#L{linestart}-L{linestop}'
-
-
 def linkcode_resolve(domain, info):
+    def find_source():
+        # try to find the file and line number, based on code from numpy:
+        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
+        obj = sys.modules[info['module']]
+        for part in info['fullname'].split('.'):
+            obj = getattr(obj, part)
+        import inspect
+        import os
+        fn = inspect.getsourcefile(obj)
+        fn = os.path.relpath(fn, start=os.path.dirname(pipeline.__file__))
+        source, lineno = inspect.getsourcelines(obj)
+        return fn, lineno, lineno + len(source) - 1
+
     if domain != 'py' or not info['module']:
         return None
-
-    modname = info['module']
-    topmodulename = modname.split('.')[0]
-    fullname = info['fullname']
-
-    submod = sys.modules.get(modname)
-    if submod is None:
-        return None
-
-    obj = submod
-    for part in fullname.split('.'):
-        try:
-            obj = getattr(obj, part)
-        except Exception:
-            return None
-
     try:
-        modpath = pkg_resources.require(topmodulename)[0].location
-        filepath = os.path.relpath(inspect.getsourcefile(obj), modpath)
-        if filepath is None:
-            return
+        filename = 'pipeline/%s#L%d-L%d' % find_source()
     except Exception:
-        return None
+        filename = info['module'].replace('.', '/') + '.py'
+    tag = 'master' if 'dev' in release else ('v' + release)
 
-    try:
-        source, lineno = inspect.getsourcelines(obj)
-    except OSError:
-        return None
-    else:
-        linestart, linestop = lineno, lineno + len(source) - 1
-
-    return linkcode_url.format(filepath=filepath, linestart=linestart,
-                               linestop=linestop)
-
+    return "https://github.com/alexenge/hu-neuro-pipeline/blob/%s/%s" % (tag, filename)
 
 # -- InterSphinx options -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
