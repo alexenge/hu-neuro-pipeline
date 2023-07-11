@@ -5,6 +5,7 @@ channels:
 dependencies:
   - jupytext
   - nbsphinx
+  - python=3.11
   - r-base
   - r-dplyr
   - r-ggplot2
