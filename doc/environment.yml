@@ -6,7 +6,6 @@ dependencies:
   - jupytext
   - nbsphinx
   - pip
-  - poetry
   - python=3.11
   - r-base
   - r-dplyr
