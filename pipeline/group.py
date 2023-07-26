@@ -109,16 +109,19 @@ def group_pipeline(
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
-        vhdr_files = files_from_dir(vhdr_files, extensions=['vhdr'])
+        vhdr_extensions = ['.vhdr']
+        vhdr_files = files_from_dir(vhdr_files, vhdr_extensions)
     if isinstance(log_files, str):
-        log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
+        log_extensions = ['.csv', '.tsv', '.txt']
+        log_files = files_from_dir(log_files, log_extensions)
     assert len(log_files) == len(vhdr_files), \
         f'Number of `log_files` ({len(log_files)}) does not match ' + \
         f'number of `vhdr_files` ({len(vhdr_files)})'
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
-        besa_files = files_from_dir(besa_files, extensions=['matrix'])
+        besa_extensions = ['.matrix']
+        besa_files = files_from_dir(besa_files, besa_extensions)
     elif besa_files is None:
         besa_files = [None] * len(vhdr_files)
     assert len(besa_files) == len(vhdr_files), \

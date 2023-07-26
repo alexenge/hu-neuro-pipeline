@@ -61,7 +61,7 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
     assert path.isdir(dir_path), f'Didn\'t find directory `{dir_path}`!'
     files = []
     for extension in extensions:
-        files += glob(f'{dir_path}/*.{extension}')
+        files += glob(f'{dir_path}/*{extension}')
 
     # Sort naturally because some files might not have leading zeros
     if natsort_files:
