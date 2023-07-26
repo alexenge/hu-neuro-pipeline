@@ -5,7 +5,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import (convert_participant_input, files_from_dir, get_participant_id,
+from .io import (besa_extensions, convert_participant_input, eeg_extensions,
+                 files_from_dir, get_participant_id, log_extensions,
                  package_versions, save_config, save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
@@ -109,10 +110,8 @@ def group_pipeline(
 
     # Get input file paths if directories were provided
     if isinstance(vhdr_files, str):
-        vhdr_extensions = ['.vhdr']
-        vhdr_files = files_from_dir(vhdr_files, vhdr_extensions)
+        vhdr_files = files_from_dir(vhdr_files, eeg_extensions)
     if isinstance(log_files, str):
-        log_extensions = ['.csv', '.tsv', '.txt']
         log_files = files_from_dir(log_files, log_extensions)
     assert len(log_files) == len(vhdr_files), \
         f'Number of `log_files` ({len(log_files)}) does not match ' + \
@@ -120,7 +119,6 @@ def group_pipeline(
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
-        besa_extensions = ['.matrix']
         besa_files = files_from_dir(besa_files, besa_extensions)
     elif besa_files is None:
         besa_files = [None] * len(vhdr_files)
