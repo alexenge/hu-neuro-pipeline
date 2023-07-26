@@ -9,7 +9,7 @@ from mne import Evoked
 from mne import __version__ as mne_version
 from mne import write_evokeds
 from mne.channels.layout import _find_topomap_coords
-from mne.io import concatenate_raws, read_raw_brainvision
+from mne.io import concatenate_raws, read_raw
 from mne.io._read_raw import readers
 from mne.time_frequency import AverageTFR, write_tfrs
 from numpy import __version__ as numpy_version
@@ -26,7 +26,7 @@ def read_raw(vhdr_file_or_files):
     if isinstance(vhdr_file_or_files, list):
         vhdr_files = vhdr_file_or_files
         print(f'\n=== Reading and combining raw data from {vhdr_files} ===')
-        raw_list = [read_raw_brainvision(f, preload=True) for f in vhdr_files]
+        raw_list = [read_raw(f, preload=True) for f in vhdr_files]
         raw = concatenate_raws(raw_list)
         participant_id = get_participant_id(vhdr_files)
 
@@ -34,7 +34,7 @@ def read_raw(vhdr_file_or_files):
     else:
         vhdr_file = vhdr_file_or_files
         print(f'\n=== Reading raw data from {vhdr_file} ===')
-        raw = read_raw_brainvision(vhdr_file, preload=True)
+        raw = read_raw(vhdr_file, preload=True)
         participant_id = get_participant_id(vhdr_file)
 
     return raw, participant_id
