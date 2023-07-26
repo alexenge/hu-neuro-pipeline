@@ -19,7 +19,7 @@ from sklearn import __version__ as sk_version
 from ._version import version as pipeline_version
 
 
-def read_raw(vhdr_file_or_files):
+def read_eeg(vhdr_file_or_files):
     """Reads one or more raw EEG datasets from the same participant."""
 
     # Read raw datasets and combine if a list was provided
