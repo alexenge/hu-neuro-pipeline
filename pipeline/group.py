@@ -5,16 +5,17 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 from .averaging import compute_grands, compute_grands_df
-from .io import (convert_participant_input, files_from_dir, get_participant_id,
+from .io import (besa_extensions, convert_participant_input, eeg_extensions,
+                 files_from_dir, get_participant_id, log_extensions,
                  package_versions, save_config, save_df, save_evokeds)
 from .participant import participant_pipeline
 from .perm import compute_perm, compute_perm_tfr
 
 
 def group_pipeline(
-    vhdr_files,
-    log_files,
-    output_dir,
+    raw_files=None,
+    log_files=None,
+    output_dir=None,
     clean_dir=None,
     epochs_dir=None,
     report_dir=None,
@@ -53,7 +54,8 @@ def group_pipeline(
     perm_channels=None,
     perm_fmin=None,
     perm_fmax=None,
-    n_jobs=1
+    n_jobs=1,
+    vhdr_files=None
 ):
     """Process EEG data for a group of participants.
 
@@ -107,33 +109,41 @@ def group_pipeline(
         report_dir=report_dir,
         to_df=to_df)
 
+    if raw_files is None:
+        if vhdr_files is not None:
+            from warnings import warn
+            warn('⚠️ The `vhdr_files` argument has been renamed to `raw_files` ' +
+                 'and will cease to work in a future version of the pipeline. ' +
+                 'Please update your code accordingly.')
+            raw_files = vhdr_files
+
     # Get input file paths if directories were provided
-    if isinstance(vhdr_files, str):
-        vhdr_files = files_from_dir(vhdr_files, extensions=['vhdr'])
+    if isinstance(raw_files, str):
+        raw_files = files_from_dir(raw_files, eeg_extensions)
     if isinstance(log_files, str):
-        log_files = files_from_dir(log_files, extensions=['csv', 'tsv', 'txt'])
-    assert len(log_files) == len(vhdr_files), \
+        log_files = files_from_dir(log_files, log_extensions)
+    assert len(log_files) == len(raw_files), \
         f'Number of `log_files` ({len(log_files)}) does not match ' + \
-        f'number of `vhdr_files` ({len(vhdr_files)})'
+        f'number of `raw_files` ({len(raw_files)})'
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
-        besa_files = files_from_dir(besa_files, extensions=['matrix'])
+        besa_files = files_from_dir(besa_files, besa_extensions)
     elif besa_files is None:
-        besa_files = [None] * len(vhdr_files)
-    assert len(besa_files) == len(vhdr_files), \
+        besa_files = [None] * len(raw_files)
+    assert len(besa_files) == len(raw_files), \
         f'Number of `besa_files` ({len(besa_files)}) does not match ' + \
-        f'number of `vhdr_files` ({len(vhdr_files)})'
+        f'number of `raw_files` ({len(raw_files)})'
 
     # Extract participant IDs from filenames
-    participant_ids = [get_participant_id(f) for f in vhdr_files]
+    participant_ids = [get_participant_id(f) for f in raw_files]
 
     # Construct lists of bad_channels and skip_log_rows per participant
     bad_channels = convert_participant_input(bad_channels, participant_ids)
     skip_log_rows = convert_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
-    participant_args = zip(vhdr_files, log_files, besa_files,
+    participant_args = zip(raw_files, log_files, besa_files,
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
@@ -160,7 +170,7 @@ def group_pipeline(
         grands, grands_df, output_dir, participant_id='grand', to_df=to_df)
 
     # Update config with participant-specific inputs...
-    config['vhdr_files'] = vhdr_files
+    config['raw_files'] = raw_files
     config['bad_channels'] = bad_channels
     config['besa_files'] = besa_files
     config['skip_log_rows'] = skip_log_rows

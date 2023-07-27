@@ -6,7 +6,7 @@ from mne.time_frequency import tfr_morlet
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
                        match_log_to_epochs, read_log, triggers_to_event_id)
-from .io import (read_raw, save_clean, save_df, save_epochs, save_evokeds,
+from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
                  save_montage, save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
@@ -15,7 +15,7 @@ from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
 def participant_pipeline(
-    vhdr_file,
+    raw_file,
     log_file,
     besa_file=None,
     bad_channels=None,
@@ -69,7 +69,7 @@ def participant_pipeline(
     config = locals()
 
     # Read raw data
-    raw, participant_id = read_raw(vhdr_file)
+    raw, participant_id = read_eeg(raw_file)
 
     # Create backup of the raw data for the HTML report
     if report_dir is not None:

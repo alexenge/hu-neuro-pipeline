@@ -20,7 +20,7 @@ def boilerplate(config):
         '({step_mne_url}) for Python (Version {python_version}; Van Rossum & '
         'Drake, 2009).\n')
     text = text.format(
-        n_participants=len(config['vhdr_files']),
+        n_participants=len(config['raw_files']),
         mne_version=mne.__version__,
         step_mne_url='https://github.com/alexenge/step-mne',  # TODO: Add version
         python_version=python_version()

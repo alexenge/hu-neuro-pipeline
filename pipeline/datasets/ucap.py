@@ -25,7 +25,7 @@ def get_paths(n_participants=40):
     eeg_paths = list(eeg_fetcher.registry.keys())[:n_files]
     eeg_paths = [eeg_fetcher.fetch(path) for path in eeg_paths]
     vhdr_paths = [path for path in eeg_paths if path.endswith('.vhdr')]
-    paths['vhdr_files'] = vhdr_paths
+    paths['raw_files'] = vhdr_paths
 
     participant_ids = [path.split('/')[-1].replace('.vhdr', '')
                        for path in vhdr_paths]
