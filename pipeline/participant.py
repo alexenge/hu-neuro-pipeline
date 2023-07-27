@@ -107,10 +107,14 @@ def participant_pipeline(
     filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
 
     # Determine events and the corresponding (selection of) triggers
-    events, event_id = events_from_annotations(
-        filt, regexp='Stimulus', verbose=False)
+    events, event_id = events_from_annotations(filt, verbose=False)
     if triggers is not None:
-        event_id = triggers_to_event_id(triggers)
+        from mne.io.brainvision.brainvision import RawBrainVision
+        if isinstance(filt, RawBrainVision):
+            event_id = {str(trigger): trigger for trigger in triggers}
+        else:
+            event_id = {key: value for key, value in event_id.items()
+                        if int(key) in triggers}
 
     # Epoching including baseline correction
     if baseline is not None:
