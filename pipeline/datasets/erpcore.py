@@ -72,6 +72,7 @@ def get_paths(component=None, n_participants=40):
 
     assert component is not None and component in osf_ids.keys(), \
         f'`component` must be one of {list(osf_ids.keys())}'
+    n_participants = int(n_participants)
     max_participants = 40
     assert n_participants in range(1, max_participants + 1), \
         f'`n_participants` must be an integer between 1 and {max_participants}'
