@@ -69,16 +69,8 @@ def apply_montage(raw, montage):
         if ch_name in raw.ch_names:
             raw.set_channel_types({ch_name: 'misc'})
 
-    # Drop EEG channels that are not in the montage
-    raw_channels = set(raw.copy().pick_types(eeg=True).ch_names)
-    montage_channels = set(digmontage.ch_names)
-    drop_channels = list(raw_channels - montage_channels)
-    if drop_channels != []:
-        print(f'Removing channels that are not in the montage {drop_channels}')
-        raw.drop_channels(drop_channels)
-
     # Apply montage
-    raw.set_montage(digmontage)
+    raw.set_montage(digmontage, match_case=False, on_missing='warn')
 
 
 def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):
