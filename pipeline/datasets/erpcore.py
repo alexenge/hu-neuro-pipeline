@@ -95,7 +95,7 @@ def get_paths(component=None, n_participants=40):
 
     paths = {'raw_files': [], 'log_files': []}
     for file in sorted(fetcher.registry_files):
-        fetcher.fetch(file)
+        file = fetcher.fetch(file)
         if file.endswith('_eeg.set'):
             paths['raw_files'].append(file)
         elif file.endswith('_events.tsv'):
@@ -125,8 +125,9 @@ def construct_fetcher(base_url, remote_dir, local_dir, exclude_dirs=None):
     urls = {}
     hashes = {}
     for file in files:
-        remote_path = file['attributes']['materialized']
-        local_path = str(Path(f'{local_dir}/{remote_path}'))
+        relative_path = file['attributes']['materialized']
+        relative_path = relative_path.replace(' Raw Data BIDS-Compatible', '')
+        local_path = str(Path(f'{local_dir}/{relative_path}'))
         urls[local_path] = base_url + file['attributes']['path']
         hashes[local_path] = 'md5:' + file['attributes']['extra']['hashes']['md5']
 
