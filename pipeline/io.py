@@ -64,6 +64,10 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
     for extension in extensions:
         files += glob(f'{dir_path}/*{extension}')
 
+    # For BrainVision files, make sure to only return the header (`.vhdr`) file
+    if any(['.vhdr' in f for f in files]):
+        files = [f for f in files if '.eeg' not in f and '.vmrk' not in f]
+
     # Sort naturally because some files might not have leading zeros
     if natsort_files:
         files = sorted(files, key=natsort)
