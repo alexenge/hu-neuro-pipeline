@@ -13,9 +13,9 @@ from .perm import compute_perm, compute_perm_tfr
 
 
 def group_pipeline(
-    raw_files,
-    log_files,
-    output_dir,
+    raw_files=None,
+    log_files=None,
+    output_dir=None,
     clean_dir=None,
     epochs_dir=None,
     report_dir=None,
@@ -54,7 +54,8 @@ def group_pipeline(
     perm_channels=None,
     perm_fmin=None,
     perm_fmax=None,
-    n_jobs=1
+    n_jobs=1,
+    vhdr_files=None
 ):
     """Process EEG data for a group of participants.
 
@@ -107,6 +108,14 @@ def group_pipeline(
         chanlocs_dir=output_dir,
         report_dir=report_dir,
         to_df=to_df)
+
+    if raw_files is None:
+        if vhdr_files is not None:
+            from warnings import warn
+            warn('⚠️ The `vhdr_files` argument has been renamed to `raw_files` ' +
+                 'and will cease to work in a future version of the pipeline. ' +
+                 'Please update your code accordingly.')
+            raw_files = vhdr_files
 
     # Get input file paths if directories were provided
     if isinstance(raw_files, str):
