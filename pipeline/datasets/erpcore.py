@@ -93,11 +93,11 @@ def get_paths(component=None, n_participants=40):
                                 local_dir='erpcore/',
                                 exclude_dirs=exclude_dirs)
 
-    paths = {'eeg_files': [], 'log_files': []}
+    paths = {'raw_files': [], 'log_files': []}
     for file in sorted(fetcher.registry_files):
         fetcher.fetch(file)
         if file.endswith('_eeg.set'):
-            paths['eeg_files'].append(file)
+            paths['raw_files'].append(file)
         elif file.endswith('_events.tsv'):
             paths['log_files'].append(file)
 

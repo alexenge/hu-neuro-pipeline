@@ -19,38 +19,38 @@ from sklearn import __version__ as sk_version
 from ._version import version as pipeline_version
 
 
-def read_eeg(vhdr_file_or_files):
+def read_eeg(raw_file_or_files):
     """Reads one or more raw EEG datasets from the same participant."""
 
     # Read raw datasets and combine if a list was provided
-    if isinstance(vhdr_file_or_files, list):
-        vhdr_files = vhdr_file_or_files
-        print(f'\n=== Reading and combining raw data from {vhdr_files} ===')
-        raw_list = [read_raw(f, preload=True) for f in vhdr_files]
+    if isinstance(raw_file_or_files, list):
+        raw_files = raw_file_or_files
+        print(f'\n=== Reading and combining raw data from {raw_files} ===')
+        raw_list = [read_raw(f, preload=True) for f in raw_files]
         raw = concatenate_raws(raw_list)
-        participant_id = get_participant_id(vhdr_files)
+        participant_id = get_participant_id(raw_files)
 
     # Read raw dataset if only a single one was provided
     else:
-        vhdr_file = vhdr_file_or_files
-        print(f'\n=== Reading raw data from {vhdr_file} ===')
-        raw = read_raw(vhdr_file, preload=True)
-        participant_id = get_participant_id(vhdr_file)
+        raw_file = raw_file_or_files
+        print(f'\n=== Reading raw data from {raw_file} ===')
+        raw = read_raw(raw_file, preload=True)
+        participant_id = get_participant_id(raw_file)
 
     return raw, participant_id
 
 
-def get_participant_id(vhdr_file_or_files):
+def get_participant_id(raw_file_or_files):
     """Extracts the basename of an input file to use as participant ID."""
 
     # Extract participant ID from raw data file name(s)
-    if isinstance(vhdr_file_or_files, list):
-        vhdr_files = vhdr_file_or_files
-        participant_id = [path.basename(f).split('.')[0] for f in vhdr_files]
+    if isinstance(raw_file_or_files, list):
+        raw_files = raw_file_or_files
+        participant_id = [path.basename(f).split('.')[0] for f in raw_files]
         participant_id = '_'.join(participant_id)
     else:
-        vhdr_file = vhdr_file_or_files
-        participant_id = path.basename(vhdr_file).split('.')[0]
+        raw_file = raw_file_or_files
+        participant_id = path.basename(raw_file).split('.')[0]
 
     return participant_id
 
@@ -94,7 +94,7 @@ def convert_participant_input(input, participant_ids):
         participant_dict = {id: None for id in participant_ids}
         for id, values in input.items():
             assert id in participant_ids, \
-                f'Participant ID {id} is not in vhdr_files'
+                f'Participant ID {id} is not in raw_files'
             values = [values] if not isinstance(values, list) else values
             participant_dict[id] = values
         return list(participant_dict.values())

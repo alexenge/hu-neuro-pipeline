@@ -13,7 +13,7 @@ from .perm import compute_perm, compute_perm_tfr
 
 
 def group_pipeline(
-    vhdr_files,
+    raw_files,
     log_files,
     output_dir,
     clean_dir=None,
@@ -109,32 +109,32 @@ def group_pipeline(
         to_df=to_df)
 
     # Get input file paths if directories were provided
-    if isinstance(vhdr_files, str):
-        vhdr_files = files_from_dir(vhdr_files, eeg_extensions)
+    if isinstance(raw_files, str):
+        raw_files = files_from_dir(raw_files, eeg_extensions)
     if isinstance(log_files, str):
         log_files = files_from_dir(log_files, log_extensions)
-    assert len(log_files) == len(vhdr_files), \
+    assert len(log_files) == len(raw_files), \
         f'Number of `log_files` ({len(log_files)}) does not match ' + \
-        f'number of `vhdr_files` ({len(vhdr_files)})'
+        f'number of `raw_files` ({len(raw_files)})'
 
     # Get input BESA matrix files if necessary
     if isinstance(besa_files, str):
         besa_files = files_from_dir(besa_files, besa_extensions)
     elif besa_files is None:
-        besa_files = [None] * len(vhdr_files)
-    assert len(besa_files) == len(vhdr_files), \
+        besa_files = [None] * len(raw_files)
+    assert len(besa_files) == len(raw_files), \
         f'Number of `besa_files` ({len(besa_files)}) does not match ' + \
-        f'number of `vhdr_files` ({len(vhdr_files)})'
+        f'number of `raw_files` ({len(raw_files)})'
 
     # Extract participant IDs from filenames
-    participant_ids = [get_participant_id(f) for f in vhdr_files]
+    participant_ids = [get_participant_id(f) for f in raw_files]
 
     # Construct lists of bad_channels and skip_log_rows per participant
     bad_channels = convert_participant_input(bad_channels, participant_ids)
     skip_log_rows = convert_participant_input(skip_log_rows, participant_ids)
 
     # Combine participant-specific inputs
-    participant_args = zip(vhdr_files, log_files, besa_files,
+    participant_args = zip(raw_files, log_files, besa_files,
                            bad_channels, skip_log_rows)
 
     # Do processing in parallel
@@ -161,7 +161,7 @@ def group_pipeline(
         grands, grands_df, output_dir, participant_id='grand', to_df=to_df)
 
     # Update config with participant-specific inputs...
-    config['vhdr_files'] = vhdr_files
+    config['raw_files'] = raw_files
     config['bad_channels'] = bad_channels
     config['besa_files'] = besa_files
     config['skip_log_rows'] = skip_log_rows

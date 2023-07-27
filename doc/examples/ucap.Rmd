@@ -56,7 +56,7 @@ We run a simple pipeline for single-trial ERP analysis with the following steps:
 res <- pipeline$group_pipeline(
 
   # Input/output paths
-  vhdr_files = ucap_paths$vhdr_files,
+  raw_files = ucap_paths$raw_files,
   log_files = ucap_paths$log_files,
   output_dir = "output",
 

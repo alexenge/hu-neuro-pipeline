@@ -15,7 +15,7 @@ from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
 def participant_pipeline(
-    vhdr_file,
+    raw_file,
     log_file,
     besa_file=None,
     bad_channels=None,
@@ -69,7 +69,7 @@ def participant_pipeline(
     config = locals()
 
     # Read raw data
-    raw, participant_id = read_eeg(vhdr_file)
+    raw, participant_id = read_eeg(raw_file)
 
     # Create backup of the raw data for the HTML report
     if report_dir is not None:
