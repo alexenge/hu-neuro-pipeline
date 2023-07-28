@@ -18,3 +18,7 @@ dependencies:
   - sphinx-book-theme=0.3.3
   - sphinx-copybutton
   - sphinx-gallery=0.7.0
+  - sphinxcontrib-bibtex
+  - pip:
+      - pybtex-apa-style
+      - sphinxcontrib-apa

@@ -5,14 +5,41 @@ import urllib.request
 import pooch
 
 # URL of the UCAP repo files on OSF
-base_url = 'https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage'
+BASE_URL = 'https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage'
 
 # Local cache to download the files to
-local_cache = 'hu-neuro-pipeline'
+LOCAL_CACHE = 'hu-neuro-pipeline'
 
 
-def get_paths(n_participants=40):
-    """Downloads sample data from the UCAP study and returns the paths."""
+def get_ucap(n_participants=40):
+    """Get sample data from the UCAP dataset.
+
+    The data are either downloaded from the OSF or found in the local cache.
+    See :footcite:`fromer2018` for details on the UCAP dataset.
+
+    Parameters
+    ----------
+    n_participants : int, optional
+        How many participants to download. By default, downloads all 40
+        participants available in the dataset.
+
+    Returns
+    -------
+    dict
+        A dictionary with the file paths of the downloaded data:
+
+        - ``'raw_files'``: A list with the paths of the raw EEG files
+          (``.vhdr``)
+        - ``'log_files'`` A list with the paths of the log files (``.txt``)
+
+    See Also
+    --------
+    pipeline.datasets.get_erpcore
+
+    References
+    ----------
+    .. footbibliography::
+    """
 
     max_participants = 40
     assert n_participants in range(1, max_participants + 1), \
@@ -46,7 +73,7 @@ def get_paths(n_participants=40):
 def construct_fetcher(remote_dir, local_dir):
     """Constructs a pooch fetcher for getting UCAP remote files locally."""
 
-    with urllib.request.urlopen(f'{base_url}/{remote_dir}') as url:
+    with urllib.request.urlopen(f'{BASE_URL}/{remote_dir}') as url:
         files = json.loads(url.read().decode())['data']
 
     files = sorted(files, key=lambda d: natsort(d['attributes']['name']))
@@ -55,11 +82,11 @@ def construct_fetcher(remote_dir, local_dir):
     hashes = {}
     for file in files:
         local_path = local_dir + file['attributes']['name']
-        urls[local_path] = base_url + file['attributes']['path']
+        urls[local_path] = BASE_URL + file['attributes']['path']
         hashes[local_path] = 'md5:' + file['attributes']['extra']['hashes']['md5']
 
-    fetcher = pooch.create(path=pooch.os_cache(local_cache),
-                           base_url=base_url,
+    fetcher = pooch.create(path=pooch.os_cache(LOCAL_CACHE),
+                           base_url=BASE_URL,
                            env='PIPELINE_DATA_DIR',
                            registry=hashes,
                            urls=urls)
@@ -67,5 +94,7 @@ def construct_fetcher(remote_dir, local_dir):
     return fetcher
 
 
-def natsort(s): return [int(t) if t.isdigit() else t.lower()
-                        for t in re.split('(\d+)', s)]
+def natsort(s):
+    """Natural sort key for sorting strings with numbers in them."""
+
+    return [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)]
