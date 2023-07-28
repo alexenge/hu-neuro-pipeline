@@ -1,8 +1,6 @@
 import json
-import sys
 import urllib.request
 from pathlib import Path
-from types import ModuleType
 from warnings import warn
 
 import pooch
@@ -15,75 +13,64 @@ osf_ids = {'ERN': 'q6gwp',
            'N400': '29xpq',
            'P3': 'etdkz'}
 
-local_cache = 'hu-neuro-pipeline'
+LOCAL_CACHE = 'hu-neuro-pipeline'
 
 
-class ern(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('ERN', n_participants)
+def get_erpcore(component, n_participants=40):
+    """Get sample data from the ERP CORE dataset.
 
+    The data are either downloaded from the OSF or found in the local cache.
+    See :footcite:`kappenman2021` for details on the ERP CORE dataset.
 
-class lrp(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('LRP', n_participants)
+    Parameters
+    ----------
+    component : str
+        Which ERP CORE experiment to download. Each experiment was designed to
+        elicit one of seven common ERP components:
 
+        - ``'ERN'`` (flanker task)
+        - ``'LRP'`` (flanker task)
+        - ``'MMN'`` (passive auditory oddball task)
+        - ``'N170'`` (face perception task)
+        - ``'N2pc'`` (simple visual search task)
+        - ``'N400'`` (word pair judgment task)
+        - ``'P3'`` (active visual oddball task)
 
-class mmn(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('MMN', n_participants)
+    n_participants : int, optional
+        How many participants to download. By default, downloads all 40
+        participants available in the dataset.
 
+    Returns
+    -------
+    dict
+        A dictionary with the file paths of the downloaded data:
 
-class n170(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('N170', n_participants)
+        - ``'raw_files'``: A list with the paths of the raw EEG files
+          (``eeg.set``)
+        - ``'log_files'`` A list with the paths of the log files
+          (``events.tsv``)
 
+    See Also
+    --------
+    pipeline.datasets.get_ucap
 
-class n2pc(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('N2pc', n_participants)
+    References
+    ----------
+    .. footbibliography::
+    """
 
-
-class n400(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('N400', n_participants)
-
-
-class p3(ModuleType):
-    def get_paths(n_participants=40):
-        return get_paths('P3', n_participants)
-
-
-def add_submodule(submod):
-    name = submod.__name__
-    sys.modules[__name__ + '.' + name] = submod(name)
-
-
-add_submodule(ern)
-add_submodule(lrp)
-add_submodule(mmn)
-add_submodule(n170)
-add_submodule(n2pc)
-add_submodule(n400)
-add_submodule(p3)
-
-
-def get_paths(component=None, n_participants=40):
-    """Downloads sample data from the ERP CORE study and returns the paths."""
-
-    assert component is not None and component in osf_ids.keys(), \
-        f'`component` must be one of {list(osf_ids.keys())}'
     n_participants = int(n_participants)
     max_participants = 40
     assert n_participants in range(1, max_participants + 1), \
         f'`n_participants` must be an integer between 1 and {max_participants}'
     if n_participants < max_participants:
         warn(f'Only fetching data for the first {n_participants} ' +
-             f'participant(s). This will not be reflected in the ' +
-             f'`participants.tsv` file of the BIDS structure, which will ' +
+             'participant(s). This will not be reflected in the ' +
+             '`participants.tsv` file of the BIDS structure, which will ' +
              f'contain all {max_participants} participants.')
 
     exclude_range = range(n_participants + 1, max_participants + 1)
-    exclude_dirs = ['sub-{:03d}'.format(id) for id in exclude_range]
+    exclude_dirs = [f'sub-{id:03d}' for id in exclude_range]
     exclude_dirs += ['stimuli']
 
     osf_id = osf_ids[component]
@@ -133,7 +120,7 @@ def construct_fetcher(base_url, remote_dir, local_dir, exclude_dirs=None):
         hashes[local_path] = 'md5:' + file['attributes']['extra']['hashes']['md5']
 
     fetcher = pooch.create(
-        path=pooch.os_cache(local_cache),
+        path=pooch.os_cache(LOCAL_CACHE),
         base_url=base_url,
         env='PIPELINE_DATA_DIR',
         registry=hashes,
