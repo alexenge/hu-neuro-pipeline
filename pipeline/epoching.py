@@ -1,25 +1,26 @@
 import chardet
 import numpy as np
 import pandas as pd
-from mne import combine_evoked, pick_channels, set_log_level
+from mne import (combine_evoked, events_from_annotations, pick_channels,
+                 set_log_level)
 from mne.channels import combine_channels
+from mne.io.brainvision.brainvision import RawBrainVision
 from scipy.stats import zscore
 
 
-def triggers_to_event_id(triggers):
-    """Convert list or dict of triggers to MNE-style event_id"""
+def get_events(raw, triggers=None):
+    """Extracts events from raw data based on a list of numeric triggers."""
 
-    # Convert list to dict with triggers as condition names
-    if isinstance(triggers, list):
-        triggers = {str(trigger): trigger for trigger in triggers}
-    else:
-        assert isinstance(triggers, dict), \
-            '`triggers` must be either list or dict'
+    events, event_id = events_from_annotations(raw, verbose=False)
 
-    # Make sure that trigger values are integers (R would pass them as floats)
-    event_id = {key: int(value) for key, value in triggers.items()}
+    if triggers is not None:
+        if isinstance(raw, RawBrainVision):
+            event_id = {str(trigger): int(trigger) for trigger in triggers}
+        else:
+            event_id = {key: value for key, value in event_id.items()
+                        if int(key) in triggers}
 
-    return event_id
+    return events, event_id
 
 
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):

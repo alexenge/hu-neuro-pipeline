@@ -5,7 +5,7 @@ from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
-                       match_log_to_epochs, read_log, triggers_to_event_id)
+                       get_events, match_log_to_epochs, read_log)
 from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
                  save_montage, save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
@@ -107,10 +107,7 @@ def participant_pipeline(
     filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
 
     # Determine events and the corresponding (selection of) triggers
-    events, event_id = events_from_annotations(
-        filt, regexp='Stimulus', verbose=False)
-    if triggers is not None:
-        event_id = triggers_to_event_id(triggers)
+    events, event_id = get_events(filt, triggers)
 
     # Epoching including baseline correction
     if baseline is not None:

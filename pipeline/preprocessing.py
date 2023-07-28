@@ -12,13 +12,15 @@ def add_heog_veog(raw, veog_channels='auto', heog_channels='auto'):
     # Add bipolar VEOG channel
     if veog_channels is not None:
         if veog_channels == 'auto':
-            veog_channels = ['Fp1', 'FP1', 'Auge_u', 'IO1']
+            veog_channels = ['Fp1', 'FP1', 'Auge_u', 'IO1',
+                             'VEOG_lower', 'VEOG_upper']
         raw = add_eog(raw, veog_channels, new_name='VEOG')
 
     # Add bipolar HEOG channel
     if heog_channels is not None:
         if heog_channels == 'auto':
-            heog_channels = ['F9', 'F10', 'Afp9', 'Afp10']
+            heog_channels = ['F9', 'F10', 'Afp9', 'Afp10',
+                             'HEOG_left', 'HEOG_right']
         raw = add_eog(raw, heog_channels, new_name='HEOG')
 
     return raw
@@ -58,7 +60,8 @@ def apply_montage(raw, montage):
         digmontage = make_standard_montage(montage)
 
     # Make sure that EOG channels are of the `eog` type
-    eog_channels = ['HEOG', 'VEOG', 'IO1', 'IO2', 'Afp9', 'Afp10', 'Auge_u']
+    eog_channels = ['HEOG', 'VEOG', 'IO1', 'IO2', 'Afp9', 'Afp10', 'Auge_u',
+                    'VEOG_upper', 'VEOG_lower', 'HEOG_left', 'HEOG_right']
     for ch_name in eog_channels:
         if ch_name in raw.ch_names:
             raw.set_channel_types({ch_name: 'eog'})
@@ -69,16 +72,8 @@ def apply_montage(raw, montage):
         if ch_name in raw.ch_names:
             raw.set_channel_types({ch_name: 'misc'})
 
-    # Drop EEG channels that are not in the montage
-    raw_channels = set(raw.copy().pick_types(eeg=True).ch_names)
-    montage_channels = set(digmontage.ch_names)
-    drop_channels = list(raw_channels - montage_channels)
-    if drop_channels != []:
-        print(f'Removing channels that are not in the montage {drop_channels}')
-        raw.drop_channels(drop_channels)
-
     # Apply montage
-    raw.set_montage(digmontage)
+    raw.set_montage(digmontage, match_case=False, on_missing='warn')
 
 
 def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):

@@ -230,7 +230,8 @@ def save_montage(epochs, output_dir):
 
     # Add 2D flattened coordinates
     # Multiplied to mm scale (with head radius =~ 95 mm as in R-eegUtils)
-    coords_df[['x', 'y']] = _find_topomap_coords(epochs.info, ch_names) * 947
+    coords_df[['x', 'y']] = \
+        _find_topomap_coords(epochs.info, ch_names, ignore_overlap=True) * 947
 
     # Save
     save_df(coords_df, output_dir, suffix='channel_locations')
