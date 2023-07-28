@@ -27,6 +27,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.linkcode',
               'sphinx.ext.napoleon',
+              'sphinxcontrib.bibtex',
+              'sphinxcontrib.apa',
               'nbsphinx',
               'sphinx_copybutton',
               'sphinx_gallery.load_style']
@@ -99,6 +101,12 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html#configuration
 
 napoleon_preprocess_types = True
+
+## -- sphinxcontrib-bibtex options -------------------------------------------
+# https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#configuration
+
+bibtex_bibfiles = ['references.bib']
+bibtex_default_style = 'apa'
 
 # -- nbsphinx options --------------------------------------------------------
 # https://nbsphinx.readthedocs.io/en/latest/configuration.html
