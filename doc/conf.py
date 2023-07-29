@@ -112,6 +112,8 @@ bibtex_default_style = 'apa'
 # https://nbsphinx.readthedocs.io/en/latest/configuration.html
 
 nbsphinx_custom_formats = {
+    '.pct.py': ['jupytext.reads', {'fmt': 'py:percent'}],
+    '.qmd': ['jupytext.reads', {'fmt': 'quarto'}],
     '.Rmd': ['jupytext.reads', {'fmt': 'Rmd'}]
 }
 
