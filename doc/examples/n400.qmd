@@ -1,0 +1,142 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.14.7
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+# ERP analysis of ERP CORE data
+
+## Loading Python modules
+
+
+```{python}
+from pipeline import group_pipeline
+from pipeline.datasets import get_erpcore
+import seaborn as sns
+```
+
+## Downloading example data
+
+The pipeline comes with a function to download example data from the ERP CORE dataset.
+This dataset contains data from 40 participants who completed six different EEG experiments which were specifically designed to elicit seven common ERP components.
+
+For example, in the N400 experiment, participants viewed pairs of prime and target words that were either semantically related (EEG triggers `211` and `212`) or unrelated (EEG triggers `221` and `222`).
+
+The raw data are stored in the [Open Science Framework](https://osf.io/29xpq) and more details about the study are in [Kappenman et al. (2021)](https://doi.org/10.1016/j.neuroimage.2020.117465).
+
+```{python}
+n400_files = get_erpcore('N400', n_participants=4)
+print(n400_files)
+```
+
+To save time, we only download and process data from the first four participants.
+Feel free to re-run the example with more participants by increasing or removing the `n_participants` argument.
+
+The paths of the downloaded raw EEG files (`.set`) and events file (`.tsv`) can now be fed into pipeline.
+
+## Running the pipeline
+
+We run a simple pipeline for single-trial ERP analysis with the following steps:
+
+- Downsampling from 1024 to 256 Hz
+- Re-referecing to common average (not shown)
+- Ocular correction with ICA
+- Bandpass filtering between 0.1 and 30 Hz
+- Segmentation to epochs around stimulus triggers
+- Baseline correction (not shown)
+- Rejecting bad epochs based on peak-to-peak amplitudes > 200 µV (not shown)
+- Computing single trial N400 amplitudes by averaging across the time window and channels of interest
+- Creating by-participant averages for the related and unrelated conditions
+
+```{python}
+trials, evokeds, config = group_pipeline(
+
+    # Input/output paths
+    raw_files=n400_files['raw_files'],
+    log_files=n400_files['log_files'],
+    output_dir='output',
+
+    # Preprocessing options
+    downsample_sfreq=256.0,
+    montage='biosemi64',
+    ica_method='fastica',
+    highpass_freq=0.1,
+    lowpass_freq=30.0,
+
+    # Epoching options
+    triggers=[211, 212, 221, 222],
+    skip_log_conditions={'value': [111, 112, 121, 122, 201, 202]},
+    components={'name': ['N400'],
+                'tmin': [0.3],
+                'tmax': [0.5],
+                'roi': [['Cz', 'CPz']]},
+
+    # Averaging options
+    average_by={'related': 'value in [211, 212]',
+                'unrelated': 'value in [221, 222]'})
+```
+
+## Cecking the results
+
+This pipeline returns three objects: A dataframe of single trial ERP amplitudes, a dataframe of by-participant condition averages, and a dictionary of pipeline metadata.
+
+### Single trial amplitudes
+These are basically just the log files, concatenated for all participants, with two added columns for the two ERP components of interest.
+Each value in these columns reflects the single trial ERP amplitude, averaged across time points and channels of interest.
+
+Here are the first couple of lines of the dataframe:
+
+```{python}
+trials.head()
+```
+
+Since we only have four participant and relatively few trials per participant, we can show all the single trial amplitudes in one plot (color-coded by condition):
+
+```{python, tags=c("nbsphinx-thumbnail")}
+trials['condition'] = trials['value'].map({211: 'related', 212: 'related',
+                                           221: 'unrelated', 222: 'unrelated'})
+trials['participant'] = trials['participant_id'].str.extract(r'(sub-\d+)')
+
+sns.swarmplot(data=trials, x='participant', y='N400', hue='condition')
+```
+
+We could also use this dataframe for statistical analysis on the single trial level, e.g., using linear mixed-effects models with the `lme4` package in R (see [UCAP example](ucap.html)) or the `statsmodels` package in Python.
+
+### By-participant averages
+This is one big data frame which, unlike `trials`, is averaged across trials (i.e., losing any single trial information) but *not* averaged across time points or channels (i.e., retaining the millisecond-wise ERP waveform at all electrodes).
+
+```{python}
+evokeds.head()
+```
+
+We can use it to display the grand-averaged ERP waveforms for different conditions as a timecourse plot at a single channel or ROI (here for the N400 ROI):
+
+```{python}
+sns.lineplot(data=evokeds, x='time', y='N400', hue='label', errorbar=None)
+```
+
+Note that we're explicitly disabling error bars here because they would be invalid due to the fact that our condition effect (related vs. unrelated) is a within-participant factor.
+See the [UCAP example](ucap.html) for how to compute and plot valid within-participant error bars around the grand-averged evoked waveform.
+
+### Pipeline metadata
+
+This is a dictionary with various metadata about the pipeline run.
+It contains:
+
+- The user-specified input arguments
+- The default values for those arguments that were not specified
+- Some descriptive statistics that were computed by the pipeline along the way
+  (e.g., the number of indices of rejecected epochs based on peak-to-peak amplitude)
+- The software version of Python, the pipeline and its most important dependency packages
+
+```{python}
+print(config)
+```
