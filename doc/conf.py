@@ -29,12 +29,15 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinxcontrib.bibtex',
               'sphinxcontrib.apa',
-              'nbsphinx',
+              'myst_nb',
               'sphinx_copybutton',
               'sphinx_gallery.load_style']
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.qmd': 'myst-nb'
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -111,15 +114,10 @@ bibtex_default_style = 'apa'
 # -- nbsphinx options --------------------------------------------------------
 # https://nbsphinx.readthedocs.io/en/latest/configuration.html
 
-nbsphinx_custom_formats = {
+nb_execution_timeout = 600
+nb_custom_formats = {
     '.pct.py': ['jupytext.reads', {'fmt': 'py:percent'}],
     '.qmd': ['jupytext.reads', {'fmt': 'quarto'}],
     '.Rmd': ['jupytext.reads', {'fmt': 'Rmd'}]
 }
-
-# -- Sphinx-Gallery options --------------------------------------------------
-# https://sphinx-gallery.github.io/stable/configuration.html
-sphinx_gallery_conf = {
-     'examples_dirs': '../examples',   # path to your example scripts
-     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-}
+nb_render_image_options = {'width': '70%', 'align': 'center'}

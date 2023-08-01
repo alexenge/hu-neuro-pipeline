@@ -17,6 +17,7 @@ jupyter:
 ## Loading R packages
 
 ```{r}
+#| tags: [remove-output]
 library("reticulate")
 library("Rmisc")
 library("dplyr")
@@ -26,9 +27,10 @@ library("lme4")
 
 ## Loading the pipeline
 
-After following the [installation instructions for R users](../installation.html#for-r-users), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
+After following the [installation instructions for R users](../installation.rst), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
 
 ```{r}
+#| tags: [remove-output]
 pipeline <- import("pipeline")
 ```
 
