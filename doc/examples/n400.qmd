@@ -33,7 +33,11 @@ For example, in the N400 experiment, participants viewed pairs of prime and targ
 The raw data are stored in the [Open Science Framework](https://osf.io/29xpq) and more details about the study are in [Kappenman et al. (2021)](https://doi.org/10.1016/j.neuroimage.2020.117465).
 
 ```{python}
+#| tags: [hide-output]
 n400_files = get_erpcore('N400', n_participants=4)
+```
+
+```{python}
 print(n400_files)
 ```
 
