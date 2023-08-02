@@ -3,10 +3,14 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import pathlib
 import sys
+from pathlib import Path
 
-sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
+# Make sure binaries installed via Conda (e.g., quarto) is available
+sys.path.insert(0, Path(sys.executable).parent.resolve().as_posix())
+
+# Make it possible to import the pipeline package
+sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
 
 import pipeline
 
