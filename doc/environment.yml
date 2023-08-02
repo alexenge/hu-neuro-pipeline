@@ -5,7 +5,7 @@ channels:
 dependencies:
   - ipykernel
   - jupytext
-  - nbsphinx
+  - myst-nb
   - pip
   - poetry
   - python=3.11
