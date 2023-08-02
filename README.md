@@ -123,6 +123,6 @@ config <- res[[3]]
 
 ## 3. Processing details
 
-<img src="https://github.com/alexenge/hu-neuro-pipeline/blob/main/doc/_static/flowchart.svg" width="400">
+<img src="https://github.com/alexenge/hu-neuro-pipeline/blob/main/doc/source/_static/flowchart.svg" width="400">
 
 See the [documentation](https://hu-neuro-pipeline.readthedocs.io/en/latest/) for more details about how to use the pipeline and how it works under the hood.
