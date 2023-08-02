@@ -3,43 +3,24 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import inspect
+import os
 import sys
 from pathlib import Path
-import os
 
-# Make sure binaries installed via Conda (e.g., quarto) is available
+# Make sure the pipeline package is available
+sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
+import pipeline
+
+# Make sure Quarto and its dependencies are available
+# This seems to be necessary when install Quarto via conda -- it doesn't by
+# itself find the `share` directory or `deno` in the correct places
 bin_path = Path(sys.executable).parent
 share_path = bin_path.parent.joinpath('share')
 os.environ['QUARTO_SHARE_PATH'] = share_path.joinpath('quarto').resolve().as_posix()
 os.environ['DENO_DIR'] = bin_path.resolve().as_posix()
 os.environ['DENO_BIN'] = bin_path.joinpath('deno').resolve().as_posix()
 os.environ['QUARTO_DENO'] = bin_path.joinpath('deno').resolve().as_posix()
-
-# print('\nPATH:', os.environ['PATH'])
-# os.environ['PATH'] = f'{bin_path.resolve().as_posix()}:{os.environ["PATH"]}'
-# print('\nPATH:', os.environ['PATH'])
-
-import subprocess
-
-proc = subprocess.Popen(["which", "quarto"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-out, err = proc.communicate()
-print('\nOutput of `which quarto`:', out.decode())
-print('\nError of `which quarto`:', err.decode())
-
-proc = subprocess.Popen(["quarto", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-out, err = proc.communicate()
-print('\nOutput of `quarto --version`:', out.decode())
-print('\nOutput of `quarto --version`:', err.decode())
-
-proc = subprocess.Popen(["quarto", "--check"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-out, err = proc.communicate()
-print('\nOutput of `quarto --check`:', out.decode())
-print('\nOutput of `quarto --check`:', err.decode())
-
-# Make it possible to import the pipeline package
-sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
-
-import pipeline
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -88,7 +69,6 @@ html_theme_options = {
     'extra_navbar': ''}
 html_static_path = ['_static']
 html_css_files = ['custom.css']
-
 pygments_style = 'tango'
 
 # -- Options for sphinx.linkscode --------------------------------------------
@@ -101,8 +81,6 @@ def linkcode_resolve(domain, info):
         obj = sys.modules[info['module']]
         for part in info['fullname'].split('.'):
             obj = getattr(obj, part)
-        import inspect
-        import os
         fn = inspect.getsourcefile(obj)
         fn = os.path.relpath(fn, start=os.path.dirname(pipeline.__file__))
         source, lineno = inspect.getsourcelines(obj)
