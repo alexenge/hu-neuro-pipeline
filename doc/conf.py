@@ -5,12 +5,20 @@
 
 import sys
 from pathlib import Path
+import os
 
 # Make sure binaries installed via Conda (e.g., quarto) is available
-print('\n', sys.path)
-sys.path.insert(0, Path(sys.executable).parent.resolve().as_posix())
+print('\n', os.environ['PATH'])
+conda_bins = Path(sys.executable).parent.resolve().as_posix()
+os.environ['PATH'] = f'{conda_bins}:{os.environ["PATH"]}'
+print('\n', os.environ['PATH'])
+
 import subprocess
-print('\n', sys.path)
+
+proc = subprocess.Popen(["which", "quarto"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+out, err = proc.communicate()
+print('\n', out)
+print('\n', err)
 
 proc = subprocess.Popen(["quarto", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out, err = proc.communicate()
