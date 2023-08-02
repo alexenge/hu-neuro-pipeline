@@ -7,7 +7,15 @@ import sys
 from pathlib import Path
 
 # Make sure binaries installed via Conda (e.g., quarto) is available
+print('\n', sys.path)
 sys.path.insert(0, Path(sys.executable).parent.resolve().as_posix())
+import subprocess
+print('\n', sys.path)
+
+proc = subprocess.Popen(["quarto", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+out, err = proc.communicate()
+print('\n', out)
+print('\n', err)
 
 # Make it possible to import the pipeline package
 sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
