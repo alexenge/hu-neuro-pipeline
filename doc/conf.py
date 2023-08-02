@@ -11,6 +11,9 @@ import os
 bin_path = Path(sys.executable).parent
 share_path = bin_path.parent.joinpath('share')
 os.environ['QUARTO_SHARE_PATH'] = share_path.joinpath('quarto').resolve().as_posix()
+os.environ['DENO_DIR'] = bin_path.resolve().as_posix()
+os.environ['DENO_BIN'] = bin_path.joinpath('deno').resolve().as_posix()
+os.environ['QUARTO_DENO'] = bin_path.joinpath('deno').resolve().as_posix()
 
 # print('\nPATH:', os.environ['PATH'])
 # os.environ['PATH'] = f'{bin_path.resolve().as_posix()}:{os.environ["PATH"]}'
