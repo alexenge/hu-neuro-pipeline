@@ -10,8 +10,6 @@ _version.py
 /dist/
 
 # Documentation
-doc/_build/
-doc/generated/
-doc/modules/
-doc/auto_examples/
-output/
+/doc/_build/
+/doc/source/generated/
+/doc/source/examples/output/

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 # Make sure the pipeline package is available
-sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
+sys.path.insert(0, Path(__file__).parents[2].resolve().as_posix())
 import pipeline
 
 # Make sure Quarto and its dependencies are available
