@@ -33,7 +33,11 @@ For example, in the N400 experiment, participants viewed pairs of prime and targ
 The raw data are stored in the [Open Science Framework](https://osf.io/29xpq) and more details about the study are in [Kappenman et al. (2021)](https://doi.org/10.1016/j.neuroimage.2020.117465).
 
 ```{python}
+#| tags: [hide-output]
 n400_files = get_erpcore('N400', n_participants=4)
+```
+
+```{python}
 print(n400_files)
 ```
 
@@ -57,6 +61,7 @@ We run a simple pipeline for single-trial ERP analysis with the following steps:
 - Creating by-participant averages for the related and unrelated conditions
 
 ```{python}
+#| tags: [hide-output]
 trials, evokeds, config = group_pipeline(
 
     # Input/output paths
@@ -105,10 +110,10 @@ trials['condition'] = trials['value'].map({211: 'related', 212: 'related',
                                            221: 'unrelated', 222: 'unrelated'})
 trials['participant'] = trials['participant_id'].str.extract(r'(sub-\d+)')
 
-sns.swarmplot(data=trials, x='participant', y='N400', hue='condition')
+_ = sns.swarmplot(data=trials, x='participant', y='N400', hue='condition')
 ```
 
-We could also use this dataframe for statistical analysis on the single trial level, e.g., using linear mixed-effects models with the `lme4` package in R (see [UCAP example](ucap.html)) or the `statsmodels` package in Python.
+We could also use this dataframe for statistical analysis on the single trial level, e.g., using linear mixed-effects models with the `lme4` package in R (see [UCAP example](ucap.qmd)) or the `statsmodels` package in Python.
 
 ### By-participant averages
 This is one big data frame which, unlike `trials`, is averaged across trials (i.e., losing any single trial information) but *not* averaged across time points or channels (i.e., retaining the millisecond-wise ERP waveform at all electrodes).
@@ -120,11 +125,11 @@ evokeds.head()
 We can use it to display the grand-averaged ERP waveforms for different conditions as a timecourse plot at a single channel or ROI (here for the N400 ROI):
 
 ```{python}
-sns.lineplot(data=evokeds, x='time', y='N400', hue='label', errorbar=None)
+_ = sns.lineplot(data=evokeds, x='time', y='N400', hue='label', errorbar=None)
 ```
 
 Note that we're explicitly disabling error bars here because they would be invalid due to the fact that our condition effect (related vs. unrelated) is a within-participant factor.
-See the [UCAP example](ucap.html) for how to compute and plot valid within-participant error bars around the grand-averged evoked waveform.
+See the [UCAP example](ucap.qmd) for how to compute and plot valid within-participant error bars around the grand-averged evoked waveform.
 
 ### Pipeline metadata
 

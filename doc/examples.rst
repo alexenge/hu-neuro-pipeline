@@ -4,13 +4,15 @@ Examples
 Python examples
 ---------------
 
-.. nbgallery::
+.. toctree::
+   :maxdepth: 1
 
-    examples/n400
+   examples/n400
 
 R examples
 ----------
 
-.. nbgallery::
+.. toctree::
+   :maxdepth: 1
 
-    examples/ucap
+   examples/ucap

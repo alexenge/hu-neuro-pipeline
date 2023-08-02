@@ -3,12 +3,24 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import pathlib
+import inspect
+import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, pathlib.Path(__file__).parents[1].resolve().as_posix())
-
+# Make sure the pipeline package is available
+sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
 import pipeline
+
+# Make sure Quarto and its dependencies are available
+# This seems to be necessary when install Quarto via conda -- it doesn't by
+# itself find the `share` directory or `deno` in the correct places
+bin_path = Path(sys.executable).parent
+share_path = bin_path.parent.joinpath('share')
+os.environ['QUARTO_SHARE_PATH'] = share_path.joinpath('quarto').resolve().as_posix()
+os.environ['DENO_DIR'] = bin_path.resolve().as_posix()
+os.environ['DENO_BIN'] = bin_path.joinpath('deno').resolve().as_posix()
+os.environ['QUARTO_DENO'] = bin_path.joinpath('deno').resolve().as_posix()
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -29,12 +41,15 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinxcontrib.bibtex',
               'sphinxcontrib.apa',
-              'nbsphinx',
+              'myst_nb',
               'sphinx_copybutton',
               'sphinx_gallery.load_style']
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.qmd': 'myst-nb'
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -54,7 +69,6 @@ html_theme_options = {
     'extra_navbar': ''}
 html_static_path = ['_static']
 html_css_files = ['custom.css']
-
 pygments_style = 'tango'
 
 # -- Options for sphinx.linkscode --------------------------------------------
@@ -67,8 +81,6 @@ def linkcode_resolve(domain, info):
         obj = sys.modules[info['module']]
         for part in info['fullname'].split('.'):
             obj = getattr(obj, part)
-        import inspect
-        import os
         fn = inspect.getsourcefile(obj)
         fn = os.path.relpath(fn, start=os.path.dirname(pipeline.__file__))
         source, lineno = inspect.getsourcelines(obj)
@@ -111,15 +123,10 @@ bibtex_default_style = 'apa'
 # -- nbsphinx options --------------------------------------------------------
 # https://nbsphinx.readthedocs.io/en/latest/configuration.html
 
-nbsphinx_custom_formats = {
+nb_execution_timeout = 600
+nb_custom_formats = {
     '.pct.py': ['jupytext.reads', {'fmt': 'py:percent'}],
     '.qmd': ['jupytext.reads', {'fmt': 'quarto'}],
     '.Rmd': ['jupytext.reads', {'fmt': 'Rmd'}]
 }
-
-# -- Sphinx-Gallery options --------------------------------------------------
-# https://sphinx-gallery.github.io/stable/configuration.html
-sphinx_gallery_conf = {
-     'examples_dirs': '../examples',   # path to your example scripts
-     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-}
+nb_render_image_options = {'width': '70%', 'align': 'center'}
