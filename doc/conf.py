@@ -8,13 +8,13 @@ from pathlib import Path
 import os
 
 # Make sure binaries installed via Conda (e.g., quarto) is available
-print('\nPATH:', os.environ['PATH'])
 bin_path = Path(sys.executable).parent
-os.environ['PATH'] = f'{bin_path.resolve().as_posix()}:{os.environ["PATH"]}'
-print('\nPATH:', os.environ['PATH'])
-
 share_path = bin_path.parent.joinpath('share')
 os.environ['QUARTO_SHARE_PATH'] = share_path.joinpath('quarto').resolve().as_posix()
+
+# print('\nPATH:', os.environ['PATH'])
+# os.environ['PATH'] = f'{bin_path.resolve().as_posix()}:{os.environ["PATH"]}'
+# print('\nPATH:', os.environ['PATH'])
 
 import subprocess
 
@@ -27,6 +27,11 @@ proc = subprocess.Popen(["quarto", "--version"], stdout=subprocess.PIPE, stderr=
 out, err = proc.communicate()
 print('\nOutput of `quarto --version`:', out.decode())
 print('\nOutput of `quarto --version`:', err.decode())
+
+proc = subprocess.Popen(["quarto", "--check"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+out, err = proc.communicate()
+print('\nOutput of `quarto --check`:', out.decode())
+print('\nOutput of `quarto --check`:', err.decode())
 
 # Make it possible to import the pipeline package
 sys.path.insert(0, Path(__file__).parents[1].resolve().as_posix())
