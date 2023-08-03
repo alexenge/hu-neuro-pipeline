@@ -1,4 +1,5 @@
 from os import path
+from warnings import warn
 
 import pandas as pd
 from mne import set_bipolar_reference
@@ -96,6 +97,12 @@ def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):
 
 def correct_ica(raw, method='fastica', n_components=None, random_seed=1234):
     """Corrects ocular artifacts using ICA and automatic component removal."""
+
+    # Convert number of components to integer
+    if n_components is not None and n_components >= 1.0:
+        warn(f'Converting `ica_n_components` to integer: {n_components} -> ' +
+             f'{int(n_components)}')
+        n_components = int(n_components)
 
     # Run ICA on a copy of the data
     raw_filt_ica = raw.copy()
