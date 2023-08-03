@@ -94,7 +94,7 @@ def interpolate_bad_channels(raw, bad_channels=None, auto_bad_channels=None):
     return raw, all_bad_channels
 
 
-def correct_ica(raw, method='fastica', n_components=0.99, random_seed=1234):
+def correct_ica(raw, method='fastica', n_components=None, random_seed=1234):
     """Corrects ocular artifacts using ICA and automatic component removal."""
 
     # Run ICA on a copy of the data

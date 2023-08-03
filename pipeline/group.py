@@ -27,7 +27,7 @@ def group_pipeline(
     bad_channels=None,
     besa_files=None,
     ica_method=None,
-    ica_n_components=0.99,
+    ica_n_components=None,
     highpass_freq=0.1,
     lowpass_freq=40.0,
     triggers=None,
