@@ -67,9 +67,14 @@ def match_log_to_epochs(epochs, log, triggers_column, depth=10):
     assert triggers_column in log.columns, \
         f'Column \'{triggers_column}\' is not in the log file'
 
-    # Read lists of triggers from log file and EEG epochs
+    # Read lists of triggers from log file
     events_log = log[triggers_column].tolist()
-    events_epochs = list(epochs.events[:, 2])
+
+    # Read lists of triggers from EEG epochs
+    event_id_keys = list(epochs.event_id.keys())
+    event_id_values = list(epochs.event_id.values())
+    events_epochs = [int(event_id_keys[event_id_values.index(event)])
+                     for event in epochs.events[:, 2]]
 
     # Check for each row in the log file
     previous_repaired = False
