@@ -16,11 +16,11 @@ jupyter:
 
 ## Loading Python modules
 
-
 ```{python}
+import json
+import seaborn as sns
 from pipeline import group_pipeline
 from pipeline.datasets import get_erpcore
-import seaborn as sns
 ```
 
 ## Downloading example data
@@ -38,7 +38,8 @@ n400_files = get_erpcore('N400', n_participants=4)
 ```
 
 ```{python}
-print(n400_files)
+def print_dict(d): print(json.dumps(d, indent=4))
+print_dict(n400_files)
 ```
 
 To save time, we only download and process data from the first four participants.
@@ -51,7 +52,9 @@ The paths of the downloaded raw EEG files (`.set`) and events file (`.tsv`) can 
 We run a simple pipeline for single-trial ERP analysis with the following steps:
 
 - Downsampling from 1024 to 256 Hz
+- Applying standard Biosemi montage for channel locations
 - Re-referecing to common average (not shown)
+- Automatic detection and interpolation of bad channels
 - Ocular correction with ICA
 - Bandpass filtering between 0.1 and 30 Hz
 - Segmentation to epochs around stimulus triggers
@@ -72,6 +75,7 @@ trials, evokeds, config = group_pipeline(
     # Preprocessing options
     downsample_sfreq=256.0,
     montage='biosemi64',
+    bad_channels='auto',
     ica_method='fastica',
     highpass_freq=0.1,
     lowpass_freq=30.0,
@@ -143,5 +147,5 @@ It contains:
 - The software version of Python, the pipeline and its most important dependency packages
 
 ```{python}
-print(config)
+print_dict(config)
 ```
