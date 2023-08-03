@@ -117,6 +117,13 @@ def group_pipeline(
                  'Please update your code accordingly.')
             raw_files = vhdr_files
 
+    if ica_method is not None and ica_n_components is None:
+        from warnings import warn
+        warn('The default value of `ica_n_components` has changed from ' +
+             '`0.99` (i.e., 99% explained variance) to `None` (i.e., ' +
+             'extract as many components as possible). To reproduce ' +
+             'previous results, explicitly set `ica_n_components=0.99`.')
+
     # Get input file paths if directories were provided
     if isinstance(raw_files, str):
         raw_files = files_from_dir(raw_files, eeg_extensions)
