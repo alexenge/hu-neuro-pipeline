@@ -18,7 +18,7 @@ Argument,Description,Python example,R example
 ,Don't use BESA/MSEC ocular correction,``None``,``NULL``
 ``ica_method`` (default: ``None``),`ICA method <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_ or,``'fastica'`` or ``'infomax'`` or ``'picard'``,``"fastica"`` or ``"infomax"`` or ``"picard"``
 ,Don't apply ICA,``None``,``NULL``
-``ica_n_components`` (default: ``0.99``),Number of ICA components to use or,``15``,``15``
+``ica_n_components`` (default: ``None``),Number of ICA components to use or,``15``,``15``
 ,Proportion of variance explained by ICA components or,``0.99``,``0.99``
 ,Use (`almost <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_) all possible ICA components,``None``,``NULL``
 ``highpass_freq`` (default: ``0.1``),High-pass filter cutoff frequency or,``0.1``,``0.1``

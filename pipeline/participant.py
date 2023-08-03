@@ -27,7 +27,7 @@ def participant_pipeline(
     heog_channels='auto',
     montage='easycap-M1',
     ica_method=None,
-    ica_n_components=0.99,
+    ica_n_components=None,
     highpass_freq=0.1,
     lowpass_freq=40.0,
     triggers=None,
@@ -125,7 +125,7 @@ def participant_pipeline(
 
     # Add bad ICA components to config
     if ica is not None:
-        if ica_n_components < 1.0:
+        if ica_n_components is None or ica_n_components < 1.0:
             config['auto_ica_n_components'] = int(ica.n_components_)
         config['auto_ica_bad_components'] = [int(x) for x in ica.exclude]
 
