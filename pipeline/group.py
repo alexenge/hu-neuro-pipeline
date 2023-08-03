@@ -176,30 +176,15 @@ def group_pipeline(
     config['skip_log_rows'] = skip_log_rows
 
     # ... and outputs that might have been created along the way
-    config['log_files'] = []
-    if triggers_column is not None:
-        config['auto_missing_epochs'] = {}
-    if reject_peak_to_peak is not None:
-        config['auto_rejected_epochs'] = {}
-    if ica_method is not None and ica_n_components < 1.0:
-        config['auto_ica_n_components'] = {}
-    for pid, pconfig in zip(participant_ids, configs):
-        config['log_files'].append(pconfig['log_file'])
-        if triggers_column is not None:
-            config['auto_missing_epochs'][pid] = \
-                pconfig['auto_missing_epochs']
-        if reject_peak_to_peak is not None:
-            config['auto_rejected_epochs'][pid] = \
-                pconfig['auto_rejected_epochs']
-        if pconfig['bad_channels'] == 'auto':
-            config.setdefault('auto_bad_channels', {}).update(
-                {pid: pconfig['auto_bad_channels']})
-        if pconfig['ica_method'] is not None:
-            if ica_n_components < 1.0:
-                config['auto_ica_n_components'][pid] = \
-                    pconfig['auto_ica_n_components']
-            config.setdefault('auto_ica_bad_components', {}).update(
-                {pid: pconfig['auto_ica_bad_components']})
+    config['log_files'] = [p_config['log_file'] for p_config in configs]
+    auto_keys = ['auto_bad_channels', 'auto_missing_epochs',
+                 'auto_rejected_epochs', 'auto_ica_n_components',
+                 'auto_ica_bad_components']
+    for key in auto_keys:
+        if any(key in p_config and p_config[key] is not None
+               for p_config in configs):
+            config[key] = {p_id: p_config[key] for p_id, p_config
+                           in zip(participant_ids, configs)}
 
     # Save config
     config['package_versions'] = package_versions()
