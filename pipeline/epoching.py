@@ -119,8 +119,10 @@ def get_bad_epochs(epochs, reject_peak_to_peak=None):
     epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak)
 
     # Get indices of bad epochs from the rejection log
-    all_ixs = [elem for elem in epochs_rej.drop_log if elem != ('IGNORED',)]
-    bad_ixs = [ix for ix, elem in enumerate(all_ixs) if elem != ()]
+    drop_log = [elem for ix, elem
+                in enumerate(epochs_rej.drop_log)
+                if epochs.drop_log[ix] == ()]
+    bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
 
     return bad_ixs
 
