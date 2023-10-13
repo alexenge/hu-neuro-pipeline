@@ -104,7 +104,7 @@ def participant_pipeline(
         ica = None
 
     # Filtering
-    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
+    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1, picks='eeg')
 
     # Determine events and the corresponding (selection of) triggers
     events, event_id = get_events(filt, triggers)
