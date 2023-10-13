@@ -11,6 +11,7 @@ from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
 from .report import create_report
+from .ride import correct_ride
 from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
@@ -36,6 +37,11 @@ def participant_pipeline(
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
     reject_peak_to_peak=200.0,
+    perform_ride=False,
+    ride_condition_column=None,
+    ride_rt_column='RT',
+    ride_s_twd=(0.0, 0.6),
+    ride_r_twd=(-0.3, 0.3),
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
@@ -150,6 +156,10 @@ def participant_pipeline(
     # Get indices of bad epochs
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
     config['auto_rejected_epochs'] = bad_ixs
+
+    if perform_ride:
+        epochs = correct_ride(epochs, bad_ixs, ride_condition_column,
+                              ride_rt_column, ride_s_twd, ride_r_twd)
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)

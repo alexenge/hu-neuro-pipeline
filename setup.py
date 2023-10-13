@@ -46,6 +46,7 @@ if __name__ == "__main__":
         packages=package_tree('pipeline'),
         install_requires=[
             'chardet',
+            'eeg-ride',
             'joblib',
             'matplotlib',
             'mne>=0.24.0',
