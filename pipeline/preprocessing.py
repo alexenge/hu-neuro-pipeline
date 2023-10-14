@@ -72,7 +72,7 @@ def apply_montage(raw, montage):
     for ch_name in misc_channels:
         if ch_name in raw.ch_names:
             raw.set_channel_types({ch_name: 'misc'})
-    
+
     # Apply montage
     raw.set_montage(digmontage, match_case=False, on_missing='warn')
 
