@@ -68,7 +68,7 @@ def apply_montage(raw, montage):
             raw.set_channel_types({ch_name: 'eog'})
 
     # Make sure that mastoid channels are of the `misc` type
-    misc_channels = ['A1', 'A2', 'M1', 'M2']
+    misc_channels = ['A1', 'A2', 'M1', 'M2', 'audio', 'sound', 'pulse']
     for ch_name in misc_channels:
         if ch_name in raw.ch_names:
             raw.set_channel_types({ch_name: 'misc'})
