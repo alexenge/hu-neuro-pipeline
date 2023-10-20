@@ -53,7 +53,7 @@ We run a simple pipeline for single-trial ERP analysis with the following steps:
 
 - Downsampling from 1024 to 256 Hz
 - Applying standard Biosemi montage for channel locations
-- Re-referecing to common average (not shown)
+- Re-referencing to common average (not shown)
 - Automatic detection and interpolation of bad channels
 - Ocular correction with ICA
 - Bandpass filtering between 0.1 and 30 Hz
