@@ -72,9 +72,12 @@ def participant_pipeline(
     # Read raw data
     raw, participant_id = read_eeg(raw_file)
 
-    # Create backup of the raw data for the HTML report
+    # Create backup of the raw data for TFR and HTML report
     if report_dir is not None:
         dirty = raw.copy()
+
+    # Filtering
+    _ = raw.filter(highpass_freq, lowpass_freq, n_jobs=1, picks='eeg')
 
     # Downsample
     if downsample_sfreq is not None:
@@ -93,9 +96,6 @@ def participant_pipeline(
     raw, interpolated_channels = interpolate_bad_channels(
         raw, bad_channels, auto_bad_channels)
 
-    # Re-reference to a set of channels or the average
-    _ = raw.set_eeg_reference(ref_channels)
-
     # Do ocular correction with BESA and/or ICA
     if besa_file is not None:
         raw = correct_besa(raw, besa_file)
@@ -104,16 +104,16 @@ def participant_pipeline(
     else:
         ica = None
 
-    # Filtering
-    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1, picks='eeg')
+    # Re-reference to a set of channels or the average
+    _ = raw.set_eeg_reference(ref_channels)
 
     # Determine events and the corresponding (selection of) triggers
-    events, event_id = get_events(filt, triggers)
+    events, event_id = get_events(raw, triggers)
 
     # Epoching including baseline correction
     if baseline is not None:
         baseline = tuple(baseline)
-    epochs = Epochs(filt, events, event_id, epochs_tmin, epochs_tmax, baseline,
+    epochs = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax, baseline,
                     preload=True, on_missing='warn')
 
     # Automatically detect bad channels and interpolate if necessary
@@ -161,7 +161,7 @@ def participant_pipeline(
 
     # Save cleaned continuous data
     if clean_dir is not None:
-        save_clean(filt, clean_dir, participant_id)
+        save_clean(raw, clean_dir, participant_id)
 
     # Save channel locations
     if chanlocs_dir is not None:
@@ -178,17 +178,27 @@ def participant_pipeline(
     # Create and save HTML report
     if report_dir is not None:
         dirty.info['bads'] = interpolated_channels
-        report = create_report(participant_id, dirty, ica, filt, events,
+        report = create_report(participant_id, dirty, ica, raw, events,
                                event_id, epochs, evokeds)
         save_report(report, report_dir, participant_id)
 
     # Time-frequency analysis
     if perform_tfr:
 
+        # Re-apply preprocessing steps on the unfiltered data
+        raw_unfilt = dirty.copy()
+        if downsample_sfreq is not None:
+            raw_unfilt.resample(downsample_sfreq)
+        raw_unfilt = add_heog_veog(raw_unfilt, veog_channels, heog_channels)
+        apply_montage(raw_unfilt, montage)
+        raw_unfilt, _ = interpolate_bad_channels(raw_unfilt, bad_channels,
+                                                 auto_bad_channels)
+        _ = raw_unfilt.set_eeg_reference(ref_channels)
+
         # Epoching again without filtering
-        epochs_unfilt = Epochs(raw, events, event_id, epochs_tmin, epochs_tmax,
-                               baseline, preload=True, on_missing='warn',
-                               verbose=False)
+        epochs_unfilt = Epochs(raw_unfilt, events, event_id, epochs_tmin,
+                               epochs_tmax, baseline, preload=True,
+                               on_missing='warn', verbose=False)
 
         # Drop the last sample to produce a nice even number
         _ = epochs_unfilt.crop(tmin=None, tmax=epochs_tmax, include_tmax=False)
