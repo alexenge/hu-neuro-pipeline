@@ -56,7 +56,7 @@ The paths of the downloaded EEG header files (`.vhdr`), behavioral log files (`.
 We run a simple pipeline for single-trial ERP analysis with the following steps:
 
 - Downsampling to 250 Hz
-- Re-referecing to common average (not shown)
+- Re-referencing to common average (not shown)
 - Ocular correction with BESA/MSEC matrices
 - Default bandpass filtering between 0.1 and 40 Hz (not_shown)
 - Segmentation to epochs around stimulus triggers

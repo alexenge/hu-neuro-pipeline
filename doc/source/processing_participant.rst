@@ -31,10 +31,10 @@ The interpolation is done using spherical splines, the default in MNE-Python [#]
 Re-reference to average
 -----------------------
 
-The EEG channels are re-referenced to an average reference, meaning that at each time point, the average of all EEG channels is subtracted from each channel.
+The EEG channels are re-referenced from the online reference (e.g., M1, the left mastoid) to a different channel or set of channels.
+The most common choice is to re-reference to an average reference, meaning that at each time point, the average of all EEG channels is subtracted from each channel.
 This is done to reduce the impact of any noise or spatial bias that may be present in the online reference electrode.
 It has the effect that the average of all EEG channels is zero at each time point but preserves any relative difference between channels at different areas of the scalp.
-This re-referencing step can currently not be customized or disabled.
 
 Ocular correction
 -----------------

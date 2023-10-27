@@ -27,6 +27,7 @@ def participant_pipeline(
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
+    ref_channels='average',
     ica_method=None,
     ica_n_components=None,
     highpass_freq=0.1,
@@ -98,8 +99,8 @@ def participant_pipeline(
     raw, interpolated_channels = interpolate_bad_channels(
         raw, bad_channels, auto_bad_channels)
 
-    # Re-reference to common average
-    _ = raw.set_eeg_reference('average')
+    # Re-reference to a set of channels or the average
+    _ = raw.set_eeg_reference(ref_channels)
 
     # Do ocular correction with BESA and/or ICA
     if besa_file is not None:
@@ -110,7 +111,7 @@ def participant_pipeline(
         ica = None
 
     # Filtering
-    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
+    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1, picks='eeg')
 
     # Determine events and the corresponding (selection of) triggers
     events, event_id = get_events(filt, triggers)
