@@ -1,6 +1,6 @@
 import json
-import urllib.request
 from pathlib import Path
+from urllib.request import urlopen
 from warnings import warn
 
 import pandas as pd
@@ -79,7 +79,7 @@ def get_ucap(participants=40, path=None):
             _ = fetcher.fetch(row['local_path'])
 
         if row['file_type'] in paths:
-            paths[row['file_type']].append(local_file)
+            paths[row['file_type']].append(str(local_file))
 
     return paths
 
@@ -108,7 +108,7 @@ def _select_participants(df, participants):
 
     if is_list_like(participants):
         missing_participants = list(set(participants) - set(all_participants))
-        assert len(missing_participants) == 0, \
+        assert not missing_participants, \
             f'Participants {missing_participants} not found in the ' + \
             f'dataset. Valid participants are {all_participants}'
         selected_participants = participants
@@ -119,13 +119,13 @@ def _select_participants(df, participants):
 def _write_ucap_manifest():
     """Writes a CSV table containing the file paths of the UCAP dataset."""
 
-    EEG_URL = '59cf07fa6c613b02958f3364/'
-    LOG_URL = '59cf12259ad5a102cc5c4b93/'
-    CALI_URL = '59cf089e6c613b02968f5724/'
+    eeg_url = '59cf07fa6c613b02958f3364/'
+    log_url = '59cf12259ad5a102cc5c4b93/'
+    cali_url = '59cf089e6c613b02968f5724/'
 
     files = []
-    for url in [EEG_URL, LOG_URL, CALI_URL]:
-        with urllib.request.urlopen(f'{BASE_URL}/{url}') as url:
+    for url in [eeg_url, log_url, cali_url]:
+        with urlopen(f'{BASE_URL}/{url}') as url:
             files += json.loads(url.read().decode())['data']
 
     attributes = [file['attributes'] for file in files]
