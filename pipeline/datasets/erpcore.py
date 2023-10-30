@@ -1,11 +1,15 @@
 import json
-import urllib.request
 from pathlib import Path
-from warnings import warn
+from urllib.request import urlopen
 
-import pooch
+import pandas as pd
 
-osf_ids = {'ERN': 'q6gwp',
+from .utils import get_dataset
+
+LOCAL_CACHE = 'hu-neuro-pipeline/erpcore'
+MANIFEST_FILE = Path(__file__).parent.joinpath('erpcore_manifest.csv')
+
+OSF_IDS = {'ERN': 'q6gwp',
            'LRP': '28e6c',
            'MMN': '5q4xs',
            'N170': 'pfde9',
@@ -13,13 +17,14 @@ osf_ids = {'ERN': 'q6gwp',
            'N400': '29xpq',
            'P3': 'etdkz'}
 
-LOCAL_CACHE = 'hu-neuro-pipeline'
+FILE_TYPE_DICT = {'eeg.set': 'raw_files',
+                  'events.tsv': 'log_files'}
 
 
-def get_erpcore(component, n_participants=40):
+def get_erpcore(component, participants=40, path=None):
     """Get sample data from the ERP CORE dataset.
 
-    The data are either downloaded from the OSF or found in the local cache.
+    Data that are not yet available locally will be downloaded from the OSF.
     See :footcite:`kappenman2021` for details on the ERP CORE dataset.
 
     Parameters
@@ -36,9 +41,16 @@ def get_erpcore(component, n_participants=40):
         - ``'N400'`` (word pair judgment task)
         - ``'P3'`` (active visual oddball task)
 
-    n_participants : int, optional
-        How many participants to download. By default, downloads all 40
-        participants available in the dataset.
+    participants : int or list of str, optional
+        Which participants to download. By default, downloads all 40
+        participants available in the dataset. If an integer, downloads that
+        many participants starting from the first participant. If a list of
+        strings, downloads the participants with the given IDs (e.g.,
+        ``['sub-001', 'sub-002']``).
+    path : str or Path, optional
+        Local directory path to download the data to. By default, uses the
+        user's local cache directory. An alternative way to specify the
+        download path is to set the environment variable ``PIPELINE_DATA_DIR``.
 
     Returns
     -------
@@ -59,43 +71,66 @@ def get_erpcore(component, n_participants=40):
     .. footbibliography::
     """
 
-    n_participants = int(n_participants)
-    max_participants = 40
-    assert n_participants in range(1, max_participants + 1), \
-        f'`n_participants` must be an integer between 1 and {max_participants}'
-    if n_participants < max_participants:
-        warn(f'Only fetching data for the first {n_participants} ' +
-             'participant(s). This will not be reflected in the ' +
-             '`participants.tsv` file of the BIDS structure, which will ' +
-             f'contain all {max_participants} participants.')
+    manifest_df = pd.read_csv(MANIFEST_FILE, dtype={'participant_id': str})
+    manifest_df = manifest_df[manifest_df['component'] == component]
 
-    exclude_range = range(n_participants + 1, max_participants + 1)
-    exclude_dirs = [f'sub-{id:03d}' for id in exclude_range]
-    exclude_dirs += ['stimuli']
+    osf_id = OSF_IDS[component]
+    base_url = f'https://files.de-1.osf.io/v1/resources/{osf_id}/providers/osfstorage'
 
-    osf_id = osf_ids[component]
-    base_url = f'https://files.de-1.osf.io/v1/resources/{osf_id}/providers/osfstorage/'
-    bids_dir = find_bids_dir(base_url)
-    fetcher = construct_fetcher(base_url=base_url,
-                                remote_dir=bids_dir,
-                                local_dir='erpcore/',
-                                exclude_dirs=exclude_dirs)
-
-    paths = {'raw_files': [], 'log_files': []}
-    for file in sorted(fetcher.registry_files):
-        file = fetcher.fetch(file)
-        if file.endswith('_eeg.set'):
-            paths['raw_files'].append(file)
-        elif file.endswith('_events.tsv'):
-            paths['log_files'].append(file)
-
-    return paths
+    return get_dataset(manifest_df, base_url, participants, path)
 
 
-def find_bids_dir(base_url):
-    """Finds the BIDS directory for a given ERP CORE component."""
+def _write_erpcore_manifest():
+    """Writes a CSV table containing the file paths of the ERP CORE datasets."""
 
-    with urllib.request.urlopen(base_url) as url:
+    dfs = []
+    for component, osf_id in OSF_IDS.items():
+
+        base_url = f'https://files.de-1.osf.io/v1/resources/{osf_id}/providers/osfstorage/'
+
+        bids_suffix = _find_bids_remote_path(base_url)
+
+        files = _list_files(base_url, bids_suffix, exclude_dirs=['stimuli'])
+
+        attributes = [file['attributes'] for file in files]
+        df = pd.DataFrame.from_dict(attributes)
+
+        df.insert(0, 'component', component)
+
+        participants = df['name'].str.split('_|\.').str[0]
+        participants = [p if p.startswith('sub') else '' for p in participants]
+        df.insert(1, 'participant_id', participants)
+        df = df.sort_values('participant_id')
+
+        local_paths = df['materialized'].str.\
+            replace(f'/{component} Raw Data BIDS-Compatible/',
+                    f'erpcore/{component}/')
+        df.insert(2, 'local_path', local_paths)
+
+        hashes = df['extra'].apply(lambda x: f'md5:{x["hashes"]["md5"]}')
+        df.insert(3, 'hash', hashes)
+
+        urls = df['path'].apply(lambda x: f'{base_url}{x}')
+        df.insert(4, 'url', urls)
+
+        file_exts = df['name'].str.split('_').str[-1]
+        file_types = file_exts.map(FILE_TYPE_DICT)
+        df.insert(5, 'file_type', file_types)
+
+        df = df[['component', 'local_path', 'url', 'hash', 'participant_id',
+                 'file_type', 'size']]
+
+        dfs.append(df)
+
+    df = pd.concat(dfs, ignore_index=True)
+
+    df.to_csv(MANIFEST_FILE, index=False)
+
+
+def _find_bids_remote_path(base_url):
+    """Finds the BIDS directory for a given ERP CORE component dataaset."""
+
+    with urlopen(base_url) as url:
         files = json.loads(url.read().decode())['data']
         bids_dir = [f for f in files
                     if 'Raw Data BIDS-Compatible'
@@ -104,51 +139,23 @@ def find_bids_dir(base_url):
     return bids_dir['attributes']['path']
 
 
-def construct_fetcher(base_url, remote_dir, local_dir, exclude_dirs=None):
-    """Constructs a pooch fetcher for getting ERP CORE remote files locally."""
+def _list_files(base_url, suffix, exclude_dirs=None):
+    """Lists files recursively in a remote directory on OSF."""
 
-    files = list_files(base_url, remote_dir, recursive=True,
-                       exclude_dirs=exclude_dirs)
-
-    urls = {}
-    hashes = {}
-    for file in files:
-        relative_path = file['attributes']['materialized']
-        relative_path = relative_path.replace(' Raw Data BIDS-Compatible', '')
-        local_path = str(Path(f'{local_dir}/{relative_path}'))
-        urls[local_path] = base_url + file['attributes']['path']
-        hashes[local_path] = 'md5:' + file['attributes']['extra']['hashes']['md5']
-
-    fetcher = pooch.create(
-        path=pooch.os_cache(LOCAL_CACHE),
-        base_url=base_url,
-        env='PIPELINE_DATA_DIR',
-        registry=hashes,
-        urls=urls,
-    )
-
-    return fetcher
-
-
-def list_files(base_url, remote_dir, recursive=False, exclude_dirs=None):
-    """Lists files in a remote directory on OSF."""
-
-    with urllib.request.urlopen(f'{base_url}/{remote_dir}') as url:
+    with urlopen(f'{base_url}/{suffix}') as url:
         files = json.loads(url.read().decode())['data']
 
-        if recursive:
-            for file in files:
-                if file['attributes']['kind'] == 'folder':
+        for file in files:
+            if file['attributes']['kind'] == 'folder':
 
-                    if exclude_dirs is not None:
-                        if file['attributes']['name'] in exclude_dirs:
-                            continue
+                if exclude_dirs is not None \
+                        and file['attributes']['name'] in exclude_dirs:
+                    continue
 
-                    remote_dir_dir = file['attributes']['path']
-                    files += list_files(base_url, remote_dir_dir,
-                                        recursive, exclude_dirs)
+                new_suffix = file['attributes']['path']
+                files += _list_files(base_url, new_suffix, exclude_dirs)
 
-            files = [file for file in files
-                     if file['attributes']['kind'] == 'file']
+        files = [file for file in files
+                 if file['attributes']['kind'] == 'file']
 
     return files
