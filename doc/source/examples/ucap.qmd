@@ -42,7 +42,7 @@ In this EEG experiment, participants performed a visual search task with visual 
 The raw data are stored in the [Open Science Framework](https://osf.io/hdxvb) and more details about the study are in [Frömer et al. (2018)](https://doi.org/10.3389/fnins.2018.00048).
 
 ```{r}
-ucap_files <- pipeline$datasets$get_ucap(n_participants = 2)
+ucap_files <- pipeline$datasets$get_ucap(participants = 2)
 print(ucap_files)
 ```
 
