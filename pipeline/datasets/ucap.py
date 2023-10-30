@@ -1,13 +1,11 @@
 import json
 from pathlib import Path
 from urllib.request import urlopen
-from warnings import warn
 
 import pandas as pd
-import pooch
-from pandas.api.types import is_list_like
 
-LOCAL_CACHE = 'hu-neuro-pipeline/ucap'
+from .utils import get_dataset
+
 BASE_URL = 'https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage'
 MANIFEST_FILE = Path(__file__).parent.joinpath('ucap_manifest.csv')
 
@@ -24,7 +22,7 @@ def get_ucap(participants=40, path=None):
 
     Parameters
     ----------
-    n_participants : int or list of str, optional
+    participants : int or list of str, optional
         Which participants to download. By default, downloads all 40
         participants available in the dataset. If an integer, downloads that
         many participants starting from the first participant. If a list of
@@ -55,65 +53,9 @@ def get_ucap(participants=40, path=None):
     .. footbibliography::
     """
 
-    paths = {file_type: [] for file_type in FILE_TYPE_DICT.values()}
+    manifest_df = pd.read_csv(MANIFEST_FILE, dtype={'participant_id': str})
 
-    if path is None:
-        path = pooch.os_cache(LOCAL_CACHE)
-        env = 'PIPELINE_DATA_DIR'
-    else:
-        env = None
-
-    fetcher = pooch.create(path=path, base_url=BASE_URL, env=env)
-    local_dir = fetcher.abspath
-
-    df = pd.read_csv(MANIFEST_FILE, dtype={'participant_id': str})
-    df = _select_participants(df, participants)
-
-    for ix, row in df.iterrows():
-
-        local_file = local_dir.joinpath(row['local_path'])
-
-        if not local_file.exists():
-            fetcher.registry[row['local_path']] = row['hash']
-            fetcher.urls[row['local_path']] = row['url']
-            _ = fetcher.fetch(row['local_path'])
-
-        if row['file_type'] in paths:
-            paths[row['file_type']].append(str(local_file))
-
-    return paths
-
-
-def _select_participants(df, participants):
-    """Selects a subset of participants by their IDs or total number."""
-
-    all_participants = df['participant_id'].str.zfill(2).unique()
-
-    if isinstance(participants, float):
-        warn(f'Converting `participants` from float ({participants}) to ' +
-             f'int ({int(participants)})')
-        selected_participants = all_participants[:int(participants)]
-
-    if isinstance(participants, int):
-        assert participants in range(1, len(all_participants) + 1), \
-            '`participants` must be an integer between 1 and ' + \
-            f'{len(all_participants)}'
-        selected_participants = all_participants[:participants]
-
-    if isinstance(participants, str):
-        assert participants in all_participants, \
-            f'Participant \'{participants}\' not found in the dataset. ' + \
-            f'Valid participants are {all_participants}'
-        selected_participants = [participants]
-
-    if is_list_like(participants):
-        missing_participants = list(set(participants) - set(all_participants))
-        assert not missing_participants, \
-            f'Participants {missing_participants} not found in the ' + \
-            f'dataset. Valid participants are {all_participants}'
-        selected_participants = participants
-
-    return df[df['participant_id'].isin(selected_participants)]
+    return get_dataset(manifest_df, BASE_URL, participants, path)
 
 
 def _write_ucap_manifest():
@@ -142,7 +84,7 @@ def _write_ucap_manifest():
     df = df.sort_values(by=['participant_id', 'name'])
     df = df[df['participant_id'].isin(good_participant_ids)]
 
-    local_paths = df['materialized'].str.replace('/UCAP/Data/', '')
+    local_paths = df['materialized'].str.replace('/UCAP/Data/', 'ucap/')
     df.insert(1, 'local_path', local_paths)
 
     hashes = df['extra'].apply(lambda x: f'md5:{x["hashes"]["md5"]}')
@@ -155,5 +97,7 @@ def _write_ucap_manifest():
     file_types = file_exts.map(FILE_TYPE_DICT)
     df.insert(4, 'file_type', file_types)
 
-    df[['local_path', 'url', 'hash', 'participant_id', 'file_type', 'size']].\
-        to_csv(MANIFEST_FILE, index=False)
+    df = df[['local_path', 'url', 'hash', 'participant_id',
+             'file_type', 'size']]
+
+    df.to_csv(MANIFEST_FILE, index=False)
