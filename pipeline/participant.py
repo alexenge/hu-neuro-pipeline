@@ -159,8 +159,9 @@ def participant_pipeline(
     config['auto_rejected_epochs'] = bad_ixs
 
     if perform_ride:
-        epochs = correct_ride(epochs, bad_ixs, ride_condition_column,
-                              ride_rt_column, ride_s_twd, ride_r_twd)
+        epochs, ride_results_conditions = \
+            correct_ride(epochs, bad_ixs, ride_condition_column,
+                         ride_rt_column, ride_s_twd, ride_r_twd)
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
@@ -188,6 +189,7 @@ def participant_pipeline(
     # Create and save HTML report
     if report_dir is not None:
         dirty.info['bads'] = interpolated_channels
+        # TODO: Pass `ride_results_conditions` and add RIDE plot to report
         report = create_report(participant_id, dirty, ica, filt, events,
                                event_id, epochs, evokeds)
         save_report(report, report_dir, participant_id)
