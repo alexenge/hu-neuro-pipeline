@@ -22,7 +22,7 @@ def correct_ride(epochs, bad_ixs, ride_condition_column, ride_rt_column,
 
     # Perform RIDE correction separately for each condition
     conditions = epochs.metadata[ride_condition_column].unique()
-    ride_results_conditions = []
+    ride_results_conditions = {}
     epochs_corr = epochs.copy()
     for condition in conditions:
 
@@ -41,7 +41,7 @@ def correct_ride(epochs, bad_ixs, ride_condition_column, ride_rt_column,
         cfg = RideCfg(comp_name, comp_twd, comp_latency, sfreq, epoch_twd,
                       re_samp=re_samp, bl=bl)
         ride_results = ride_call(epochs_condition_good, cfg)
-        ride_results_conditions.append(ride_results)
+        ride_results_conditions[condition] = ride_results
 
         # Subtract RIDE R component from all (good + bad) epochs
         rt = epochs_condition.metadata[ride_rt_column].values

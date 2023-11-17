@@ -158,10 +158,13 @@ def participant_pipeline(
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
     config['auto_rejected_epochs'] = bad_ixs
 
+    # Perform RIDE to correct speech artifacts
     if perform_ride:
         epochs, ride_results_conditions = \
             correct_ride(epochs, bad_ixs, ride_condition_column,
                          ride_rt_column, ride_s_twd, ride_r_twd)
+    else:
+        ride_results_conditions = None
 
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
@@ -189,9 +192,9 @@ def participant_pipeline(
     # Create and save HTML report
     if report_dir is not None:
         dirty.info['bads'] = interpolated_channels
-        # TODO: Pass `ride_results_conditions` and add RIDE plot to report
         report = create_report(participant_id, dirty, ica, filt, events,
-                               event_id, epochs, evokeds)
+                               event_id, epochs, ride_results_conditions,
+                               evokeds)
         save_report(report, report_dir, participant_id)
 
     # Time-frequency analysis
