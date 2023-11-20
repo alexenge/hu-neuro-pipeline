@@ -1,9 +1,5 @@
 Group level
-=================
-
-.. contents::
-    :depth: 2
-    :backlinks: none
+===========
 
 Combine trials
 --------------

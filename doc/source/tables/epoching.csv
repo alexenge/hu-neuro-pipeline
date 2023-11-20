@@ -3,7 +3,7 @@ Argument,Description,Python example,R example
 ``triggers_column`` (default: ``None``),Name of log file column with EEG triggers for automatic matching,``'trigger'``,``"trigger"``
 ``epochs_tmin`` (default: ``-0.5``),Start of epochs relative to event onset (in s),``-0.5``,``-0.5``
 ``epochs_tmax`` (default: ``1.5``),End of epochs relative to event onset (in s),``1.5``,``1.5``
-"``baseline`` (default: ``(-0.2, 0.0)``",Time window for baseline correction (in s) or,"``(-0.2, 0.0)``","``c(-0.2, 0.0)``"
+"``baseline`` (default: ``(-0.2, 0.0)``)",Time window for baseline correction (in s) or,"``(-0.2, 0.0)``","``c(-0.2, 0.0)``"
 ,Use entire prestimulus interval or,"``(None, 0.0)``","``c(NULL, 0.0)``"
 ,Do not perform baseline correction,``None``,``NULL``
 ``reject_peak_to_peak`` (default: ``200.0``),Peak-to-peak threshold for rejecting epochs (in µV) or,``200.0``,``200.0``

@@ -1,10 +1,6 @@
 Input arguments
 ===============
 
-.. contents::
-    :depth: 2
-    :backlinks: none
-
 Input file paths
 ----------------
 

@@ -1,11 +1,7 @@
 Argument,Description,Python example,R example
-"``triggers`` (recommended, default: `None`)",Numerical EEG triggers for events of interest,"``[201, 202]``","``c(201, 202)``"
-``triggers_column`` (default: ``None``),Name of log file column with EEG triggers for automatic matching,``'trigger'``,``"trigger"``
-``epochs_tmin`` (default: ``-0.5``),Start of epochs relative to event onset (in s),``-0.5``,``-0.5``
-``epochs_tmax`` (default: ``1.5``),End of epochs relative to event onset (in s),``1.5``,``1.5``
-"``baseline`` (default: ``(-0.2, 0.0)``",Time window for baseline correction (in s) or,"``(-0.2, 0.0)``","``c(-0.2, 0.0)``"
-,Use entire prestimulus interval or,"``(None, 0.0)``","``c(NULL, 0.0)``"
-,Do not perform baseline correction,``None``,``NULL``
-``reject_peak_to_peak`` (default: ``200.0``),Peak-to-peak threshold for rejecting epochs (in µV) or,``200.0``,``200.0``
-,Do not reject epochs based on peak-to-peak amplitude,``None``,``NULL``
-"``components`` (recommended, default: ``None``)",Definition of single trial ERP components of interest,"``{'name': ['P1', 'N170'], 'tmin': [0.08, 0.15], 'tmax': [0.13, 0.2], 'roi': [['PO3', ...], ['P7', ...]]}``","``list(name = list(""P1"", ""N170""), tmin = list(0.08, 0.15), tmax = list(0.13, 0.2), roi = list(c(""PO3"", ...), c(""P7"", ...)))``"
+``perm_contrasts`` (default: ``None``),Contrast(s) between condition labels (see ``average_by``) to compute `cluster-based permutation tests <https://doi.org/10.1016/j.jneumeth.2007.03.024>`_ for,"``[('related', 'unrelated')]``","``list(c(""related"", ""unrelated""))``"
+``perm_tmin`` (default: ``0.0``),Start of time window (in s relative to stimulus onset) for restricting the permutation test,"``0.0`` or ``None`` (i.e., use entire epoch)","``0.0`` or ``NULL`` (i.e., use entire epoch)"
+``perm_tmax`` (default: ``1.0``),End of time window (in s relative to stimulus onset) for restricting the permutation test,"``1.0`` or ``None`` (i.e., use entire epoch)","``1.0`` or ``NULL`` (i.e., use entire epoch)"
+``perm_channels`` (default: ``None``),Selection of channels for restricting the permutation test,"``['C1', 'Cz', 'C2', ...]`` or ``None`` (i.e., use all channels)","``c(""C1"", ""Cz"", ""C2"", ...)`` or ``NULL`` (i.e., use all channels)"
+``perm_fmin`` (default: ``None``),Lowest frequency (in Hz) for restricting the permutation test (event-related power only),"``8.0`` or ``None`` (i.e., use all frequencies)","``8.0`` or ``NULL`` (i.e., use all frequencies)"
+``perm_fmax`` (default: ``None``),Highest frequency (in Hz) for restricting the permutation test (event-related power only),"``30.0`` or ``None`` (i.e., use all frequencies)","``30.0`` or ``NULL`` (i.e., use all frequencies)"
