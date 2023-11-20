@@ -1,79 +1,103 @@
 import json
-import re
-import urllib.request
+from pathlib import Path
+from urllib.request import urlopen
 
-import pooch
+import pandas as pd
 
-# URL of the UCAP repo files on OSF
-base_url = 'https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage'
+from .utils import get_dataset
 
-# Local cache to download the files to
-local_cache = 'hu-neuro-pipeline'
+BASE_URL = 'https://files.de-1.osf.io/v1/resources/hdxvb/providers/osfstorage'
+MANIFEST_FILE = Path(__file__).parent.joinpath('ucap_manifest.csv')
 
-
-def construct_fetcher(remote_dir, local_dir):
-    """Constructs a pooch fetcher for getting UCAP remote files locally."""
-
-    # Parse remote files on OSF
-    urls = {}
-    hashes = {}
-    with urllib.request.urlopen(f'{base_url}/{remote_dir}') as url:
-        files = json.loads(url.read().decode())['data']
-        files_attributes = [file['attributes'] for file in files]
-
-        # Natural-sort files by name
-        # Necessary because log file names are without leading zeros
-        natsort = lambda s: [int(t) if t.isdigit() else t.lower()
-                             for t in re.split('(\d+)', s)]
-        files_attributes_sorted = sorted(
-            files_attributes, key=lambda d: natsort(d['name']))
-
-        # Extract file URLs and hashsums
-        for attributes in files_attributes_sorted:
-            local_path = local_dir + attributes['name']
-            urls[local_path] = base_url + attributes['path']
-            hashes[local_path] = 'md5:' + attributes['extra']['hashes']['md5']
-
-    # Construct fetcher for getting UCAP data
-    fetcher = pooch.create(
-        path=pooch.os_cache(local_cache),
-        base_url=base_url,
-        env='PIPELINE_DATA_DIR',
-        registry=hashes,
-        urls=urls,
-    )
-
-    return fetcher
+FILE_TYPE_DICT = {'vhdr': 'raw_files',
+                  'txt': 'log_files',
+                  'matrix': 'besa_files'}
 
 
-def get_paths(n_participants=40):
-    """Downloads sample data from the UCAP study and returns the paths."""
+def get_ucap(participants=40, path=None):
+    """Get sample data from the UCAP dataset.
 
-    # Prepare dict of file paths for return
-    paths = {}
+    Data that are not yet available locally will be downloaded from the OSF.
+    See :footcite:`fromer2018` for details on the UCAP dataset.
 
-    # Get raw EEG files - note that there are 3 files per participant
-    eeg_fetcher = construct_fetcher('59cf07fa6c613b02958f3364/', 'raw/')
-    n_files = int(n_participants) * 3
-    eeg_paths = list(eeg_fetcher.registry.keys())[:n_files]
-    eeg_paths = [eeg_fetcher.fetch(path) for path in eeg_paths]
-    vhdr_paths = [path for path in eeg_paths if path.endswith('.vhdr')]
-    paths['vhdr_files'] = vhdr_paths
+    Parameters
+    ----------
+    participants : int or list of str, optional
+        Which participants to download. By default, downloads all 40
+        participants available in the dataset. If an integer, downloads that
+        many participants starting from the first participant. If a list of
+        strings, downloads the participants with the given IDs (e.g.,
+        ``['05', '07']``).
+    path : str or Path, optional
+        Local directory path to download the data to. By default, uses the
+        user's local cache directory. An alternative way to specify the
+        download path is to set the environment variable ``PIPELINE_DATA_DIR``.
 
-    # Extract participant IDs
-    participant_ids = [
-        path.split('/')[-1].replace('.vhdr', '') for path in vhdr_paths]
+    Returns
+    -------
+    dict
+        A dictionary with the file paths of the downloaded data:
 
-    # Get corresponding behavioral log files
-    log_fetcher = construct_fetcher('59cf12259ad5a102cc5c4b93/', 'log/')
-    log_paths = [f'log/{int(p_id)}_test.txt' for p_id in participant_ids]
-    log_paths = [log_fetcher.fetch(path) for path in log_paths]
-    paths['log_files'] = log_paths
+        - ``'raw_files'``: A list with the paths of the raw EEG files
+          (``.vhdr``)
+        - ``'log_files'`` A list with the paths of the log files (``.txt``)
+        - ``'besa_files'`` A list with the paths of the BESA calibration files
+          (``.matrix``)
 
-    # Get corresponding BESA/MSEC cali files
-    cali_fetcher = construct_fetcher('59cf089e6c613b02968f5724/', 'cali/')
-    cali_paths = [f'cali/{p_id}_cali.matrix' for p_id in participant_ids]
-    cali_paths = [cali_fetcher.fetch(path) for path in cali_paths]
-    paths['besa_files'] = cali_paths
+    See Also
+    --------
+    pipeline.datasets.get_erpcore
 
-    return paths
+    References
+    ----------
+    .. footbibliography::
+    """
+
+    manifest_df = pd.read_csv(MANIFEST_FILE, dtype={'participant_id': str})
+
+    return get_dataset(manifest_df, BASE_URL, participants, path)
+
+
+def _write_ucap_manifest():
+    """Writes a CSV table containing the file paths of the UCAP dataset."""
+
+    eeg_url = '59cf07fa6c613b02958f3364/'
+    log_url = '59cf12259ad5a102cc5c4b93/'
+    cali_url = '59cf089e6c613b02968f5724/'
+
+    files = []
+    for url in [eeg_url, log_url, cali_url]:
+        with urlopen(f'{BASE_URL}/{url}') as url:
+            files += json.loads(url.read().decode())['data']
+
+    attributes = [file['attributes'] for file in files]
+
+    df = pd.DataFrame.from_dict(attributes)
+
+    participants = df['name'].str.split('_|\.').str[0].str.zfill(2)
+
+    n_expected_files = 5  # Complete participants have 3 x EEG, 1 x log, 1 x cali
+    n_files = participants.value_counts()
+    good_participant_ids = n_files[n_files == n_expected_files].index.to_list()
+
+    df.insert(0, 'participant_id', participants)
+    df = df.sort_values(by=['participant_id', 'name'])
+    df = df[df['participant_id'].isin(good_participant_ids)]
+
+    local_paths = df['materialized'].str.replace('/UCAP/Data/', 'ucap/')
+    df.insert(1, 'local_path', local_paths)
+
+    hashes = df['extra'].apply(lambda x: f'md5:{x["hashes"]["md5"]}')
+    df.insert(2, 'hash', hashes)
+
+    urls = df['path'].apply(lambda x: f'{BASE_URL}{x}')
+    df.insert(3, 'url', urls)
+
+    file_exts = df['name'].apply(lambda x: Path(x).suffix[1:])
+    file_types = file_exts.map(FILE_TYPE_DICT)
+    df.insert(4, 'file_type', file_types)
+
+    df = df[['local_path', 'url', 'hash', 'participant_id',
+             'file_type', 'size']]
+
+    df.to_csv(MANIFEST_FILE, index=False)

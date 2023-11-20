@@ -9,6 +9,9 @@ Argument,Description,Python example,R example
 ,Do not construct a new HEOG channel,``None``,``NULL``
 ``montage`` (default: ``'easycap-M1'``),`Standard EEG montage name <https://mne.tools/stable/auto_tutorials/intro/40_sensor_locations.html#working-with-built-in-montages>`_ or,``'easycap-M1'``,``"easycap-M1"``
 ,`Custom EEG montage file path <https://mne.tools/stable/generated/mne.channels.read_custom_montage.html>`_,``'data/chanlocs.elc'``,``"data/chanlocs.elc"``
+``ref_channels`` (default: ``'average'``),List of channels to re-reference EEG channels to or,"``['M1', 'M2']``","``c(""M1"", ""M2"")``"
+,Re-reference EEG channels to an average reference or,``'average'``,``"average"``
+,Use the `Reference Electrode Standardization Technique (REST) <https://doi.org/10.1088/0967-3334/22/4/305>`_,``'REST'``,``"REST"``
 ``bad_channels`` (default: ``None``),Lists of bad channels for each participant or,"``[['P7', 'Oz'], ['Fp2'], ...]``","``list(c(""P7"", ""Oz""), c(""Fp2""), ...)``"
 ,Dict with participant labels and their list of bad channels or,"``{'Vp05': ['PO8', 'O2'], ...}``","``list(""Vp05"" = c(""PO8"", ""O2""))``"
 ,Auto-detect bad channels based on standard error across epochs or,``'auto'``,``"auto"``
@@ -18,7 +21,7 @@ Argument,Description,Python example,R example
 ,Don't use BESA/MSEC ocular correction,``None``,``NULL``
 ``ica_method`` (default: ``None``),`ICA method <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_ or,``'fastica'`` or ``'infomax'`` or ``'picard'``,``"fastica"`` or ``"infomax"`` or ``"picard"``
 ,Don't apply ICA,``None``,``NULL``
-``ica_n_components`` (default: ``0.99``),Number of ICA components to use or,``15``,``15``
+``ica_n_components`` (default: ``None``),Number of ICA components to use or,``15``,``15``
 ,Proportion of variance explained by ICA components or,``0.99``,``0.99``
 ,Use (`almost <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_) all possible ICA components,``None``,``NULL``
 ``highpass_freq`` (default: ``0.1``),High-pass filter cutoff frequency or,``0.1``,``0.1``

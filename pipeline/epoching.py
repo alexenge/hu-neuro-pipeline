@@ -1,25 +1,26 @@
 import chardet
 import numpy as np
 import pandas as pd
-from mne import combine_evoked, pick_channels, set_log_level
+from mne import (combine_evoked, events_from_annotations, pick_channels,
+                 set_log_level)
 from mne.channels import combine_channels
+from mne.io.brainvision.brainvision import RawBrainVision
 from scipy.stats import zscore
 
 
-def triggers_to_event_id(triggers):
-    """Convert list or dict of triggers to MNE-style event_id"""
+def get_events(raw, triggers=None):
+    """Extracts events from raw data based on a list of numeric triggers."""
 
-    # Convert list to dict with triggers as condition names
-    if isinstance(triggers, list):
-        triggers = {str(trigger): trigger for trigger in triggers}
-    else:
-        assert isinstance(triggers, dict), \
-            '`triggers` must be either list or dict'
+    events, event_id = events_from_annotations(raw, verbose=False)
 
-    # Make sure that trigger values are integers (R would pass them as floats)
-    event_id = {key: int(value) for key, value in triggers.items()}
+    if triggers is not None:
+        if isinstance(raw, RawBrainVision):
+            event_id = {str(trigger): int(trigger) for trigger in triggers}
+        else:
+            event_id = {key: value for key, value in event_id.items()
+                        if int(key) in triggers}
 
-    return event_id
+    return events, event_id
 
 
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
@@ -66,9 +67,14 @@ def match_log_to_epochs(epochs, log, triggers_column, depth=10):
     assert triggers_column in log.columns, \
         f'Column \'{triggers_column}\' is not in the log file'
 
-    # Read lists of triggers from log file and EEG epochs
+    # Read lists of triggers from log file
     events_log = log[triggers_column].tolist()
-    events_epochs = list(epochs.events[:, 2])
+
+    # Read lists of triggers from EEG epochs
+    event_id_keys = list(epochs.event_id.keys())
+    event_id_values = list(epochs.event_id.values())
+    events_epochs = [int(event_id_keys[event_id_values.index(event)])
+                     for event in epochs.events[:, 2]]
 
     # Check for each row in the log file
     previous_repaired = False
@@ -113,8 +119,10 @@ def get_bad_epochs(epochs, reject_peak_to_peak=None):
     epochs_rej = epochs.copy().drop_bad(reject_peak_to_peak)
 
     # Get indices of bad epochs from the rejection log
-    all_ixs = [elem for elem in epochs_rej.drop_log if elem != ('IGNORED',)]
-    bad_ixs = [ix for ix, elem in enumerate(all_ixs) if elem != ()]
+    drop_log = [elem for ix, elem
+                in enumerate(epochs_rej.drop_log)
+                if epochs.drop_log[ix] == ()]
+    bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
 
     return bad_ixs
 

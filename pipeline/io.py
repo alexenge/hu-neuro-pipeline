@@ -9,7 +9,8 @@ from mne import Evoked
 from mne import __version__ as mne_version
 from mne import write_evokeds
 from mne.channels.layout import _find_topomap_coords
-from mne.io import concatenate_raws, read_raw_brainvision
+from mne.io import concatenate_raws, read_raw
+from mne.io._read_raw import readers
 from mne.time_frequency import AverageTFR, write_tfrs
 from numpy import __version__ as numpy_version
 from pandas import __version__ as pandas_version
@@ -18,38 +19,38 @@ from sklearn import __version__ as sk_version
 from ._version import version as pipeline_version
 
 
-def read_raw(vhdr_file_or_files):
+def read_eeg(raw_file_or_files):
     """Reads one or more raw EEG datasets from the same participant."""
 
     # Read raw datasets and combine if a list was provided
-    if isinstance(vhdr_file_or_files, list):
-        vhdr_files = vhdr_file_or_files
-        print(f'\n=== Reading and combining raw data from {vhdr_files} ===')
-        raw_list = [read_raw_brainvision(f, preload=True) for f in vhdr_files]
+    if isinstance(raw_file_or_files, list):
+        raw_files = raw_file_or_files
+        print(f'\n=== Reading and combining raw data from {raw_files} ===')
+        raw_list = [read_raw(f, preload=True) for f in raw_files]
         raw = concatenate_raws(raw_list)
-        participant_id = get_participant_id(vhdr_files)
+        participant_id = get_participant_id(raw_files)
 
     # Read raw dataset if only a single one was provided
     else:
-        vhdr_file = vhdr_file_or_files
-        print(f'\n=== Reading raw data from {vhdr_file} ===')
-        raw = read_raw_brainvision(vhdr_file, preload=True)
-        participant_id = get_participant_id(vhdr_file)
+        raw_file = raw_file_or_files
+        print(f'\n=== Reading raw data from {raw_file} ===')
+        raw = read_raw(raw_file, preload=True)
+        participant_id = get_participant_id(raw_file)
 
     return raw, participant_id
 
 
-def get_participant_id(vhdr_file_or_files):
+def get_participant_id(raw_file_or_files):
     """Extracts the basename of an input file to use as participant ID."""
 
     # Extract participant ID from raw data file name(s)
-    if isinstance(vhdr_file_or_files, list):
-        vhdr_files = vhdr_file_or_files
-        participant_id = [path.basename(f).split('.')[0] for f in vhdr_files]
+    if isinstance(raw_file_or_files, list):
+        raw_files = raw_file_or_files
+        participant_id = [path.basename(f).split('.')[0] for f in raw_files]
         participant_id = '_'.join(participant_id)
     else:
-        vhdr_file = vhdr_file_or_files
-        participant_id = path.basename(vhdr_file).split('.')[0]
+        raw_file = raw_file_or_files
+        participant_id = path.basename(raw_file).split('.')[0]
 
     return participant_id
 
@@ -61,13 +62,22 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
     assert path.isdir(dir_path), f'Didn\'t find directory `{dir_path}`!'
     files = []
     for extension in extensions:
-        files += glob(f'{dir_path}/*.{extension}')
+        files += glob(f'{dir_path}/*{extension}')
+
+    # For BrainVision files, make sure to only return the header (`.vhdr`) file
+    if any(['.vhdr' in f for f in files]):
+        files = [f for f in files if '.eeg' not in f and '.vmrk' not in f]
 
     # Sort naturally because some files might not have leading zeros
     if natsort_files:
         files = sorted(files, key=natsort)
 
     return files
+
+
+eeg_extensions = list(readers.keys())
+log_extensions = ['.csv', '.tsv', '.txt']
+besa_extensions = ['.matrix']
 
 
 def natsort(s):
@@ -84,7 +94,7 @@ def convert_participant_input(input, participant_ids):
         participant_dict = {id: None for id in participant_ids}
         for id, values in input.items():
             assert id in participant_ids, \
-                f'Participant ID {id} is not in vhdr_files'
+                f'Participant ID {id} is not in raw_files'
             values = [values] if not isinstance(values, list) else values
             participant_dict[id] = values
         return list(participant_dict.values())
@@ -220,7 +230,8 @@ def save_montage(epochs, output_dir):
 
     # Add 2D flattened coordinates
     # Multiplied to mm scale (with head radius =~ 95 mm as in R-eegUtils)
-    coords_df[['x', 'y']] = _find_topomap_coords(epochs.info, ch_names) * 947
+    coords_df[['x', 'y']] = \
+        _find_topomap_coords(epochs.info, ch_names, ignore_overlap=True) * 947
 
     # Save
     save_df(coords_df, output_dir, suffix='channel_locations')

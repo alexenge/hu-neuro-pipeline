@@ -7,3 +7,7 @@ a.footnote-reference {
     vertical-align: baseline;
     font-size: 100%;
 }
+
+.output.text_html {
+    overflow: auto;
+}

@@ -3,10 +3,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - ipykernel
   - jupytext
-  - nbsphinx
+  - myst-nb
   - pip
   - python=3.11
+  - quarto
   - r-base
   - r-dplyr
   - r-ggplot2
@@ -14,6 +16,11 @@ dependencies:
   - r-lme4
   - r-reticulate
   - r-rmisc
+  - seaborn
   - sphinx-book-theme=0.3.3
   - sphinx-copybutton
   - sphinx-gallery=0.7.0
+  - sphinxcontrib-bibtex
+  - pip:
+      - pybtex-apa-style
+      - sphinxcontrib-apa

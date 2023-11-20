@@ -2,24 +2,36 @@
 jupyter:
   jupytext:
     text_representation:
-      extension: .Rmd
-      format_name: rmarkdown
-      format_version: '1.1'
-      jupytext_version: 1.1.1
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.14.7
   kernelspec:
     display_name: R
     language: R
     name: ir
 ---
 
-# ERP analysis (in R)
+# ERP analysis of UCAP data
+
+## Loading R packages
+
+```{r}
+#| tags: [remove-output]
+library("reticulate")
+library("Rmisc")
+library("dplyr")
+library("ggplot2")
+library("lme4")
+```
 
 ## Loading the pipeline
 
-After following the [installation instructions for R users](../installation.html#for-r-users), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
+After following the [installation instructions for R users](../installation.rst), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
 
 ```{r}
-pipeline <- reticulate::import("pipeline")
+#| tags: [remove-output]
+pipeline <- import("pipeline")
 ```
 
 ## Downloading example data
@@ -30,8 +42,8 @@ In this EEG experiment, participants performed a visual search task with visual 
 The raw data are stored in the [Open Science Framework](https://osf.io/hdxvb) and more details about the study are in [Frömer et al. (2018)](https://doi.org/10.3389/fnins.2018.00048).
 
 ```{r}
-ucap_paths <- pipeline$datasets$ucap$get_paths(n_participants = 2)
-print(ucap_paths)
+ucap_files <- pipeline$datasets$get_ucap(participants = 2)
+print(ucap_files)
 ```
 
 To save time, we only download and process data from the first two participants.
@@ -44,11 +56,12 @@ The paths of the downloaded EEG header files (`.vhdr`), behavioral log files (`.
 We run a simple pipeline for single-trial ERP analysis with the following steps:
 
 - Downsampling to 250 Hz
-- Re-referecing to common average (not shown)
+- Re-referencing to common average (not shown)
 - Ocular correction with BESA/MSEC matrices
-- Bandpass filtering between 0.1 and 40 Hz
+- Default bandpass filtering between 0.1 and 40 Hz (not_shown)
 - Segmentation to epochs around stimulus triggers
 - Baseline correction (not shown)
+- Rejecting bad epochs based on peak-to-peak amplitudes > 200 µV (not shown)
 - Computing single trial N2 and P3b amplitudes by averaging across time windows and channels of interest
 - Creating by-participant averages for the blurred and normal conditions
 
@@ -56,15 +69,13 @@ We run a simple pipeline for single-trial ERP analysis with the following steps:
 res <- pipeline$group_pipeline(
 
   # Input/output paths
-  vhdr_files = ucap_paths$vhdr_files,
-  log_files = ucap_paths$log_files,
+  raw_files = ucap_files$raw_files,
+  log_files = ucap_files$log_files,
   output_dir = "output",
 
   # Preprocessing options
   downsample_sfreq = 250.0,
-  besa_files = ucap_paths$besa_files,
-  highpass_freq = 0.1,
-  lowpass_freq = 40.0,
+  besa_files = ucap_files$besa_files,
 
   # Epoching options
   triggers = c(201:208, 211:218),
@@ -104,8 +115,7 @@ head(trials)
 
 We can plot the single trial ERP amplitudes (here for the N2 component), separately for the blurred and normal conditions, e.g., as a kernel density plot:
 
-```{r, tags=c("nbsphinx-thumbnail")}
-library(ggplot2)
+```{r}
 trials |>
   ggplot(aes(x = N2, fill = n_b)) +
   geom_density(color = NA, alpha = 0.5) +
@@ -120,7 +130,6 @@ Note that these kinds of plots do not take into account the fact that the single
 To do this, and to quantify if any descriptive differences between conditions are statistically reliable, we can run a linear mixed-effects model:
 
 ```{r}
-library(lme4)
 mod <- lmer(N2 ~ n_b + (1 | participant_id), data = trials)
 summary(mod)
 ```
@@ -151,9 +160,7 @@ evokeds |>
 
 We can add error bars to the waveforms using the appropriate [standard error for whin-participant variables](http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/#error-bars-for-within-subjects-variables):
 
-```{r, message=FALSE}
-library(Rmisc)
-library(dplyr)
+```{r, tags=c("nbsphinx-thumbnail")}
 evokeds |>
   summarySEwithin(
     measurevar = "N2",

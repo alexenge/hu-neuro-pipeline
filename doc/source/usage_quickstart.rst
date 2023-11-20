@@ -13,7 +13,7 @@ Here is a fairly minimal example for a (fictional) N400/P600 experiment with two
     from pipeline import group_pipeline
 
     trials, evokeds, config = group_pipeline(
-        vhdr_files='Results/EEG/raw',
+        raw_files='Results/EEG/raw',
         log_files='Results/RT',
         output_dir='Results/EEG/export',
         besa_files='Results/EEG/cali',
@@ -33,7 +33,7 @@ Here is a fairly minimal example for a (fictional) N400/P600 experiment with two
 
 In this example we have specified:
 
-- ``vhdr_files``, ``log_files``, ``output_dir``, ``besa_files``: The paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction
+- ``raw_files``, ``log_files``, ``output_dir``, ``besa_files``: The paths to the raw EEG data, to the behavioral log files, to the desired output directory, and to the BESA files for ocular correction
 
 - ``triggers``: The four different numerical EEG trigger codes corresponding to each of the four cells in the 2 × 2 design
 
@@ -55,7 +55,7 @@ Here is the same example as above but for using the pipeline from R:
     pipeline <- reticulate::import("pipeline")
 
     res <- pipeline$group_pipeline(
-        vhdr_files = "Results/EEG/raw",
+        raw_files = "Results/EEG/raw",
         log_files = "Results/RT",
         output_dir = "Results/EEG/export",
         besa_files = "Results/EEG/cali",

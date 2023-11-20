@@ -1,6 +1,0 @@
-Examples
-========
-
-.. nbgallery::
-
-    examples/ucap

@@ -5,8 +5,8 @@ from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
-                       match_log_to_epochs, read_log, triggers_to_event_id)
-from .io import (read_raw, save_clean, save_df, save_epochs, save_evokeds,
+                       get_events, match_log_to_epochs, read_log)
+from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
                  save_montage, save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
@@ -15,7 +15,7 @@ from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
 def participant_pipeline(
-    vhdr_file,
+    raw_file,
     log_file,
     besa_file=None,
     bad_channels=None,
@@ -26,8 +26,9 @@ def participant_pipeline(
     veog_channels='auto',
     heog_channels='auto',
     montage='easycap-M1',
+    ref_channels='average',
     ica_method=None,
-    ica_n_components=0.99,
+    ica_n_components=None,
     highpass_freq=0.1,
     lowpass_freq=40.0,
     triggers=None,
@@ -69,7 +70,7 @@ def participant_pipeline(
     config = locals()
 
     # Read raw data
-    raw, participant_id = read_raw(vhdr_file)
+    raw, participant_id = read_eeg(raw_file)
 
     # Create backup of the raw data for the HTML report
     if report_dir is not None:
@@ -92,8 +93,8 @@ def participant_pipeline(
     raw, interpolated_channels = interpolate_bad_channels(
         raw, bad_channels, auto_bad_channels)
 
-    # Re-reference to common average
-    _ = raw.set_eeg_reference('average')
+    # Re-reference to a set of channels or the average
+    _ = raw.set_eeg_reference(ref_channels)
 
     # Do ocular correction with BESA and/or ICA
     if besa_file is not None:
@@ -104,13 +105,10 @@ def participant_pipeline(
         ica = None
 
     # Filtering
-    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1)
+    filt = raw.copy().filter(highpass_freq, lowpass_freq, n_jobs=1, picks='eeg')
 
     # Determine events and the corresponding (selection of) triggers
-    events, event_id = events_from_annotations(
-        filt, regexp='Stimulus', verbose=False)
-    if triggers is not None:
-        event_id = triggers_to_event_id(triggers)
+    events, event_id = get_events(filt, triggers)
 
     # Epoching including baseline correction
     if baseline is not None:
@@ -128,7 +126,7 @@ def participant_pipeline(
 
     # Add bad ICA components to config
     if ica is not None:
-        if ica_n_components < 1.0:
+        if ica_n_components is None or ica_n_components < 1.0:
             config['auto_ica_n_components'] = int(ica.n_components_)
         config['auto_ica_bad_components'] = [int(x) for x in ica.exclude]
 

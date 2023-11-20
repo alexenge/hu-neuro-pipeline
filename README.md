@@ -57,7 +57,7 @@ Here is a fairly minimal example for a (fictional) N400/P600 experiment with two
 from pipeline import group_pipeline
 
 trials, evokeds, config = group_pipeline(
-    vhdr_files='Results/EEG/raw',
+    raw_files='Results/EEG/raw',
     log_files='Results/RT',
     output_dir='Results/EEG/export',
     besa_files='Results/EEG/cali',
@@ -94,7 +94,7 @@ pipeline <- reticulate::import("pipeline")
 
 # Run the group level pipeline
 res <- pipeline$group_pipeline(
-    vhdr_files = "Results/EEG/raw",
+    raw_files = "Results/EEG/raw",
     log_files = "Results/RT",
     output_dir = "Results/EEG/export",
     besa_files = "Results/EEG/cali",
@@ -123,6 +123,6 @@ config <- res[[3]]
 
 ## 3. Processing details
 
-<img src="https://github.com/alexenge/hu-neuro-pipeline/blob/main/doc/_static/flowchart.svg" width="400">
+<img src="https://github.com/alexenge/hu-neuro-pipeline/blob/main/doc/source/_static/flowchart.svg" width="400">
 
 See the [documentation](https://hu-neuro-pipeline.readthedocs.io/en/latest/) for more details about how to use the pipeline and how it works under the hood.
