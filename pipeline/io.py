@@ -10,7 +10,6 @@ from mne import __version__ as mne_version
 from mne import write_evokeds
 from mne.channels.layout import _find_topomap_coords
 from mne.io import concatenate_raws, read_raw
-from mne.io._read_raw import readers
 from mne.time_frequency import AverageTFR, write_tfrs
 from numpy import __version__ as numpy_version
 from pandas import __version__ as pandas_version
@@ -74,6 +73,13 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
 
     return files
 
+
+# `readers` changed to `_get_supported` in MNE 1.6.0, we currently support both
+try:
+    from mne.io._read_raw import readers
+except ImportError:
+    from mne.io._read_raw import _get_supported
+    readers = _get_supported()
 
 eeg_extensions = list(readers.keys())
 log_extensions = ['.csv', '.tsv', '.txt']
