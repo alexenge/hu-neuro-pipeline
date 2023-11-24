@@ -43,6 +43,7 @@ def participant_pipeline(
     ride_rt_column='RT',
     ride_s_twd=(0.0, 0.6),
     ride_r_twd=(-0.3, 0.3),
+    ride_reject_peak_to_peak=None,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
@@ -163,6 +164,9 @@ def participant_pipeline(
         epochs, ride_results_conditions = \
             correct_ride(epochs, bad_ixs, ride_condition_column,
                          ride_rt_column, ride_s_twd, ride_r_twd)
+        config['auto_rejected_epochs_before_ride'] = bad_ixs
+        bad_ixs = get_bad_epochs(epochs, ride_reject_peak_to_peak)
+        config['auto_rejected_epochs'] = bad_ixs
     else:
         ride_results_conditions = None
 
