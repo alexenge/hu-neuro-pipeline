@@ -1,5 +1,5 @@
 Argument,Description,Python example,R example
-``downsample_sfreq`` (default: ``None``),"Downsample to lower sampling rate (e.g., 250 Hz) or",``250.0``,``250.0``
+``downsample_sfreq`` (default: ``None``),"Downsample to lower sampling rate or",``250.0``,``250.0``
 ,Do not downsample,``None``,``NULL``
 ``veog_channels`` (default: ``'auto'``),Construct bipolar VEOG from two EEG or EOG channels or,"``['Fp1', 'IO1']``","``c(""Fp1"", ""IO1"")``"
 ,Construct VEOG from default channels or,``'auto'``,``"auto"``
@@ -13,7 +13,7 @@ Argument,Description,Python example,R example
 ,Re-reference EEG channels to an average reference or,``'average'``,``"average"``
 ,Use the `Reference Electrode Standardization Technique (REST) <https://doi.org/10.1088/0967-3334/22/4/305>`_,``'REST'``,``"REST"``
 ``bad_channels`` (default: ``None``),Lists of bad channels for each participant or,"``[['P7', 'Oz'], ['Fp2'], ...]``","``list(c(""P7"", ""Oz""), c(""Fp2""), ...)``"
-,Dict with (a subset of) participant labels and their list of bad channels or,"``{'Vp05': ['PO8', 'O2'], ...}``","``list(""Vp05"" = c(""PO8"", ""O2""))``"
+,Dict with participant labels and their list of bad channels or,"``{'Vp05': ['PO8', 'O2'], ...}``","``list(""Vp05"" = c(""PO8"", ""O2""))``"
 ,Auto-detect bad channels based on standard error across epochs or,``'auto'``,``"auto"``
 ,Don't interpolate any bad channels,``None``,``NULL``
 ``besa_files`` (default: ``None``),Directory of BESA/MSEC correction matrix files or,``'data/cali'``,``"data/cali"``

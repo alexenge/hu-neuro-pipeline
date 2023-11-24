@@ -6,8 +6,6 @@
 hu-neuro-pipeline
 =================
 
-Single trial EEG pipeline at the `Abdel Rahman Lab for Neurocognitive Psychology <https://abdelrahmanlab.com>`_, Humboldt-Universität zu Berlin
-
 .. image:: https://img.shields.io/pypi/v/hu-neuro-pipeline
    :target: https://pypi.org/project/hu-neuro-pipeline
    :alt: Latest Version
@@ -21,6 +19,8 @@ Single trial EEG pipeline at the `Abdel Rahman Lab for Neurocognitive Psychology
    :alt: License
 
 |
+
+Single trial EEG pipeline at the `Abdel Rahman Lab for Neurocognitive Psychology <https://abdelrahmanlab.com>`_, Humboldt-Universität zu Berlin
 
 Based on Frömer, R., Maier, M., & Abdel Rahman, R. (2018).
 Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models.

@@ -34,7 +34,7 @@ The raw data are stored in the [Open Science Framework](https://osf.io/29xpq) an
 
 ```{python}
 #| tags: [hide-output]
-n400_files = get_erpcore('N400', n_participants=4)
+n400_files = get_erpcore('N400', participants=4)
 ```
 
 ```{python}

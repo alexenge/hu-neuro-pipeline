@@ -44,6 +44,8 @@ if __name__ == "__main__":
             'Operating System :: OS Independent',
         ],
         packages=package_tree('pipeline'),
+        package_data={'pipeline.datasets': ['erpcore_manifest.csv',
+                                            'ucap_manifest.csv']},
         install_requires=[
             'chardet',
             'eeg-ride',
