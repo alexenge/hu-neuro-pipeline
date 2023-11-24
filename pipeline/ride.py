@@ -18,6 +18,7 @@ def correct_ride(epochs, bad_ixs, ride_condition_column, ride_rt_column,
     sfreq = epochs.info['sfreq']
     epoch_twd = [epochs.tmin * 1000, epochs.tmax * 1000]
     re_samp = 1000 / sfreq
+    prg = 0
     bl = np.abs(epochs.baseline[0]) * 1000
 
     # Perform RIDE correction separately for each condition
@@ -27,6 +28,7 @@ def correct_ride(epochs, bad_ixs, ride_condition_column, ride_rt_column,
     for condition in conditions:
 
         # Select epochs of the current condition
+        print(f'Performing RIDE correction for condition "{condition}"')
         is_condition = epochs.metadata[ride_condition_column] == condition
         condition_ixs = np.where(is_condition)[0]
         epochs_condition = epochs[condition_ixs].copy()
@@ -39,7 +41,7 @@ def correct_ride(epochs, bad_ixs, ride_condition_column, ride_rt_column,
 
         # Perform RIDE correction
         cfg = RideCfg(comp_name, comp_twd, comp_latency, sfreq, epoch_twd,
-                      re_samp=re_samp, bl=bl)
+                      re_samp=re_samp, prg=prg, bl=bl)
         ride_results = ride_call(epochs_condition_good, cfg)
         ride_results_conditions[condition] = ride_results
 
