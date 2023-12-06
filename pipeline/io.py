@@ -2,6 +2,7 @@ import json
 import re
 from glob import glob
 from os import makedirs, path
+from pathlib import Path
 from platform import python_version
 
 import pandas as pd
@@ -250,10 +251,24 @@ def save_config(config, output_dir):
     # Create output directory
     makedirs(output_dir, exist_ok=True)
 
+    # Turn all Path objects into strings so they can be saved
+    config_copy = config.copy()
+    for key, value in config_copy.items():
+        if isinstance(value, Path):
+            config_copy[key] = str(value)
+        elif is_list_like(value):
+            for ix, elem in enumerate(value):
+                if isinstance(elem, Path):
+                    config_copy[key][ix] = str(elem)
+                elif is_list_like(elem):
+                    for sub_ix, sub_elem in enumerate(elem):
+                        if isinstance(sub_elem, Path):
+                            config_copy[key][ix][sub_ix] = str(sub_elem)
+
     # Save
     fname = f'{output_dir}/config.json'
     with open(fname, 'w') as f:
-        json.dump(config, f, indent=4)
+        json.dump(config_copy, f, indent=4)
 
 
 def save_report(report, output_dir, participant_id):

@@ -1,4 +1,5 @@
 from functools import partial
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -127,16 +128,16 @@ def group_pipeline(
              'previous results, explicitly set `ica_n_components=0.99`.')
 
     # Get input file paths if directories were provided
-    if isinstance(raw_files, str):
+    if isinstance(raw_files, (str, Path)):
         raw_files = files_from_dir(raw_files, eeg_extensions)
-    if isinstance(log_files, str):
+    if isinstance(log_files, (str, Path)):
         log_files = files_from_dir(log_files, log_extensions)
     assert len(log_files) == len(raw_files), \
         f'Number of `log_files` ({len(log_files)}) does not match ' + \
         f'number of `raw_files` ({len(raw_files)})'
 
     # Get input BESA matrix files if necessary
-    if isinstance(besa_files, str):
+    if isinstance(besa_files, (str, Path)):
         besa_files = files_from_dir(besa_files, besa_extensions)
     elif besa_files is None:
         besa_files = [None] * len(raw_files)
