@@ -13,6 +13,7 @@ from mne.io import concatenate_raws, read_raw
 from mne.time_frequency import AverageTFR, write_tfrs
 from numpy import __version__ as numpy_version
 from pandas import __version__ as pandas_version
+from pandas.api.types import is_list_like
 from sklearn import __version__ as sk_version
 
 from ._version import version as pipeline_version
@@ -22,7 +23,7 @@ def read_eeg(raw_file_or_files):
     """Reads one or more raw EEG datasets from the same participant."""
 
     # Read raw datasets and combine if a list was provided
-    if isinstance(raw_file_or_files, list):
+    if is_list_like(raw_file_or_files):
         raw_files = raw_file_or_files
         print(f'\n=== Reading and combining raw data from {raw_files} ===')
         raw_list = [read_raw(f, preload=True) for f in raw_files]
@@ -43,7 +44,7 @@ def get_participant_id(raw_file_or_files):
     """Extracts the basename of an input file to use as participant ID."""
 
     # Extract participant ID from raw data file name(s)
-    if isinstance(raw_file_or_files, list):
+    if is_list_like(raw_file_or_files):
         raw_files = raw_file_or_files
         participant_id = [path.basename(f).split('.')[0] for f in raw_files]
         participant_id = '_'.join(participant_id)
@@ -64,7 +65,7 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
         files += glob(f'{dir_path}/*{extension}')
 
     # For BrainVision files, make sure to only return the header (`.vhdr`) file
-    if any(['.vhdr' in f for f in files]):
+    if any('.vhdr' in f for f in files):
         files = [f for f in files if '.eeg' not in f and '.vmrk' not in f]
 
     # Sort naturally because some files might not have leading zeros
@@ -101,7 +102,7 @@ def convert_participant_input(input, participant_ids):
         for id, values in input.items():
             assert id in participant_ids, \
                 f'Participant ID {id} is not in raw_files'
-            values = [values] if not isinstance(values, list) else values
+            values = values if is_list_like(values) else [values]
             participant_dict[id] = values
         return list(participant_dict.values())
 
@@ -120,8 +121,8 @@ def is_nested_list(input):
     """Checks if a list is nested, i.e., contains at least one other list."""
 
     # Check if there is any list in the list
-    if isinstance(input, list):
-        return any(isinstance(elem, list) for elem in input)
+    if is_list_like(input):
+        return any(is_list_like(elem) for elem in input)
     else:
         return False
 
@@ -226,7 +227,7 @@ def save_montage(epochs, output_dir):
 
     # Get locations of EEG channels
     chs = epochs.copy().pick_types(eeg=True).info['chs']
-    coords = [ch['loc'][0:3] for ch in chs]
+    coords = [ch['loc'][:3] for ch in chs]
     coords_df = pd.DataFrame(
         columns=['cart_x', 'cart_y', 'cart_z'], data=coords)
 

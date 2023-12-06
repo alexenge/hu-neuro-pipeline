@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from mne import concatenate_epochs, set_log_level
+from pandas.api.types import is_list_like
 
 
 def subtract_evoked(epochs, average_by=None, evokeds=None):
@@ -39,8 +40,9 @@ def compute_single_trials_tfr(epochs, components, bad_ixs=None):
     """Computes single trial power for a dict of multiple components."""
 
     # Check that values in the dict are lists
-    if not isinstance(components['name'], list):
-        components = {key: [value] for key, value in components.items()}
+    for key in ['name', 'tmin', 'tmax', 'roi']:
+        if not is_list_like(components[key]):
+            components[key] = [components[key]]
 
     # Loop over components
     components_df = pd.DataFrame(components)
