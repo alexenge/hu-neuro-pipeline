@@ -65,7 +65,7 @@ def files_from_dir(dir_path, extensions, natsort_files=True):
         files += glob(f'{dir_path}/*{extension}')
 
     # For BrainVision files, make sure to only return the header (`.vhdr`) file
-    if any(['.vhdr' in f for f in files]):
+    if any('.vhdr' in f for f in files):
         files = [f for f in files if '.eeg' not in f and '.vmrk' not in f]
 
     # Sort naturally because some files might not have leading zeros
@@ -227,7 +227,7 @@ def save_montage(epochs, output_dir):
 
     # Get locations of EEG channels
     chs = epochs.copy().pick_types(eeg=True).info['chs']
-    coords = [ch['loc'][0:3] for ch in chs]
+    coords = [ch['loc'][:3] for ch in chs]
     coords_df = pd.DataFrame(
         columns=['cart_x', 'cart_y', 'cart_z'], data=coords)
 
