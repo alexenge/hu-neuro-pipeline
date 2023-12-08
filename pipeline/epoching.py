@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import chardet
 import numpy as np
 import pandas as pd
@@ -39,7 +41,7 @@ def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
         encoding = chardet_res['encoding']
 
         # Read into DataFrame
-        if '.csv' in log_file:
+        if Path(log_file).suffix == '.csv':
             log = pd.read_csv(log_file, encoding=encoding)
         else:
             log = pd.read_csv(log_file, delimiter='\t', encoding=encoding)
