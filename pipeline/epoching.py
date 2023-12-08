@@ -5,6 +5,7 @@ from mne import (combine_evoked, events_from_annotations, pick_channels,
                  set_log_level)
 from mne.channels import combine_channels
 from mne.io.brainvision.brainvision import RawBrainVision
+from pandas.api.types import is_list_like
 from scipy.stats import zscore
 
 
@@ -52,7 +53,7 @@ def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
         assert isinstance(skip_log_conditions, dict), \
             '"skip_log_conditions" must be a dict ({column: [conditions]})'
         for col, values in skip_log_conditions.items():
-            if not isinstance(values, list):
+            if not is_list_like(values):
                 log = log[log[col] != values]
             else:
                 log = log[~log[col].isin(values)]
@@ -161,8 +162,9 @@ def compute_single_trials(epochs, components, bad_ixs=None):
     """Computes single trial mean amplitudes a dict of multiple components."""
 
     # Check that values in the dict are lists
-    if not isinstance(components['name'], list):
-        components = {key: [value] for key, value in components.items()}
+    for key in ['name', 'tmin', 'tmax', 'roi']:
+        if not is_list_like(components[key]):
+            components[key] = [components[key]]
 
     # Loop over components
     components_df = pd.DataFrame(components)
