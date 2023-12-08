@@ -182,6 +182,8 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     """Computes single trial mean amplitudes for single component."""
 
     # Check that requested region of interest channels are present in the data
+    if not is_list_like(roi):
+        roi = [roi]
     for ch in roi:
         assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 
