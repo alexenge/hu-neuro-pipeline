@@ -99,7 +99,8 @@ def correct_ica(raw, method='fastica', n_components=None, random_seed=1234):
     """Corrects ocular artifacts using ICA and automatic component removal."""
 
     # Convert number of components to integer
-    if n_components is not None and n_components >= 1.0:
+    if n_components is not None and n_components >= 1.0 \
+            and not isinstance(n_components, int):
         warn(f'Converting `ica_n_components` to integer: {n_components} -> ' +
              f'{int(n_components)}')
         n_components = int(n_components)
