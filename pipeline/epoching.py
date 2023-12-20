@@ -1,4 +1,5 @@
 from pathlib import Path
+from warnings import warn
 
 import chardet
 import numpy as np
@@ -24,6 +25,37 @@ def get_events(raw, triggers=None):
                         if int(key) in triggers}
 
     return events, event_id
+
+
+def update_skip_log_rows(skip_log_rows, epochs):
+    """Updates log file rows to skip, based on dropped epochs."""
+
+    if dropped_ixs := get_dropped_epochs(epochs):
+
+        if skip_log_rows is None:
+            return dropped_ixs
+
+        else:
+            return list(set(skip_log_rows) | set(dropped_ixs))
+
+
+def get_dropped_epochs(epochs):
+    """Gets indices of dropped epochs (e.g., due to 'NO_DATA')."""
+
+    drop_log = [elem for elem in epochs.drop_log if elem != ('IGNORED',)]
+
+    reasons = ['NO_DATA', 'TOO_SHORT']
+    dropped_ixs = set()
+    for reason in reasons:
+        if ixs := [ix for ix, elem in enumerate(drop_log) if reason in elem]:
+            dropped_ixs.update(ixs)
+            message = f'Dropped {len(ixs)} epochs ({ixs}) for reason ' + \
+                f'"{reason}". They will also be dropped from the log file.'
+            if reason == 'TOO_SHORT':
+                message += ' You may want reduce `epochs_tmax` to avoid this.'
+            warn(message)
+
+    return list(dropped_ixs)
 
 
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):

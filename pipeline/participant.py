@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
-from mne import Epochs, events_from_annotations
+from mne import Epochs
 from mne.time_frequency import tfr_morlet
 
 from .averaging import compute_evokeds
 from .epoching import (compute_single_trials, get_bad_channels, get_bad_epochs,
-                       get_events, match_log_to_epochs, read_log)
+                       get_events, match_log_to_epochs, read_log,
+                       update_skip_log_rows)
 from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
                  save_montage, save_report)
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
@@ -135,6 +136,7 @@ def participant_pipeline(
     print(epochs.__str__().replace(u"\u2013", "-"))
 
     # Read behavioral log file and match to the epochs
+    skip_log_rows = update_skip_log_rows(skip_log_rows, epochs)
     log = read_log(log_file, skip_log_rows, skip_log_conditions)
     if triggers_column is not None:
         log, missing_ixs = match_log_to_epochs(epochs, log, triggers_column)
