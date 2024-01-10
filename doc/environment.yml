@@ -1,4 +1,4 @@
-name: hu-neuro-pipeline-docs
+name: hu-neuro-pipeline
 channels:
   - conda-forge
   - defaults
