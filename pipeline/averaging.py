@@ -1,4 +1,3 @@
-import warnings
 from warnings import warn
 
 import numpy as np
@@ -18,11 +17,10 @@ def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
         all_evokeds, all_evokeds_df = compute_evokeds_queries(
             epochs, average_by, bad_ixs, participant_id)
     else:
-        warnings.warn(
-            'Passing a list of column names to `average_by` will ' +
-            'be deprecated in a future version of the pipeline. ' +
-            'Please use a dict of  labels and log file queries ' +
-            'instead (see https://github.com/alexenge/hu-neuro-pipeline/blob/main/docs/inputs.md#average_by-recommended-default-none)')
+        warn('Passing a list of column names to `average_by` will ' +
+             'be deprecated in a future version of the pipeline. ' +
+             'Please use a dict of  labels and log file queries ' +
+             'instead (see https://github.com/alexenge/hu-neuro-pipeline/blob/main/docs/inputs.md#average_by-recommended-default-none)')
         all_evokeds, all_evokeds_df = compute_evokeds_cols(
             epochs, average_by, bad_ixs, participant_id)
 
