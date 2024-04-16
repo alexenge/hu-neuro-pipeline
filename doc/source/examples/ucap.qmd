@@ -56,12 +56,12 @@ The paths of the downloaded EEG header files (`.vhdr`), behavioral log files (`.
 We run a simple pipeline for single-trial ERP analysis with the following steps:
 
 - Downsampling to 250 Hz
-- Re-referencing to common average (not shown)
+- Re-referencing to common average (per default)
 - Ocular correction with BESA/MSEC matrices
-- Default bandpass filtering between 0.1 and 40 Hz (not_shown)
+- Default bandpass filtering between 0.1 and 40 Hz (per default)
 - Segmentation to epochs around stimulus triggers
-- Baseline correction (not shown)
-- Rejecting bad epochs based on peak-to-peak amplitudes > 200 µV (not shown)
+- Baseline correction (per default)
+- Rejecting bad epochs based on peak-to-peak amplitudes > 200 µV (per default)
 - Computing single trial N2 and P3b amplitudes by averaging across time windows and channels of interest
 - Creating by-participant averages for the blurred and normal conditions
 
@@ -97,9 +97,15 @@ res <- pipeline$group_pipeline(
 )
 ```
 
+See the [Input arguments](../usage_inputs.rst) page for a list of all available processing options.
+
 ## Checking the results
 
 The resulting object (`res`) is a list with three components: A dataframe of single trial ERP amplitudes, a dataframe of by-participant condition averages, and a dictionary of pipeline metadata.
+
+```{r}
+str(res, max.level = 1)
+```
 
 ### Single-trial ERP amplitudes
 
@@ -113,7 +119,7 @@ trials <- res[[1]]
 head(trials)
 ```
 
-We can plot the single trial ERP amplitudes (here for the N2 component), separately for the blurred and normal conditions, e.g., as a kernel density plot:
+We can plot the single trial ERP amplitudes (here for the N2 component), separately for the blurred and normal conditions, e.g., as a density plot:
 
 ```{r}
 trials |>
@@ -136,7 +142,11 @@ summary(mod)
 
 Here we predict the single trial N2 amplitude based on the fixed effect of blurred vs. normal, and we allow for random variation in the intercept between participants.
 
-Note that for sound inference on the full dataset, we would want to (a) apply proper contrast coding to the `n_b` factor (e.g., [Schad et al., 2020](https://doi.org/10.1016/j.jml.2019.104038)), (b) include random effects not just for participants, but also for items (e.g., [Judd et al., 2012](https://doi.org/10.1037/a0028347)), and (c) include not just random intercepts, but also random slopes (e.g., [Barr et al., 2013](https://doi.org/10.1016/j.jml.2012.11.001)).
+Note that for sound inference on the full dataset, we would want to:
+
+- apply proper contrast coding to the `n_b` factor (e.g., [Schad et al., 2020](https://doi.org/10.1016/j.jml.2019.104038)),
+- include random effects not just for participants, but also for items (e.g., [Judd et al., 2012](https://doi.org/10.1037/a0028347)), and
+- include not just random intercepts, but also random slopes (e.g., [Barr et al., 2013](https://doi.org/10.1016/j.jml.2012.11.001)).
 
 ### By-participant condition averages
 
