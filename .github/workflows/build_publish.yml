@@ -48,7 +48,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags') != true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
 
       - name: Publish on PyPI
         if: startsWith(github.ref, 'refs/tags')
