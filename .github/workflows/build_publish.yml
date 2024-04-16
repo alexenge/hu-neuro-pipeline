@@ -4,9 +4,6 @@ on:
   release:
     types: [published]
   push:
-    branches:
-      - main
-      - fix-pypi-upload
 
 permissions:
   id-token: write
