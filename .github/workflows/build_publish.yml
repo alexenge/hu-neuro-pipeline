@@ -8,6 +8,9 @@ on:
       - main
       - fix-pypi-upload
 
+permissions:
+  id-token: write
+
 jobs:
   build:
     name: Build package ⚙️
