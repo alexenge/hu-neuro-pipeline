@@ -1,3 +1,6 @@
+from pathlib import Path
+from warnings import warn
+
 import chardet
 import numpy as np
 import pandas as pd
@@ -24,6 +27,37 @@ def get_events(raw, triggers=None):
     return events, event_id
 
 
+def update_skip_log_rows(skip_log_rows, epochs):
+    """Updates log file rows to skip, based on dropped epochs."""
+
+    if dropped_ixs := get_dropped_epochs(epochs):
+
+        if skip_log_rows is None:
+            return dropped_ixs
+
+        else:
+            return list(set(skip_log_rows) | set(dropped_ixs))
+
+
+def get_dropped_epochs(epochs):
+    """Gets indices of dropped epochs (e.g., due to 'NO_DATA')."""
+
+    drop_log = [elem for elem in epochs.drop_log if elem != ('IGNORED',)]
+
+    reasons = ['NO_DATA', 'TOO_SHORT']
+    dropped_ixs = set()
+    for reason in reasons:
+        if ixs := [ix for ix, elem in enumerate(drop_log) if reason in elem]:
+            dropped_ixs.update(ixs)
+            message = f'Dropped {len(ixs)} epochs ({ixs}) for reason ' + \
+                f'"{reason}". They will also be dropped from the log file.'
+            if reason == 'TOO_SHORT':
+                message += ' You may want reduce `epochs_tmax` to avoid this.'
+            warn(message)
+
+    return list(dropped_ixs)
+
+
 def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
     """Reads the behavioral log file with information about each EEG trial."""
 
@@ -39,7 +73,7 @@ def read_log(log_file, skip_log_rows=None, skip_log_conditions=None):
         encoding = chardet_res['encoding']
 
         # Read into DataFrame
-        if '.csv' in log_file:
+        if Path(log_file).suffix == '.csv':
             log = pd.read_csv(log_file, encoding=encoding)
         else:
             log = pd.read_csv(log_file, delimiter='\t', encoding=encoding)
@@ -182,6 +216,8 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     """Computes single trial mean amplitudes for single component."""
 
     # Check that requested region of interest channels are present in the data
+    if not is_list_like(roi):
+        roi = [roi]
     for ch in roi:
         assert ch in epochs.ch_names, f'ROI channel \'{ch}\' not in the data'
 

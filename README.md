@@ -14,37 +14,50 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 
 ### 1.1 For Python users
 
-Install the pipeline via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
+Install the pipeline via `pip` from the [Python Package Index (PyPI)](https://pypi.org/project/hu-neuro-pipeline/):
 
 ```bash
-python3 -m pip install hu-neuro-pipeline
+pip install hu-neuro-pipeline
 ```
 
-To install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
+Alternatively, you can install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
 
 ```bash
-python3 -m pip install git+https://github.com/alexenge/hu-neuro-pipeline.git
+pip install git+https://github.com/alexenge/hu-neuro-pipeline.git
 ```
 
 ### 1.2 For R users
 
-First install [reticulate](https://rstudio.github.io/reticulate/) and [Miniconda](https://docs.conda.io/en/latest/miniconda.html) for being able to import Python packages into R:
+First install and load [reticulate](https://rstudio.github.io/reticulate/) (an R package for accessing Python functionality from within R):
 
 ```r
 install.packages("reticulate")
-reticulate::install_miniconda()
+library("reticulate")
 ```
 
-Then install the pipeline via `pip` from the [Python Package Index](https://pypi.org/project/hu-neuro-pipeline/) (PyPI):
+Check if you already have [conda](https://docs.conda.io/en/latest/) (a scientific Python distribution) installed on your system:
 
 ```r
-reticulate::py_install("hu-neuro-pipeline", pip = TRUE)
+conda_exe()
 ```
 
-To install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
+If this shows you the path to a conda executable, you can skip the next step.
+If instead it shows you an error, you need to install conda:
 
 ```r
-reticulate::py_install("git+https://github.com/alexenge/hu-neuro-pipeline.git", pip = TRUE)
+install_miniconda()
+```
+
+Then install the pipeline from the [Python Package Index (PyPI)](https://pypi.org/project/hu-neuro-pipeline/):
+
+```r
+py_install("hu-neuro-pipeline", pip = TRUE)
+```
+
+Alternatively, you can install the latest development version from [GitHub](https://github.com/alexenge/hu-neuro-pipeline.git):
+
+```r
+py_install("git+https://github.com/alexenge/hu-neuro-pipeline.git", pip = TRUE)
 ```
 
 ## 2. Usage

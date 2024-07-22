@@ -1,4 +1,4 @@
-import warnings
+from warnings import warn
 
 import numpy as np
 import pandas as pd
@@ -17,11 +17,10 @@ def compute_evokeds(epochs, average_by=None, bad_ixs=[], participant_id=None):
         all_evokeds, all_evokeds_df = compute_evokeds_queries(
             epochs, average_by, bad_ixs, participant_id)
     else:
-        warnings.warn(
-            'Passing a list of column names to `average_by` will ' +
-            'be deprecated in a future version of the pipeline. ' +
-            'Please use a dict of  labels and log file queries ' +
-            'instead (see https://github.com/alexenge/hu-neuro-pipeline/blob/main/docs/inputs.md#average_by-recommended-default-none)')
+        warn('Passing a list of column names to `average_by` will ' +
+             'be deprecated in a future version of the pipeline. ' +
+             'Please use a dict of  labels and log file queries ' +
+             'instead (see https://github.com/alexenge/hu-neuro-pipeline/blob/main/docs/inputs.md#average_by-recommended-default-none)')
         all_evokeds, all_evokeds_df = compute_evokeds_cols(
             epochs, average_by, bad_ixs, participant_id)
 
@@ -69,13 +68,15 @@ def compute_evokeds_queries(epochs, queries, bad_ixs=[], participant_id=None):
 
         # Compute evokeds for trials that match the current query
         evoked = compute_evoked_query(epochs[good_ixs], query, label)
-        evokeds.append(evoked)
+        if evoked is not None:
+            evokeds.append(evoked)
 
-        # Convert to data frame
-        extra_cols = \
-            {'participant_id': participant_id, 'label': label, 'query': query}
-        evoked_df = evoked_to_df(evoked, extra_cols)
-        evoked_dfs.append(evoked_df)
+            # Convert to data frame
+            extra_cols = {'participant_id': participant_id,
+                          'label': label,
+                          'query': query}
+            evoked_df = evoked_to_df(evoked, extra_cols)
+            evoked_dfs.append(evoked_df)
 
     # Combine data frames
     evokeds_df = pd.concat(evoked_dfs, ignore_index=True)
@@ -85,6 +86,12 @@ def compute_evokeds_queries(epochs, queries, bad_ixs=[], participant_id=None):
 
 def compute_evoked_query(epochs, query, label):
     """Computes one condition average (evoked) based on a log file query."""
+
+    if len(epochs[query]) == 0:
+        warn(f'No trials found for query "{query}" (label: "{label}"). ' +
+             'This condition for this participant won\'t be included in the ' +
+             'evokeds and grand averages.')
+        return None
 
     # Compute evokeds based on ERP or TFR epochs
     if isinstance(epochs, EpochsTFR):
@@ -268,7 +275,8 @@ def compute_grands_df(evokeds_df):
 
     # Average by grouping columns
     group_cols = list(evokeds_df.columns[grouping_ixs])
-    grands_df = evokeds_df.groupby(group_cols, dropna=False).mean(numeric_only=True)
+    grands_df = evokeds_df.groupby(
+        group_cols, dropna=False).mean(numeric_only=True)
 
     # Convert conditions from index back to columns
     grands_df = grands_df.reset_index()
