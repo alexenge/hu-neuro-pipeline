@@ -79,8 +79,8 @@ RIDE speech artifact correction
 -------------------------------
 
 RIDE (Residue Iteration Decomposition) is a method to decompose event-related potentials into separate component clusters [#]_ [#]_.
-One typical use case (and the only one implemented here) is to correct for speech artifacts in EEG data from language production tasks.
-This works by separating the ERP into a stimulus-related component (the "S" component) and a response-related component (the "R" component), and then subtracting the R component (containing the speech artifact) from each single trial, based on its individual response latency (see [#]_ for details).
+One typical use case (and the only one implemented here) is to separate the ERP into a stimulus-related component (the "S" component) and a response-related component (the "R" component), and then subtract the R component (containing the speech artifact) from each single trial, based on its individual response latency (e.g., measured with a voice onset trigger in a language production experiment).
+The result are single trial ERPs that are "cleaned" from any response-related artifacts (e.g., the speech artifacts that occur during language production tasks; see [#]_ for details).
 
 There are a few things to note when you want to use RIDE for speech artifact correction:
 
