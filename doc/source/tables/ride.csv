@@ -5,9 +5,11 @@ Argument,Description,Python example,R example
 ``ride_rt_column`` (default: ``'RT'``),Name of log file column containing the voice (key) onset times,``'RT'``,``"RT"``
 "``ride_s_twd`` (default: ``(0.0, 0.6)``)",Time window in which stimulus-locked component should occur (in s),"``(0.0, 0.6)``","``c(0.0, 0.6)``"
 "``ride_r_twd`` (default: ``(-0.3, 0.3)``)","Time window around RT (voice onset time) in wich response-locked component should occur (in s). Default is `'supposed to be efficient to cover RT-locked component cluster' <https://cns.hkbu.edu.hk/ride/manual.pdf>`_","``(-0.3, 0.3)``","``c(-0.3, 0.3)``"
-``ride_epochs_tmin_after`` (default: ``None``),"Start of final epochs relative to stimulus onset (in s) (usual analyses time window can be used after RIDE)",``-0.5``,``-0.5``
-``ride_epochs_tmax_after_ride`` (default: ``None``),"Start of final epochs relative to stimulus onset (in s)",``1.5``,``1.5``
+``ride_epochs_tmin_after_ride`` (default: ``None``),"Crop epochs t_min and t_max if longer epochs needed for ride (in s) (usual analyses time window can be used after RIDE)",``-0.5``,``-0.5``
+,Do not crop time window after RIDE,``None``,``NULL``
+``ride_epochs_tmax_after_ride`` (default: ``None``),"Crop epochs t_min and t_max if longer epochs needed for ride (in s)",``1.5``,``1.5``
+,Do not crop time window after RIDE,``None``,``NULL``
 ,Note: ``epochs_tmin`` and ``epochs_tmax`` must be adjusted to contain entire speech artifact (min 1s)!, 
 ``reject_peak_to_peak`` (default: ``None``),Peak-to-peak threshold for rejecting epochs after RIDE correction (in µV) or,``200.0``,``200.0``
 ,Do not re-reject epochs after RIDE,``None``,``NULL``
-,"Note: you may use a relatively lenient ``reject_peak_to_peak`` threshold before RIDE and a more stringent one here (see participant level Preprocessing details)",
+,"Note: you may use a relatively lenient ``reject_peak_to_peak`` threshold before RIDE and a more stringent one here (see :doc:`Processing details <processing_participant>`)",
