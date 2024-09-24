@@ -139,7 +139,7 @@ nb_render_image_options = {'width': '70%', 'align': 'center'}
 def convert_input_tables():
     """Converts tables with Python syntax examples to R syntax examples."""
 
-    input_dir = Path(__file__).parent / 'tables'
+    input_dir = Path(__file__).parent / 'tables_py'
     input_files = input_dir.glob('*.csv')
 
     output_dir = Path(__file__).parent / 'tables_r'
@@ -197,7 +197,7 @@ def convert_input_tables():
 
 def convert_input_page():
 
-    input_file = Path(__file__).parent / 'usage_inputs.rst'
+    input_file = Path(__file__).parent / 'inputs_py.rst'
 
     with open(input_file, 'r') as file:
         input = file.read()
@@ -205,7 +205,7 @@ def convert_input_page():
             replace('Python syntax', 'R syntax').\
             replace(' tables/', ' tables_r/')
     
-    output_file = Path(__file__).parent / 'usage_inputs_r.rst'
+    output_file = Path(__file__).parent / 'inputs_r.rst'
 
     with open(output_file, 'w') as file:
         file.write(output)

@@ -12,7 +12,7 @@ jupyter:
     name: ir
 ---
 
-# ERP analysis of UCAP data
+# Example: UCAP data
 
 ## Loading R packages
 
@@ -27,7 +27,7 @@ library("lme4")
 
 ## Loading the pipeline
 
-After following the [installation instructions for R users](../installation.rst), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
+After following the [installation instructions for R users](../installation_r.rst), we can use the [reticulate](https://rstudio.github.io/reticulate/) Package to load the Python pipeline package directly from R.
 
 ```{r}
 #| tags: [remove-output]
@@ -97,7 +97,7 @@ res <- pipeline$group_pipeline(
 )
 ```
 
-See the [Input arguments](../usage_inputs.rst) page for a list of all available processing options.
+See the [Pipeline inputs](../inputs_r.rst) page for a list of all available processing options.
 
 ## Checking the results
 
