@@ -1,2 +1,2 @@
-Argument,Description,Python example,R example
-"``average_by`` (recommended, default: `None`)","Selection of (combinations of) conditions to create by-participant averages for (keys = custom condition labels, values = `Pandas query <https://pandas.pydata.org/docs/user_guide/indexing.html#indexing-query>`_)","``{'neg_unrel': 'context == ""negative"" & semantics == ""unrelated"" & rt < 3000', ...}``","``list(neg_unrel = ""context == 'negative' & semantics == 'unrelated' & rt < 3000"", ...)``"
+Argument,Description,Example
+"``average_by`` (recommended, default: ``None``)","Selection of (combinations of) conditions to create by-participant averages for (keys = custom condition labels, values = `Pandas query <https://pandas.pydata.org/docs/user_guide/indexing.html#indexing-query>`_)","``{'neg_unrel': 'context == ""negative"" & semantics == ""unrelated"" & rt < 3000', ...}``"

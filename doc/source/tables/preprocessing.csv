@@ -1,30 +1,30 @@
-Argument,Description,Python example,R example
-``downsample_sfreq`` (default: ``None``),"Downsample to lower sampling rate or",``250.0``,``250.0``
-,Do not downsample,``None``,``NULL``
-``veog_channels`` (default: ``'auto'``),Construct bipolar VEOG from two EEG or EOG channels or,"``['Fp1', 'IO1']``","``c(""Fp1"", ""IO1"")``"
-,Construct VEOG from default channels or,``'auto'``,``"auto"``
-,Do not construct a new VEOG channel,``None``,``NULL``
-``heog_channels`` (default: ``'auto'``),Construct bipolar HEOG from two EEG or EOG channels or,"``['F9', 'F10']``","``c(""F9"", ""F10"")``"
-,Construct HEOG from default channels or,``'auto'``,``"auto"``
-,Do not construct a new HEOG channel,``None``,``NULL``
-``montage`` (default: ``'easycap-M1'``),`Standard EEG montage name <https://mne.tools/stable/auto_tutorials/intro/40_sensor_locations.html#working-with-built-in-montages>`_ or,``'easycap-M1'``,``"easycap-M1"``
-,`Custom EEG montage file path <https://mne.tools/stable/generated/mne.channels.read_custom_montage.html>`_,``'data/chanlocs.elc'``,``"data/chanlocs.elc"``
-``ref_channels`` (default: ``'average'``),List of channels to re-reference EEG channels to or,"``['M1', 'M2']``","``c(""M1"", ""M2"")``"
-,Re-reference EEG channels to an average reference or,``'average'``,``"average"``
-,Use the `Reference Electrode Standardization Technique (REST) <https://doi.org/10.1088/0967-3334/22/4/305>`_,``'REST'``,``"REST"``
-``bad_channels`` (default: ``None``),Lists of bad channels for each participant or,"``[['P7', 'Oz'], ['Fp2'], ...]``","``list(c(""P7"", ""Oz""), c(""Fp2""), ...)``"
-,Dict with participant labels and their list of bad channels or,"``{'Vp05': ['PO8', 'O2'], ...}``","``list(""Vp05"" = c(""PO8"", ""O2""))``"
-,Auto-detect bad channels based on standard error across epochs or,``'auto'``,``"auto"``
-,Don't interpolate any bad channels,``None``,``NULL``
-``besa_files`` (default: ``None``),Directory of BESA/MSEC correction matrix files or,``'data/cali'``,``"data/cali"``
-,List of BESA/MSEC correction matrix file paths or,"``['data/cali/Vp01.matrix', 'data/cali/Vp02.matrix', ...]``","``c(""data/cali/Vp01.matrix"", ""data/cali/Vp02.matrix"", ...)``"
-,Don't use BESA/MSEC ocular correction,``None``,``NULL``
-``ica_method`` (default: ``None``),`ICA method <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_ or,``'fastica'`` or ``'infomax'`` or ``'picard'``,``"fastica"`` or ``"infomax"`` or ``"picard"``
-,Don't apply ICA,``None``,``NULL``
-``ica_n_components`` (default: ``None``),Number of ICA components to use or,``15``,``15``
-,Proportion of variance explained by ICA components or,``0.99``,``0.99``
-,Use (`almost <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_) all possible ICA components,``None``,``NULL``
-``highpass_freq`` (default: ``0.1``),High-pass filter cutoff frequency or,``0.1``,``0.1``
-,Do not apply high-pass filter,``None``,``NULL``
-``lowpass_freq`` (default: ``40.0``),Low-pass filter cutoff frequency or,``40.0``,``40.0``
-,Do not apply low-pass filter,``None``,``NULL``
+Argument,Description,Example
+``downsample_sfreq`` (default: ``None``),Downsample to lower sampling rate or,``250.0``
+,Do not downsample,``None``
+``veog_channels`` (default: ``'auto'``),Construct bipolar VEOG from two EEG or EOG channels or,"``['Fp1', 'IO1']``"
+,Construct VEOG from default channels or,``'auto'``
+,Do not construct a new VEOG channel,``None``
+``heog_channels`` (default: ``'auto'``),Construct bipolar HEOG from two EEG or EOG channels or,"``['F9', 'F10']``"
+,Construct HEOG from default channels or,``'auto'``
+,Do not construct a new HEOG channel,``None``
+``montage`` (default: ``'easycap-M1'``),`Standard EEG montage name <https://mne.tools/stable/auto_tutorials/intro/40_sensor_locations.html#working-with-built-in-montages>`_ or,``'easycap-M1'``
+,`Custom EEG montage file path <https://mne.tools/stable/generated/mne.channels.read_custom_montage.html>`_,``'data/chanlocs.elc'``
+``ref_channels`` (default: ``'average'``),List of channels to re-reference EEG channels to or,"``['M1', 'M2']``"
+,Re-reference EEG channels to an average reference or,``'average'``
+,Use the `Reference Electrode Standardization Technique (REST) <https://doi.org/10.1088/0967-3334/22/4/305>`_,``'REST'``
+``bad_channels`` (default: ``None``),Lists of bad channels for each participant or,"``[['P7', 'Oz'], ['Fp2'], ...]``"
+,Dict with participant labels and their list of bad channels or,"``{'Vp05': ['PO8', 'O2'], ...}``"
+,Auto-detect bad channels based on standard error across epochs or,``'auto'``
+,Don't interpolate any bad channels,``None``
+``besa_files`` (default: ``None``),Directory of BESA/MSEC correction matrix files or,``'data/cali'``
+,List of BESA/MSEC correction matrix file paths or,"``['data/cali/Vp01.matrix', 'data/cali/Vp02.matrix', ...]``"
+,Don't use BESA/MSEC ocular correction,``None``
+``ica_method`` (default: ``None``),`ICA method <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_ or,``'fastica'`` or ``'infomax'`` or ``'picard'``
+,Don't apply ICA,``None``
+``ica_n_components`` (default: ``None``),Number of ICA components to use or,``15``
+,Proportion of variance explained by ICA components or,``0.99``
+,Use (`almost <https://mne.tools/stable/generated/mne.preprocessing.ICA.html#mne.preprocessing.ICA>`_) all possible ICA components,``None``
+``highpass_freq`` (default: ``0.1``),High-pass filter cutoff frequency or,``0.1``
+,Do not apply high-pass filter,``None``
+``lowpass_freq`` (default: ``40.0``),Low-pass filter cutoff frequency or,``40.0``
+,Do not apply low-pass filter,``None``

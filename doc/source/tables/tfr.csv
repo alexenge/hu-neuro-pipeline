@@ -1,8 +1,8 @@
-Argument,Description,Python example,R example
-``perform_tfr`` (default: ``False``),Enable time-frequency analysis or,``True`` or ``False``,``TRUE`` or ``FALSE``
-``tfr_subtract_evoked`` (default: ``False``),Subtract evoked activity from epochs before time-frequency analysis or,``True`` or ``False``,``TRUE`` or ``FALSE``
-"``tfr_freqs`` (default: ``np.linspace(4.0, 40.0, num=37)``)",Frequencies for the family of Morlet wavelets,"``np.arange(6.0, 41.0, step=2.0)``","``seq(6.0, 40.0, by = 2.0)``"
-"``tfr_cycles`` (default: ``np.linspace(2.0, 20.0, num=37))``",Numbers of cycles for the family of Morlet wavelets,"``np.arange(2.0, 21.0, step=1.0)``","``seq(2.0, 20.0, by = 1.0)``"
-``tfr_mode`` (default: ``'percent'``),"`Method for divisive baseline correction <https://mne.tools/stable/generated/mne.time_frequency.EpochsTFR.html#mne.time_frequency.EpochsTFR.apply_baseline>`_ of event-related power using the full epoch interval (`Delorme & Grandchamp, 2012 <https://doi.org/10.3389/fpsyg.2011.00236>`_)",``'percent'`` or ``'ratio'`` or ``'logratio'`` or ``'zscore'`` or ``'zlogratio'`` or ``None``,``"percent"`` or ``"ratio"`` or ``"logratio"`` or ``"zscore"`` or ``"zlogratio"`` or ``NULL``
-"``tfr_baseline`` (default: ``(-0.45, -0.05)``)",Time window for subtractive baseline correction of event-related power,"``(-0.45, -0.05)``","``c(-0.45, -0.05)``"
-``tfr_components`` (default: ``None``),"Similar to ``components``, the definition of single trial event-related power bands of interest","``{'name': ['alpha'], 'tmin': [0.05], 'tmax': [0.25], 'fmin': [8.0], 'fmax': [13.0], 'roi': [['PO9', ...]]}``","``list(name = list(""alpha""), tmin = list(0.05), tmax = list(0.25), fmin = list(8.0), fmax = list(13.0), roi = list(c(""PO9"", ...)))``"
+Argument,Description,Example
+``perform_tfr`` (default: ``False``),Enable time-frequency analysis or,``True`` or ``False``
+``tfr_subtract_evoked`` (default: ``False``),Subtract evoked activity from epochs before time-frequency analysis or,``True`` or ``False``
+"``tfr_freqs`` (default: ``np.linspace(4.0, 40.0, num=37)``)",Frequencies for the family of Morlet wavelets,"``np.arange(6.0, 41.0, step=2.0)``"
+"``tfr_cycles`` (default: ``np.linspace(2.0, 20.0, num=37)``)",Numbers of cycles for the family of Morlet wavelets,"``np.arange(2.0, 21.0, step=1.0)``"
+``tfr_mode`` (default: ``'percent'``),"`Method for divisive baseline correction <https://mne.tools/stable/generated/mne.time_frequency.EpochsTFR.html#mne.time_frequency.EpochsTFR.apply_baseline>`_ of event-related power using the full epoch interval (`Delorme & Grandchamp, 2012 <https://doi.org/10.3389/fpsyg.2011.00236>`_)",``'percent'`` or ``'ratio'`` or ``'logratio'`` or ``'zscore'`` or ``'zlogratio'`` or ``None``
+"``tfr_baseline`` (default: ``(-0.45, -0.05)``)",Time window for subtractive baseline correction of event-related power,"``(-0.45, -0.05)``"
+``tfr_components`` (default: ``None``),"Similar to ``components``, the definition of single trial event-related power bands of interest","``{'name': ['alpha'], 'tmin': [0.05], 'tmax': [0.25], 'fmin': [8.0], 'fmax': [13.0], 'roi': [['PO9', ...]]}``"
