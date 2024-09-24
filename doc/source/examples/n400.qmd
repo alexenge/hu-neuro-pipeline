@@ -12,7 +12,7 @@ jupyter:
     name: python3
 ---
 
-# ERP analysis of ERP CORE data
+# Example: ERP CORE data
 
 ## Loading Python modules
 
@@ -92,6 +92,8 @@ trials, evokeds, config = group_pipeline(
     average_by={'related': 'value in [211, 212]',
                 'unrelated': 'value in [221, 222]'})
 ```
+
+See the [Pipeline inputs](../inputs_py.rst) page for a list of all available processing options.
 
 ## Cecking the results
 
