@@ -1,2 +1,2 @@
-Argument,Description,Python example,R example
-``n_jobs`` (default: ``1``),"Number of jobs (i.e., participants) to be processed in parallel","``4`` or ``-1`` (i.e., use all CPUs)","``4`` or ``-1`` (i.e., use all CPUs)"
+Argument,Description,Example
+``n_jobs`` (default: ``1``),"Number of jobs (i.e., participants) to be processed in parallel","``4`` or ``-1`` (i.e., use all CPUs)"
