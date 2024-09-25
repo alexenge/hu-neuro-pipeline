@@ -8,7 +8,7 @@ dependencies:
   - myst-nb
   - pip
   - python=3.11
-  - quarto
+  - quarto=1.4.550
   - r-base
   - r-dplyr
   - r-ggplot2
