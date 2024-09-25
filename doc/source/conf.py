@@ -203,7 +203,7 @@ def convert_input_page():
         input = file.read()
         output = input.\
             replace('Python syntax', 'R syntax').\
-            replace(' tables/', ' tables_r/')
+            replace(' tables_py/', ' tables_r/')
     
     output_file = Path(__file__).parent / 'inputs_r.rst'
 
