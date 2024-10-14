@@ -37,8 +37,8 @@ RIDE correction options
 -----------------------
 
 .. csv-table::
-   :file: tables/ride.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/ride.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Averaging options

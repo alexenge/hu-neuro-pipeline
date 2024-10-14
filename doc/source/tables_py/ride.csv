@@ -1,15 +1,14 @@
-Argument,Description,Python example
+Argument,Description,Example
 ``perform_ride`` (default: ``False``),"Enable RIDE for speech-artifact correction (`Ouyang et al, 2015 <https://cns.hkbu.edu.hk/RIDE.htm>`_)", ``True`` or ``False``
-,"Further arguments needed only if ``perform_ride=True``:",
 ``ride_condition_column`` (default: ``None``),Name of log file column coding each experimental condition (may be identical to triggers_column),``'ride_condition'``
 ``ride_rt_column`` (default: ``'RT'``),Name of log file column containing the voice (key) onset times,``'RT'``
 "``ride_s_twd`` (default: ``(0.0, 0.6)``)",Time window in which stimulus-locked component should occur (in s),"``(0.0, 0.6)``"
-"``ride_r_twd`` (default: ``(-0.3, 0.3)``)","Time window around RT (voice onset time) in wich response-locked component should occur (in s). Default is `'supposed to be efficient to cover RT-locked component cluster' <https://cns.hkbu.edu.hk/ride/manual.pdf>`_","``(-0.3, 0.3)``"
-``ride_epochs_tmin_after_ride`` (default: ``None``),"Crop epochs t_min and t_max if longer epochs needed for ride (in s) (usual analyses time window can be used after RIDE)",``-0.5``
+"``ride_r_twd`` (default: ``(-0.3, 0.3)``)",Time window around RT (voice onset time) in wich response-locked component should occur (in s). Default is `'supposed to be efficient to cover RT-locked component cluster' <https://cns.hkbu.edu.hk/ride/manual.pdf>`_,"``(-0.3, 0.3)``"
+``ride_epochs_tmin_after_ride`` (default: ``None``),Crop epochs t_min and t_max if longer epochs needed for ride (in s) (usual analyses time window can be used after RIDE) or,``-0.5``
 ,Do not crop time window after RIDE,``None``
-``ride_epochs_tmax_after_ride`` (default: ``None``),"Crop epochs t_min and t_max if longer epochs needed for ride (in s)",``1.5``
+``ride_epochs_tmax_after_ride`` (default: ``None``),Crop epochs t_min and t_max if longer epochs needed for ride (in s) or,``1.5``
 ,Do not crop time window after RIDE,``None``
 ,Note: ``epochs_tmin`` and ``epochs_tmax`` must be adjusted to contain entire speech artifact (min 1s)!, 
 ``reject_peak_to_peak`` (default: ``None``),Peak-to-peak threshold for rejecting epochs after RIDE correction (in µV) or,``200.0``
 ,Do not re-reject epochs after RIDE,``None``
-,"Note: you may use a relatively lenient ``reject_peak_to_peak`` threshold before RIDE and a more stringent one here (see :doc:`Processing details <processing_participant>`)",
+,Note: you may use a relatively lenient ``reject_peak_to_peak`` threshold before RIDE and a more stringent one here (see :ref:`ride-details`),

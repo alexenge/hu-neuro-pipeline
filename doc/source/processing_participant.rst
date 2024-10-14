@@ -75,6 +75,8 @@ Reject bad epochs
 The pipeline will declare epochs as "bad" if the peak-to-peak amplitude (i.e., the difference between the highest voltage and the lowest voltage) at any channel exceeds a certain threshold (default: 200 µV).
 Declaring epochs as "bad" means that their single trial mean ERP amplitude will be set to ``NaN`` for all components in the single trial data frame, and that these epochs will not enter the computation of the by-participant condition averages (evokeds).
 
+.. _ride-details:
+
 RIDE speech artifact correction
 -------------------------------
 
