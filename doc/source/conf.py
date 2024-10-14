@@ -8,6 +8,8 @@ import os
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 # Make sure the pipeline package is available
 sys.path.insert(0, Path(__file__).parents[2].resolve().as_posix())
 import pipeline
@@ -130,3 +132,93 @@ nb_custom_formats = {
     '.Rmd': ['jupytext.reads', {'fmt': 'Rmd'}]
 }
 nb_render_image_options = {'width': '70%', 'align': 'center'}
+
+# -- Convert Python syntax examples to R syntax examples ---------------------
+
+
+def convert_input_tables():
+    """Converts tables with Python syntax examples to R syntax examples."""
+
+    input_dir = Path(__file__).parent / 'tables_py'
+    input_files = input_dir.glob('*.csv')
+
+    output_dir = Path(__file__).parent / 'tables_r'
+    output_dir.mkdir(exist_ok=True)
+
+    for input_file in input_files:
+
+        df = pd.read_csv(input_file)
+
+        df.to_csv(input_file, index=False)
+
+        for col_name in ['Argument', 'Example']:
+
+            python_strings = list(df[col_name])
+
+            r_strings = []
+
+            for python_string in python_strings:
+
+                if not isinstance(python_string, str):
+
+                    r_strings.append(python_string)
+
+                    continue
+
+                r_string = python_string.\
+                    replace('\'', 'PLACEHOLDER').\
+                    replace('\"', '\'').\
+                    replace('PLACEHOLDER', '\"').\
+                    replace('[(', 'list(c(').\
+                    replace(')]', '))').\
+                    replace('[[', 'list(c(').\
+                    replace(': [', ' = list(').\
+                    replace('[', 'c(').\
+                    replace(']', ')').\
+                    replace('{', 'list(').\
+                    replace('":', '" =').\
+                    replace('}', ')').\
+                    replace('``(', '``c(').\
+                    replace('True', 'TRUE').\
+                    replace('False', 'FALSE').\
+                    replace('None', 'NULL').\
+                    replace('np.arange', 'seq').\
+                    replace('np.linspace', 'seq').\
+                    replace('step=', 'by = ').\
+                    replace('num=', 'length.out = ').\
+                    replace(r'^nan$', '')
+                r_strings.append(r_string)
+
+            df[col_name] = r_strings
+
+        output_file = output_dir / input_file.name
+        df.to_csv(output_file, index=False)
+
+
+def convert_input_page():
+
+    input_file = Path(__file__).parent / 'inputs_py.rst'
+
+    with open(input_file, 'r') as file:
+        input = file.read()
+        output = input.\
+            replace('Python syntax', 'R syntax').\
+            replace(' tables_py/', ' tables_r/')
+    
+    output_file = Path(__file__).parent / 'inputs_r.rst'
+
+    with open(output_file, 'w') as file:
+        file.write(output)
+
+
+def run_before_docs(app):
+    """Runs some functions before the documentation is built."""
+
+    convert_input_tables()
+    convert_input_page()
+
+
+def setup(app):
+    """Controls the setup of the Sphinx documentation build process."""
+
+    app.connect('builder-inited', run_before_docs)

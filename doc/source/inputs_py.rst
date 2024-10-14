@@ -1,36 +1,36 @@
-Input arguments
+Pipeline inputs
 ===============
 
 Input file paths
 ----------------
 
 .. csv-table::
-   :file: tables/inputs.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/inputs.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Output file paths
 -----------------
 
 .. csv-table::
-   :file: tables/outputs.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/outputs.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Preprocessing options
 ---------------------
 
 .. csv-table::
-   :file: tables/preprocessing.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/preprocessing.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Epoching options
 ----------------
 
 .. csv-table::
-   :file: tables/epoching.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/epoching.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 RIDE correction options
@@ -45,30 +45,30 @@ Averaging options
 -----------------
 
 .. csv-table::
-   :file: tables/averaging.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/averaging.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Time-frequency analysis options
 -------------------------------
 
 .. csv-table::
-   :file: tables/tfr.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/tfr.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Permutation test options
 ------------------------
 
 .. csv-table::
-   :file: tables/perm.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/perm.csv
+   :widths: 20, 45, 35
    :header-rows: 1
 
 Performance options
 -------------------
 
 .. csv-table::
-   :file: tables/performance.csv
-   :widths: 10, 30, 30, 30
+   :file: tables_py/performance.csv
+   :widths: 20, 45, 35
    :header-rows: 1

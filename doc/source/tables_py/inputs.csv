@@ -1,0 +1,6 @@
+Argument,Description,Example
+``vhdr_files`` (required),List of raw EEG file paths,"``['raw/Vp01.vhdr', 'raw/Vp02.vhdr', ...]``"
+,Nested list if (some) participants have multiple EEG files or,"``[['raw/Vp01_a.vhdr', 'raw/Vp01_b.vhdr'], 'raw/Vp02.vhdr', ...]``"
+,Directory path with raw EEG files,``'raw'``
+``log_files`` (required),List of behavioral log file paths,"``['log/Vp01.txt', 'log/Vp02.txt', ...]``"
+,Directory of raw EEG files,``'log'``

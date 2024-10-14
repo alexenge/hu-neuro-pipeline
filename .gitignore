@@ -13,3 +13,5 @@ _version.py
 /doc/_build/
 /doc/source/generated/
 /doc/source/examples/output/
+/doc/source/tables_r/
+/doc/source/inputs_r.rst

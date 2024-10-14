@@ -1,6 +1,0 @@
-Argument,Description,Python example,R example
-``vhdr_files`` (required),List of raw EEG file paths,"``['raw/Vp01.vhdr', 'raw/Vp02.vhdr', ...]``","``c(""raw/Vp01.vhdr"", ""raw/Vp02.vhdr"", ...)``"
-,Nested list if (some) participants have multiple EEG files or,"``['raw/Vp01.vhdr', ['raw/Vp02_a.vhdr', 'raw/Vp02_b.vhdr'], ...]``","``list(""raw/Vp01.vhdr"", c(""raw/Vp02_a.vhdr"", ""raw/Vp02_b.vhdr""), ...)``"
-,Directory path with raw EEG files,``'raw'``,``"raw"``
-``log_files`` (required),List of behavioral log file paths,"``['log/Vp01.txt', 'log/Vp02.txt', ...]``","``c(""log/Vp01.txt"", ""log/Vp02.txt"", ...)``"
-,Directory of raw EEG files,``'log'``,``"log"``

@@ -28,10 +28,30 @@ Group-level EEG-processing pipeline for flexible single trial-based analyses inc
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: For Python users
 
-   installation
-   usage
-   processing
-   examples
-   reference
+   installation_py
+   quickstart_py
+   inputs_py
+   outputs_py
+   examples/n400
+   reference_py
+
+.. toctree::
+   :maxdepth: 1
+   :caption: For R users
+
+   installation_r
+   quickstart_r
+   inputs_r
+   outputs_r
+   examples/ucap
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Processing details
+
+   processing_overview
+   processing_participant
+   processing_group
+   processing_tfr

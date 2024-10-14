@@ -1,0 +1,11 @@
+Argument,Description,Example
+"``triggers`` (recommended, default: ``None``)",Numerical EEG triggers for events of interest,"``[201, 202]``"
+``triggers_column`` (default: ``None``),Name of log file column with EEG triggers for automatic matching,``'trigger'``
+``epochs_tmin`` (default: ``-0.5``),Start of epochs relative to event onset (in s),``-0.5``
+``epochs_tmax`` (default: ``1.5``),End of epochs relative to event onset (in s),``1.5``
+"``baseline`` (default: ``(-0.2, 0.0)``)",Time window for baseline correction (in s) or,"``(-0.2, 0.0)``"
+,Use entire prestimulus interval or,"``(None, 0.0)``"
+,Do not perform baseline correction,``None``
+``reject_peak_to_peak`` (default: ``200.0``),Peak-to-peak threshold for rejecting epochs (in µV) or,``200.0``
+,Do not reject epochs based on peak-to-peak amplitude,``None``
+"``components`` (recommended, default: ``None``)",Definition of single trial ERP components of interest,"``{'name': ['P1', 'N170'], 'tmin': [0.08, 0.15], 'tmax': [0.13, 0.2], 'roi': [['PO3', ...], ['P7', ...]]}``"

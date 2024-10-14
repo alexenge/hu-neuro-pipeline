@@ -1,0 +1,2 @@
+Argument,Description,Example
+``n_jobs`` (default: ``1``),"Number of jobs (i.e., participants) to be processed in parallel","``4`` or ``-1`` (i.e., use all CPUs)"

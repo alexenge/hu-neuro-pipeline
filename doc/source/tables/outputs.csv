@@ -1,8 +1,0 @@
-Argument,Description,Python example,R example
-``output_dir`` (required),Output directory,``'data/output'``,``"data/output"``
-``clean_dir`` (default: ``None``),Cleaned (continuous) data output directory,``'data/clean'``,``"data/clean"``
-``epochs_dir`` (default: ``None``),Epoched data output directory,``'data/clean'``,``"data/clean"``
-``report_dir`` (default: ``None``),HTML quality control report output directory,``'data/reports'``,``"data/reports"``
-``to_df`` (default: ``True``),Save outputs as data frames with comma-separated values or,``True``,``TRUE``
-,Save outputs as MNE-Python (``.fif``) files or,``False``,``FALSE``
-,Save outputs as data frames *and* MNE-Python files,``'both'``,``"both"``
