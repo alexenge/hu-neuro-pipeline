@@ -48,6 +48,7 @@ if __name__ == "__main__":
                                             'ucap_manifest.csv']},
         install_requires=[
             'chardet',
+            'eeg-ride',
             'joblib',
             'matplotlib',
             'mne>=0.24.0',

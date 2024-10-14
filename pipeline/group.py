@@ -40,6 +40,14 @@ def group_pipeline(
     skip_log_rows=None,
     skip_log_conditions=None,
     reject_peak_to_peak=200.0,
+    perform_ride=False,
+    ride_condition_column=None,
+    ride_rt_column='RT',
+    ride_s_twd=(0.0, 0.6),
+    ride_r_twd=(-0.3, 0.3),
+    ride_epochs_tmin_after_ride=None,
+    ride_epochs_tmax_after_ride=None,
+    ride_reject_peak_to_peak=None,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
@@ -97,6 +105,14 @@ def group_pipeline(
         epochs_tmax=epochs_tmax,
         baseline=baseline,
         reject_peak_to_peak=reject_peak_to_peak,
+        perform_ride=perform_ride,
+        ride_condition_column=ride_condition_column,
+        ride_rt_column=ride_rt_column,
+        ride_s_twd=ride_s_twd,
+        ride_r_twd=ride_r_twd,
+        ride_epochs_tmin_after_ride=ride_epochs_tmin_after_ride,
+        ride_epochs_tmax_after_ride=ride_epochs_tmax_after_ride,
+        ride_reject_peak_to_peak=ride_reject_peak_to_peak,
         components=components,
         average_by=average_by,
         perform_tfr=perform_tfr,
@@ -188,8 +204,8 @@ def group_pipeline(
     # ... and outputs that might have been created along the way
     config['log_files'] = [p_config['log_file'] for p_config in configs]
     auto_keys = ['auto_bad_channels', 'auto_missing_epochs',
-                 'auto_rejected_epochs', 'auto_ica_n_components',
-                 'auto_ica_bad_components']
+                 'auto_rejected_epochs', 'auto_rejected_epochs_before_ride',
+                 'auto_ica_n_components', 'auto_ica_bad_components']
     for key in auto_keys:
         if any(key in p_config and p_config[key] is not None
                for p_config in configs):
