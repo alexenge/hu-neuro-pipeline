@@ -4,8 +4,8 @@ import numpy as np
 from mne import Report, set_log_level
 
 
-def create_report(
-    participant_id, raw, ica, clean, events, event_id, epochs, evokeds):
+def create_report(participant_id, raw, ica, clean, events, event_id, epochs,
+                  ride_results_conditions, evokeds):
     """Creates a HTML report for the processing steps of one participant."""
 
     # Disable warnings about number of open figures
@@ -49,6 +49,14 @@ def create_report(
     # Add epochs
     report.add_epochs(epochs, title='Epochs')
 
+    # Add RIDE results
+    if ride_results_conditions is not None:
+        for condition, ride_results in ride_results_conditions.items():
+            fig = ride_results.plot()
+            _ = report.add_figure(fig,
+                                  title=f'Condition "{condition}"',
+                                  section='RIDE correction', tags=('ride',))
+
     # Add evokeds
     report.add_evokeds(evokeds)  # Automatically uses comments as titles
     set_log_level('INFO')
@@ -73,5 +81,5 @@ def plot_time_series(raw, n=10, duration=10.):
         show_scrollbars=False,
         show_scalebars=False)
         for start in starts]
-    
+
     return figs

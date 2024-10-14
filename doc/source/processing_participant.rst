@@ -75,6 +75,27 @@ Reject bad epochs
 The pipeline will declare epochs as "bad" if the peak-to-peak amplitude (i.e., the difference between the highest voltage and the lowest voltage) at any channel exceeds a certain threshold (default: 200 µV).
 Declaring epochs as "bad" means that their single trial mean ERP amplitude will be set to ``NaN`` for all components in the single trial data frame, and that these epochs will not enter the computation of the by-participant condition averages (evokeds).
 
+.. _ride-details:
+
+RIDE speech artifact correction
+-------------------------------
+
+RIDE (Residue Iteration Decomposition) is a method to decompose event-related potentials into separate component clusters [#]_ [#]_.
+One typical use case (and the only one implemented here) is to separate the ERP into a stimulus-related component (the "S" component) and a response-related component (the "R" component), and then subtract the R component (containing the speech artifact) from each single trial, based on its individual response latency (e.g., measured with a voice onset trigger in a language production experiment).
+The result are single trial ERPs that are "cleaned" from any response-related artifacts (e.g., the speech artifacts that occur during language production tasks; see [#]_ for details).
+
+There are a few things to note when you want to use RIDE for speech artifact correction:
+
+* RIDE should be applied separately for each experimental condition, so you will need to specify a ``ride_condition_column`` from your log files.
+
+* Your epochs need to be long enough to cover the entire speech artifact, so you may want to adjust your ``epochs_tmin`` and ``epochs_tmax`` arguments.
+
+* In case you want to shorten your epochs after RIDE correction (e.g., to save disk space), you can specify the ``ride_epochs_tmin_after_ride`` and ``ride_epochs_tmax_after_ride`` arguments.
+
+* RIDE expects that the epochs were cleaned from all other artifacts beforehand, which is why we apply artifact rejection (based on peak-to-peak amplitude) *before* RIDE (see above). However, when using a relatively stringent peak-to-peak threshold, many epochs will be rejected because of the speech artifacts. When using RIDE, we therefore suggest to use a relatively lenient rejection threshold for ``reject_peak_to_peak`` (e.g., 250 µV) and then enable a second, more stringent rejection threshold *after* RIDE using the ``ride_reject_peak_to_peak`` argument, to deal with remaining non-speech artifacts.
+
+If you've enabled the visual HTML reports using the ``report_dir`` argument, plots of the results of the RIDE correction for all experimental conditions will be included in the report.
+
 Compute single trial amplitudes
 -------------------------------
 
@@ -103,4 +124,7 @@ Notes
 .. [#] https://mne.tools/stable/generated/mne.io.Raw.html#mne.io.Raw.interpolate_bads
 .. [#] https://mne.tools/stable/auto_tutorials/preprocessing/25_background_filtering.html
 .. [#] Tanner, D., Morgan-Short, K., & Luck, S. J. (2015). How inappropriate high-pass filters can produce artifactual effects and incorrect conclusions in ERP studies of language and cognition. *Psychophysiology*, 52(8), 997–1009. https://doi.org/10.1111/psyp.12437
+.. [#] Ouyang, G., Herzmann, G., Zhou, C., & Sommer, W. (2011). Residue iteration decomposition (RIDE): A new method to separate ERP components on the basis of latency variability in single trials. *Psychophysiology*, 48(12), 1631–1647. https://doi.org/10.1111/j.1469-8986.2011.01269.x
+.. [#] Ouyang, G., Sommer, W., & Zhou, C. (2015). A toolbox for residue iteration decomposition (RIDE)—A method for the decomposition, reconstruction, and single trial analysis of event related potentials. *Journal of Neuroscience Methods*, 250, 7–21. https://doi.org/10.1016/j.jneumeth.2014.10.009
+.. [#] Ouyang, G., Sommer, W., Zhou, C., Aristei, S., Pinkpank, T., & Abdel Rahman, R. (2016). Articulation artifacts during overt language production in event-related brain potentials: Description and correction. *Brain Topography*, 29(6), 791–813. https://doi.org/10.1007/s10548-016-0515-1
 .. [#] Frömer, R., Maier, M., & Abdel Rahman, R. (2018). Group-level EEG-processing pipeline for flexible single trial-based analyses including linear mixed models. *Frontiers in Neuroscience*, 12, 48. https://doi.org/10.3389/fnins.2018.00048

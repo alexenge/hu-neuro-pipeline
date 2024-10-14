@@ -33,6 +33,14 @@ Epoching options
    :widths: 20, 45, 35
    :header-rows: 1
 
+RIDE correction options
+-----------------------
+
+.. csv-table::
+   :file: tables_py/ride.csv
+   :widths: 20, 45, 35
+   :header-rows: 1
+
 Averaging options
 -----------------
 
@@ -41,8 +49,8 @@ Averaging options
    :widths: 20, 45, 35
    :header-rows: 1
 
-Time-frequency analsis options
-------------------------------
+Time-frequency analysis options
+-------------------------------
 
 .. csv-table::
    :file: tables_py/tfr.csv

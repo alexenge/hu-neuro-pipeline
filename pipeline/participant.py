@@ -12,6 +12,7 @@ from .io import (read_eeg, save_clean, save_df, save_epochs, save_evokeds,
 from .preprocessing import (add_heog_veog, apply_montage, correct_besa,
                             correct_ica, interpolate_bad_channels)
 from .report import create_report
+from .ride import correct_ride
 from .tfr import compute_single_trials_tfr, subtract_evoked
 
 
@@ -38,6 +39,14 @@ def participant_pipeline(
     epochs_tmax=1.5,
     baseline=(-0.2, 0.0),
     reject_peak_to_peak=200.0,
+    perform_ride=False,
+    ride_condition_column=None,
+    ride_rt_column='RT',
+    ride_s_twd=(0.0, 0.6),
+    ride_r_twd=(-0.3, 0.3),
+    ride_epochs_tmin_after_ride=None,
+    ride_epochs_tmax_after_ride=None,
+    ride_reject_peak_to_peak=None,
     components={'name': [], 'tmin': [], 'tmax': [], 'roi': []},
     average_by=None,
     perform_tfr=False,
@@ -154,6 +163,18 @@ def participant_pipeline(
     bad_ixs = get_bad_epochs(epochs, reject_peak_to_peak)
     config['auto_rejected_epochs'] = bad_ixs
 
+    # Perform RIDE to correct speech artifacts
+    if perform_ride:
+        epochs, ride_results_conditions = \
+            correct_ride(epochs, bad_ixs, ride_condition_column,
+                         ride_rt_column, ride_s_twd, ride_r_twd)
+        epochs.crop(ride_epochs_tmin_after_ride, ride_epochs_tmax_after_ride)
+        config['auto_rejected_epochs_before_ride'] = bad_ixs
+        bad_ixs = get_bad_epochs(epochs, ride_reject_peak_to_peak)
+        config['auto_rejected_epochs'] = bad_ixs
+    else:
+        ride_results_conditions = None
+
     # Compute single trial mean ERP amplitudes and add to metadata
     trials = compute_single_trials(epochs, components, bad_ixs)
 
@@ -181,7 +202,8 @@ def participant_pipeline(
     if report_dir is not None:
         dirty.info['bads'] = interpolated_channels
         report = create_report(participant_id, dirty, ica, filt, events,
-                               event_id, epochs, evokeds)
+                               event_id, epochs, ride_results_conditions,
+                               evokeds)
         save_report(report, report_dir, participant_id)
 
     # Time-frequency analysis
