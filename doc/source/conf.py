@@ -28,8 +28,8 @@ os.environ['QUARTO_DENO'] = bin_path.joinpath('deno').resolve().as_posix()
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'hu-neuro-pipeline'
-copyright = '2023, Alexander Enge'
-author = 'Alexander Enge'
+copyright = '2024, Abdel Rahman Lab for Neurocognitive Psychology'
+author = 'Abdel Rahman Lab for Neurocognitive Psychology'
 version = '.'.join(pipeline.__version__.split('.', 2)[:2])
 release = pipeline.__version__
 
