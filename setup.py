@@ -36,12 +36,12 @@ if __name__ == "__main__":
             'Issue trackers': 'https://github.com/alexenge/hu-neuro-pipeline/issues',
         },
         classifiers=[
-            'Programming Language :: Python :: 3.8',
-            'Programming Language :: Python :: 3.9',
-            'Programming Language :: Python :: 3.10',
-            'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
             'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering'
         ],
         packages=package_tree('pipeline'),
         package_data={'pipeline.datasets': ['erpcore_manifest.csv',
