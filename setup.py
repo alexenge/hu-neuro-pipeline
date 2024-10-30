@@ -36,10 +36,12 @@ if __name__ == "__main__":
             'Issue trackers': 'https://github.com/alexenge/hu-neuro-pipeline/issues',
         },
         classifiers=[
-           'Programming Language :: Python',
+            'Programming Language :: Python',
             'Programming Language :: Python :: 3',
             'License :: OSI Approved :: MIT License',
             'Operating System :: OS Independent',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering'
         ],
         packages=package_tree('pipeline'),
         package_data={'pipeline.datasets': ['erpcore_manifest.csv',
@@ -49,8 +51,6 @@ if __name__ == "__main__":
             'eeg-ride',
             'joblib',
             'matplotlib',
-            'numpy',
-            'scipy',
             'mne>=0.24.0',
             'pandas!=1.4.0',
             'pooch>=1.5',
