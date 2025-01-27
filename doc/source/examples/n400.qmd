@@ -95,7 +95,7 @@ trials, evokeds, config = group_pipeline(
 
 See the [Pipeline inputs](../inputs_py.rst) page for a list of all available processing options.
 
-## Cecking the results
+## Checking the results
 
 This pipeline returns three objects: A dataframe of single trial ERP amplitudes, a dataframe of by-participant condition averages, and a dictionary of pipeline metadata.
 
