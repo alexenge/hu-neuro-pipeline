@@ -207,12 +207,13 @@ def compute_single_trials(epochs, components, bad_ixs=None):
         # Compute single trial mean ERP amplitudes
         compute_component(
             epochs, component['name'], component['tmin'],
-            component['tmax'], component['roi'], bad_ixs)
+            component['tmax'], component['roi'], component['se'],
+            bad_ixs)
 
     return epochs.metadata
 
 
-def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
+def compute_component(epochs, name, tmin, tmax, roi, se, bad_ixs=None):
     """Computes single trial mean amplitudes for single component."""
 
     # Check that requested region of interest channels are present in the data
@@ -229,18 +230,32 @@ def compute_component(epochs, name, tmin, tmax, roi, bad_ixs=None):
     epochs.add_channels([epochs_roi], force_update_info=True)
     epochs.set_channel_types({name: 'misc'})
 
-    # Compute mean amplitudes by averaging across the relevant time window
-    epochs_roi.crop(tmin, tmax)
-    df = epochs_roi.to_data_frame()
-    mean_amp = df.groupby('epoch')[name].mean()
+    # Compute mean amplitude in the region and time window of interest
+    data = epochs.\
+        copy().\
+        pick_channels(roi).\
+        crop(tmin, tmax).\
+        get_data(units='uV')
+    mean_amp = data.mean(axis=(1, 2))
+
+    # Optionally compute standard error
+    if se:
+        name_se = f'{name}_se'
+        sd_amp = data.std(axis=(1, 2), ddof=1)
+        n_samples = data.shape[1] * data.shape[2]
+        se_amp = sd_amp / np.sqrt(n_samples)
 
     # Set ERPs for bad epochs to NaN
     if bad_ixs is not None:
         if isinstance(bad_ixs, int):
             bad_ixs = [bad_ixs]
         mean_amp[bad_ixs] = np.nan
+        if se:
+            se_amp[bad_ixs] = np.nan
 
     # Add as a new column to the original metadata
     epochs.metadata.reset_index(drop=True, inplace=True)
-    epochs.metadata = pd.concat([epochs.metadata, mean_amp], axis=1)
+    epochs.metadata[name] = mean_amp
+    if se:
+        epochs.metadata[name_se] = se_amp
     set_log_level('INFO')
