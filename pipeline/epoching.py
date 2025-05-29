@@ -195,10 +195,19 @@ def get_bad_channels(epochs, threshold=3., by_event_type=True):
 def compute_single_trials(epochs, components, bad_ixs=None):
     """Computes single trial mean amplitudes a dict of multiple components."""
 
-    # Check that values in the dict are lists
+    # Check dict keys
     for key in ['name', 'tmin', 'tmax', 'roi']:
+        assert key in components, \
+            f'Key \'{key}\' is missing from the `components` argument'
+    if 'se' not in components:
+        components['se'] = False
+
+    # Check that values in the dict are lists
+    for key in ['name', 'tmin', 'tmax', 'roi', 'se']:
         if not is_list_like(components[key]):
-            components[key] = [components[key]]
+            max_len = max([len(value) for value in components.values()
+                           if is_list_like(value)])
+            components[key] = [components[key]] * max_len
 
     # Loop over components
     components_df = pd.DataFrame(components)
