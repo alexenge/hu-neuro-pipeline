@@ -113,8 +113,23 @@ def correct_ica(raw, method='fastica', n_components=None, random_seed=1234):
     ica.fit(raw_filt_ica)
 
     # Remove bad components from the raw data
+    channel_names = []
+    print(raw.ch_names)
+    if 'HEOG' in raw.ch_names and 'VEOG' in raw.ch_names:
+        print('Finding EOG ICA components using HEOG and VEOG')
+        channel_names = ['HEOG', 'VEOG']
+    elif 'HEOG' in raw.ch_names:
+        print('Finding EOG ICA components only using HEOG')
+        channel_names = ['HEOG']
+    elif 'VEOG' in raw.ch_names:
+        print('Finding EOG ICA components only using VEOG')
+        channel_names = ['VEOG']
+    else: 
+        print('No EOG channels found, skipping ICA component removal')
+        warn('⚠️ Automatic bad component detection based on ICA will not work' +
+            'as channels were not provided. At least HEOG or VEOG must be entered!')
     eog_indices, _ = ica.find_bads_eog(
-        raw, ch_name=['HEOG', 'VEOG'], verbose=False)
+        raw, ch_name=channel_names, verbose=False)
     ica.exclude = eog_indices
     raw = ica.apply(raw)
 
