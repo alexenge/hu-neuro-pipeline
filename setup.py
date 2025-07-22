@@ -43,8 +43,8 @@ if __name__ == "__main__":
             'Intended Audience :: Science/Research',
             'Topic :: Scientific/Engineering'
         ],
-        packages=package_tree('pipeline'),
-        package_data={'pipeline.datasets': ['erpcore_manifest.csv',
+        packages=package_tree('pypeline'),
+        package_data={'pypeline.datasets': ['erpcore_manifest.csv',
                                             'ucap_manifest.csv']},
         install_requires=[
             'chardet',
