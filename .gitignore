@@ -15,3 +15,6 @@ _version.py
 /doc/source/examples/output/
 /doc/source/tables_r/
 /doc/source/inputs_r.rst
+
+# Testing
+.coverage
