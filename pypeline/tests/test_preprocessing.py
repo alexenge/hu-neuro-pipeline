@@ -1,5 +1,5 @@
-from mne.io import BaseRaw
 import numpy as np
+from mne.io import BaseRaw
 
 from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
 
@@ -58,14 +58,14 @@ def test_preprocessing_pipeline(sample_preprocessing_config,
         preprocessing_pipeline.raw.get_data().std(axis=1).mean() > 2.0
 
 
-def test_preprocessing_pipeline_besa(sample_preprocessing_config,
-                                     sample_input_pipeline):
+def test_preprocessing_pipeline_besa(sample_preprocessing_config_besa,
+                                     sample_input_pipeline_besa):
     """Tests the PreprocessingPipeline class with BESA correction."""
 
-    sample_preprocessing_config.ica_method = None
-    preprocessing_pipeline = PreprocessingPipeline(sample_preprocessing_config)
-    raw = sample_input_pipeline.raw
-    besa = sample_input_pipeline.besa
+    preprocessing_pipeline = \
+        PreprocessingPipeline(sample_preprocessing_config_besa)
+    raw = sample_input_pipeline_besa.raw
+    besa = sample_input_pipeline_besa.besa
     preprocessing_pipeline.run(raw, besa)
 
     # Preprocessing should reduce the mean standard deviation over time

@@ -30,6 +30,14 @@ def test_input_pipeline(sample_input_config):
     assert isinstance(input_pipeline.raw, BaseRaw)
     assert input_pipeline.participant_id == '05'
     assert isinstance(input_pipeline.log, pd.DataFrame)
+
+
+def test_input_pipeline_besa(sample_input_config_besa):
+    """Tests the InputPipeline class for the case when a BESA file is provided."""
+
+    input_pipeline = InputPipeline(sample_input_config_besa)
+    input_pipeline.run()
+
     assert isinstance(input_pipeline.besa, pd.DataFrame)
 
 
