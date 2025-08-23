@@ -18,7 +18,7 @@ class PreprocessingConfig:
     montage: str | PathLike = 'easycap-M1'
     bad_channels: list[str] | str = 'auto'
     ref_channels: list[str] | str = 'average'
-    ica_method: str = None
+    ica_method: str = 'fastica'
     ica_n_components: int | float = None
     ica_eog_channels: list[str] | str = 'auto'
 
