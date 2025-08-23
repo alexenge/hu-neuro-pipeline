@@ -21,6 +21,8 @@ class PreprocessingConfig:
     ica_method: str = 'fastica'
     ica_n_components: int | float = None
     ica_eog_channels: list[str] | str = 'auto'
+    highpass_freq: float = 0.1
+    lowpass_freq: float = 40.0
 
 
 class PreprocessingPipeline:
@@ -64,6 +66,10 @@ class PreprocessingPipeline:
             else:
                 self.ica_eog_channels = self.config.ica_eog_channels
             self._correct_ica()
+
+        if self.config.lowpass_freq is not None \
+                or self.config.highpass_freq is not None:
+            self._filter()
 
     def _resample(self):
         """Resample the raw data to the specified sampling frequency."""
@@ -195,6 +201,13 @@ class PreprocessingPipeline:
 
         self.ica = ica
         self.raw = ica.apply(self.raw)
+
+    def _filter(self):
+        """Filter the raw data using a bandpass filter."""
+
+        self.raw.filter(self.config.highpass_freq,
+                        self.config.lowpass_freq,
+                        n_jobs=1, picks='eeg')
 
 
 AUTO_HEOG_CHANNELS = ['F9', 'F10', 'Afp9', 'Afp10', 'HEOG_left', 'HEOG_right']

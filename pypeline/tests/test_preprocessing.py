@@ -52,6 +52,8 @@ def test_preprocessing_pipeline(sample_preprocessing_config,
     assert preprocessing_pipeline.ica_eog_channels == ['HEOG', 'VEOG']
     assert len(preprocessing_pipeline.ica.labels_['eog/0/HEOG']) > 0
     assert len(preprocessing_pipeline.ica.labels_['eog/1/VEOG']) > 0
+    assert preprocessing_pipeline.raw.info['highpass'] == 0.1
+    assert preprocessing_pipeline.raw.info['lowpass'] == 40.0
 
     # Preprocessing should reduce the mean standard deviation over time
     assert raw.get_data().std(axis=1).mean() / \
