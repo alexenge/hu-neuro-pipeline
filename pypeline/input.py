@@ -21,7 +21,6 @@ class InputPipeline:
 
         assert isinstance(config, InputConfig), \
             "`config` must be an instance of the `InputConfig` class"
-
         self.config = config
 
     def run(self):
@@ -32,9 +31,13 @@ class InputPipeline:
 
         if self.config.log_file is not None:
             self.log = self._read_log()
+        else:
+            self.log = None
 
         if self.config.besa_file is not None:
             self.besa = self._read_besa()
+        else:
+            self.besa = None
 
     def _read_raw(self):
         """Reads raw data from the specified file(s)."""

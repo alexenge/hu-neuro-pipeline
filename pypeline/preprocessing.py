@@ -7,6 +7,7 @@ import pandas as pd
 from mne import set_bipolar_reference
 from mne.channels import make_standard_montage, read_custom_montage
 from mne.channels.montage import DigMontage, get_builtin_montages
+from mne.io import BaseRaw
 from mne.preprocessing import ICA
 
 
@@ -31,11 +32,12 @@ class PreprocessingPipeline:
 
         assert isinstance(config, PreprocessingConfig), \
             "`config` must be an instance of the `PreprocessingConfig` class"
-
         self.config = config
 
     def run(self, raw, besa=None):
 
+        assert isinstance(raw, BaseRaw), \
+            "`raw` must be an instance of the `mne.io.BaseRaw` class"
         self.raw = raw
 
         if self.config.downsample_sfreq is not None:
@@ -57,6 +59,8 @@ class PreprocessingPipeline:
         self._set_eeg_reference()
 
         if besa is not None:
+            assert isinstance(besa, pd.DataFrame), \
+                "`besa` must be an instance of the `pandas.DataFrame` class"
             self.besa = besa
             self._correct_besa()
 
