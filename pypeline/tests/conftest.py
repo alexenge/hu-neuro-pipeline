@@ -1,6 +1,7 @@
 import pytest
 
 from ..datasets.ucap import get_ucap
+from ..epoching import EpochingConfig, EpochingPipeline
 from ..input import InputConfig, InputPipeline
 from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
 
@@ -109,3 +110,49 @@ def sample_preprocessing_pipeline_besa(sample_preprocessing_config_besa,
     preprocessing_pipeline.run(raw, besa)
 
     return preprocessing_pipeline
+
+
+@pytest.fixture(scope='session')
+def sample_epoching_config():
+    """Creates an EpochingConfig for the sample data."""
+
+    return EpochingConfig(triggers=[201, 202, 203, 204, 205, 206, 207, 208,
+                                    211, 212, 213, 214, 215, 216, 217, 218])
+
+
+@pytest.fixture(scope='session')
+def sample_epoching_config_match():
+    """Creates an EpochingConfig for the sample data."""
+
+    return EpochingConfig(triggers=[201, 202, 203, 204, 205, 206, 207, 208,
+                                    211, 212, 213, 214, 215, 216, 217, 218],
+                          triggers_column='bot')
+
+
+@pytest.fixture(scope='session')
+def sample_epoching_pipeline(sample_epoching_config,
+                             sample_input_pipeline,
+                             sample_preprocessing_pipeline):
+    """Creates and runs an EpochingPipeline for the sample data."""
+
+    epoching_pipeline = EpochingPipeline(sample_epoching_config)
+    raw = sample_preprocessing_pipeline.raw
+    log = sample_input_pipeline.log
+    epoching_pipeline.run(raw, log)
+
+    return epoching_pipeline
+
+
+@pytest.fixture(scope='session')
+def sample_epoching_pipeline_triggers_match(sample_epoching_config_match,
+                                            sample_input_pipeline,
+                                            sample_preprocessing_pipeline):
+    """Creates and runs an EpochingPipeline for the sample data."""
+
+    epoching_pipeline = EpochingPipeline(sample_epoching_config_match)
+    raw = sample_preprocessing_pipeline.raw
+    # TODO: Delete some annotations from `raw` so that some trials are "missing"
+    log = sample_input_pipeline.log
+    epoching_pipeline.run(raw, log)
+
+    return epoching_pipeline
