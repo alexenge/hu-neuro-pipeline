@@ -37,3 +37,15 @@ def test_epoching_pipeline(sample_epoching_pipeline):
     assert isinstance(pipeline.epochs.metadata, pd.DataFrame)
     assert isinstance(pipeline.bad_ixs, list)
     assert len(pipeline.bad_ixs) > 0
+
+
+def test_epoching_pipeline_match(sample_epoching_pipeline_match):
+    """Tests the EpochingPipeline class with a triggers column to match."""
+
+    pipeline = sample_epoching_pipeline_match
+
+    assert len(pipeline.epochs) > 0
+    assert len(pipeline.epochs) < 1920
+    triggers_column = pipeline.config.triggers_column
+    assert np.array_equal(pipeline.epochs.events[:, 2],
+                          pipeline.epochs.metadata[triggers_column].values)

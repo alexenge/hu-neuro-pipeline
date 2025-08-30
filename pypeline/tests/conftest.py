@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from ..datasets.ucap import get_ucap
@@ -144,15 +145,19 @@ def sample_epoching_pipeline(sample_epoching_config,
 
 
 @pytest.fixture(scope='session')
-def sample_epoching_pipeline_triggers_match(sample_epoching_config_match,
-                                            sample_input_pipeline,
-                                            sample_preprocessing_pipeline):
+def sample_epoching_pipeline_match(sample_epoching_config_match,
+                                   sample_input_pipeline,
+                                   sample_preprocessing_pipeline):
     """Creates and runs an EpochingPipeline for the sample data."""
 
     epoching_pipeline = EpochingPipeline(sample_epoching_config_match)
-    raw = sample_preprocessing_pipeline.raw
-    # TODO: Delete some annotations from `raw` so that some trials are "missing"
+    # Let's pretend some trials/triggers are missing from the EEG recording
+    raw_to_match = sample_preprocessing_pipeline.raw.copy()
+    ixs = np.concatenate([np.arange(0, 1001),
+                          np.arange(5000, 6001),
+                          np.arange(10000, len(raw_to_match.annotations))])
+    raw_to_match.annotations.delete(ixs)
     log = sample_input_pipeline.log
-    epoching_pipeline.run(raw, log)
+    epoching_pipeline.run(raw_to_match, log)
 
     return epoching_pipeline
