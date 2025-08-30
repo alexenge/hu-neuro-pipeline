@@ -129,9 +129,9 @@ class PreprocessingPipeline:
                 montage = make_standard_montage(self.config.montage)
 
             else:
-                raise ValueError(
-                    '`montage` must be a valid file path, the name of a valid '
-                    'standard montage, or an MNE `DigMontage` object')
+                raise ValueError('`montage` must be a valid file path, the '
+                                 'name of a valid standard montage, or an MNE '
+                                 '`DigMontage` object')
 
         else:
             montage = self.config.montage

@@ -40,7 +40,7 @@ def test_input_pipeline(sample_input_pipeline):
 
     assert isinstance(pipeline, InputPipeline)
     assert isinstance(pipeline.raw, BaseRaw)
-    assert pipeline.participant_id == '05'
+    assert pipeline.raw.info['subject_info']['his_id'] == '05'
     assert isinstance(pipeline.log, pd.DataFrame)
 
 
@@ -59,4 +59,4 @@ def test_input_pipeline_combine(sample_input_pipeline_combine):
     pipeline = sample_input_pipeline_combine
 
     assert isinstance(pipeline.raw, BaseRaw)
-    assert pipeline.participant_id == '05_07'
+    assert pipeline.raw.info['subject_info']['his_id'] == '05_07'
