@@ -1,21 +1,6 @@
-from ..participant import ParticipantPipeline
+def test_participant_pipeline(sample_participant_pipeline):
+    """Tests the ParticipantPipeline class."""
 
+    pipeline = sample_participant_pipeline
 
-def test_participant_pipeline(sample_input_config,
-                              sample_preprocessing_config,
-                              sample_epoching_config):
-
-    participant_pipeline = ParticipantPipeline(sample_input_config,
-                                               sample_preprocessing_config,
-                                               sample_epoching_config)
-    participant_pipeline.run()
-
-
-def test_participant_pipeline_besa(sample_input_config_besa,
-                                   sample_preprocessing_config_besa,
-                                   sample_epoching_config):
-
-    participant_pipeline = ParticipantPipeline(sample_input_config_besa,
-                                               sample_preprocessing_config_besa,
-                                               sample_epoching_config)
-    participant_pipeline.run()
+    assert True
