@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 
 import numpy as np
-from mne import Epochs, events_from_annotations
+from mne import Epochs, combine_evoked, events_from_annotations
 from mne.io import BaseRaw
 from mne.io.brainvision.brainvision import RawBrainVision
+from scipy.stats import zscore
 
 
 @dataclass
@@ -129,3 +130,20 @@ class EpochingPipeline:
         drop_log = [elem for elem in self.epochs.drop_log
                     if 'IGNORED' not in elem]
         self.bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
+
+    def detect_bad_channels(self, threshold=3.):
+        """Automatically detects "bad" channels based on their standard
+        deviation compared to all other channels."""
+
+        ses = self.epochs.standard_error(by_event_type=True)
+        ses = combine_evoked(ses, weights='nave')
+        ses = ses.data.mean(axis=1)
+
+        zs = zscore(ses)
+
+        ixs = np.where(zs > threshold)[0]
+
+        bad_channels = [self.epochs.ch_names[ix] for ix in ixs]
+        print(f'Detected bad channels: {bad_channels}')
+
+        return bad_channels

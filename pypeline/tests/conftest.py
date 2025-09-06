@@ -12,7 +12,7 @@ from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
 def sample_data():
     """Downloads some EEG data to use for running all tests."""
 
-    return get_ucap(participants=['05', '07'])
+    return get_ucap(participants=['09', '12'])
 
 
 @pytest.fixture(scope='session')

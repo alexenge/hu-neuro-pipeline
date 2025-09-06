@@ -38,7 +38,7 @@ class PreprocessingPipeline:
 
         assert isinstance(raw, BaseRaw), \
             "`raw` must be an instance of the `mne.io.BaseRaw` class"
-        self.raw = raw
+        self.raw = raw.copy()
 
         if self.config.downsample_sfreq is not None:
             self._resample()
