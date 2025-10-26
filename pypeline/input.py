@@ -10,12 +10,15 @@ from pandas.api.types import is_list_like
 
 @dataclass
 class InputConfig:
+    """The configuration for the input pipeline."""
+
     raw_file: str | PathLike | list[str | PathLike]
     log_file: str | PathLike | pd.DataFrame = None
     besa_file: str | PathLike = None
 
 
 class InputPipeline:
+    """The input pipeline for reading the raw EEG data and associated files."""
 
     def __init__(self, config):
 
@@ -24,6 +27,7 @@ class InputPipeline:
         self.config = config
 
     def run(self):
+        """Run the input pipeline."""
 
         self._read_raw()
 
@@ -34,7 +38,7 @@ class InputPipeline:
         self._read_besa()
 
     def _read_raw(self):
-        """Reads raw data from the specified file(s)."""
+        """Read EEG raw data from the specified file(s)."""
 
         if is_list_like(self.config.raw_file):
             raws = [read_raw(elem, preload=True)
@@ -45,7 +49,7 @@ class InputPipeline:
             self.raw = read_raw(self.config.raw_file, preload=True)
 
     def _get_participant_id(self):
-        """Generates a participant ID based on the raw file name(s)."""
+        """Generate a participant ID based on the raw file name(s)."""
 
         if is_list_like(self.config.raw_file):
             ids = [Path(elem).stem for elem in self.config.raw_file]
@@ -60,7 +64,7 @@ class InputPipeline:
             self.raw.info['subject_info'] = {'his_id': participant_id}
 
     def _read_log(self):
-        """Reads the behavioral log file with information about each EEG
+        """Read the behavioral log file with information about each EEG
         trial."""
 
         if self.config.log_file is None:
@@ -84,7 +88,7 @@ class InputPipeline:
                                        encoding=encoding)
 
     def _read_besa(self):
-        """Reads the BESA file containing the ocular correction matrix."""
+        """Read the BESA file containing the ocular correction matrix."""
 
         if self.config.besa_file is None:
             self.besa = None

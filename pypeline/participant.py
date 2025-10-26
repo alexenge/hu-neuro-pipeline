@@ -4,6 +4,8 @@ from .preprocessing import PreprocessingConfig, PreprocessingPipeline
 
 
 class ParticipantPipeline:
+    """The participant pipeline for processing the EEG data of a single
+    participant."""
 
     def __init__(self,
                  input_config: InputConfig,

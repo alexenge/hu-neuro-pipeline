@@ -13,6 +13,8 @@ from mne.preprocessing import ICA
 
 @dataclass
 class PreprocessingConfig:
+    """The configuration for the preprocessing pipeline."""
+
     downsample_sfreq: float = None
     heog_channels: list[str] | str = 'auto'
     veog_channels: list[str] | str = 'auto'
@@ -27,6 +29,7 @@ class PreprocessingConfig:
 
 
 class PreprocessingPipeline:
+    """The preprocessing pipeline for cleaning the raw EEG data."""
 
     def __init__(self, config):
 
@@ -35,6 +38,7 @@ class PreprocessingPipeline:
         self.config = config
 
     def run(self, raw, besa=None):
+        """Run the preprocessing pipeline."""
 
         assert isinstance(raw, BaseRaw), \
             "`raw` must be an instance of the `mne.io.BaseRaw` class"
@@ -50,6 +54,7 @@ class PreprocessingPipeline:
             self._add_veog()
 
         self._adjust_channel_types()
+
         self._apply_montage()
 
         if self.config.bad_channels is not None:
@@ -60,7 +65,7 @@ class PreprocessingPipeline:
 
         if besa is not None:
             assert isinstance(besa, pd.DataFrame), \
-                "`besa` must be an instance of the `pandas.DataFrame` class"
+                "`besa` must be a `pandas.DataFrame`"
             self.besa = besa
             self._correct_besa()
 

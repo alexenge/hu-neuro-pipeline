@@ -9,6 +9,8 @@ from scipy.stats import zscore
 
 @dataclass
 class EpochingConfig:
+    """The configuration for the epoching pipeline."""
+
     triggers: list[int] = None
     triggers_column: str = None
     tmin: float = -0.2
@@ -18,6 +20,8 @@ class EpochingConfig:
 
 
 class EpochingPipeline:
+    """The epoching pipeline for segmenting the continuous EEG data into
+    epochs."""
 
     def __init__(self, config):
 
@@ -27,6 +31,7 @@ class EpochingPipeline:
         self.config = config
 
     def run(self, raw, log=None):
+        """Run the epoching pipeline."""
 
         assert isinstance(raw, BaseRaw), \
             "`raw` must be an instance of the `mne.io.BaseRaw` class"
@@ -43,6 +48,7 @@ class EpochingPipeline:
             self._reject_bad_epochs()
 
     def _get_events(self, raw):
+        """Get the events (e.g., stimulus onsets) from the raw data."""
 
         self.events, self.event_id = events_from_annotations(raw,
                                                              verbose=False)
@@ -57,6 +63,7 @@ class EpochingPipeline:
                                  if int(key) in self.config.triggers}
 
     def _create_epochs(self, raw):
+        """Segment the continuous EEG data into epochs based on the events."""
 
         self.epochs = Epochs(raw, self.events, self.event_id,
                              tmin=self.config.tmin, tmax=self.config.tmax,
@@ -66,6 +73,7 @@ class EpochingPipeline:
         self.epochs.crop(tmin=None, tmax=self.config.tmax, include_tmax=False)
 
     def _add_log(self, log, participant_id):
+        """Add the behavioral log to the epochs as metadata."""
 
         if self.config.triggers_column is not None:
             log, self.missing_ixs = self._match_log_to_epochs(log)
@@ -76,6 +84,8 @@ class EpochingPipeline:
                                     value=participant_id)
 
     def _match_log_to_epochs(self, log, depth=10):
+        """Automatically match the behavioral log to the epochs in case of
+        missing EEG trials."""
 
         assert self.config.triggers_column in log.columns, \
             f'Column \'{self.config.triggers_column}\' is not in the log file'
@@ -118,6 +128,7 @@ class EpochingPipeline:
         return log, missing_ixs
 
     def _reject_bad_epochs(self):
+        """Reject "bad" epochs based on a peak-to-peak amplitude threshold."""
 
         reject_dict = {'eeg': self.config.reject * 1e-6}
         # TODO: Decide if this needs to be done on a copy of the data
@@ -126,13 +137,14 @@ class EpochingPipeline:
         self._get_bad_ixs()
 
     def _get_bad_ixs(self):
+        """Get the indices of the bad epochs."""
 
         drop_log = [elem for elem in self.epochs.drop_log
                     if 'IGNORED' not in elem]
         self.bad_ixs = [ix for ix, elem in enumerate(drop_log) if elem != ()]
 
     def detect_bad_channels(self, threshold=3.):
-        """Automatically detects "bad" channels based on their standard
+        """Automatically detect "bad" channels based on their standard
         deviation compared to all other channels."""
 
         ses = self.epochs.standard_error(by_event_type=True)
