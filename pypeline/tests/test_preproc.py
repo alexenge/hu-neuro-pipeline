@@ -30,8 +30,7 @@ def test_preproc_pipeline(sample_preproc_pipeline,
     assert isinstance(pipeline, PreprocPipeline)
     assert isinstance(pipeline.raw, BaseRaw)
     assert pipeline.raw.info['sfreq'] == 100.0
-    assert pipeline.raw.get_channel_types(['HEOG', 'VEOG']) == \
-        ['eog', 'eog']
+    assert pipeline.raw.get_channel_types(['HEOG', 'VEOG']) == ['eog', 'eog']
 
     # All EEG channels should have locations set via montage
     assert all(~np.isnan(ch['loc']).all() for ch in pipeline.raw.info['chs']

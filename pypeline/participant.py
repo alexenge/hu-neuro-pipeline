@@ -21,8 +21,7 @@ class ParticipantPipeline:
     def __init__(self, config: ParticipantConfig):
 
         self.input_pipeline = InputPipeline(config.input_config)
-        self.preproc_pipeline = \
-            PreprocPipeline(config.preproc_config)
+        self.preproc_pipeline = PreprocPipeline(config.preproc_config)
         self.epoching_pipeline = EpochingPipeline(config.epoching_config)
 
     def run(self):

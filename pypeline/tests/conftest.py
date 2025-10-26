@@ -107,8 +107,7 @@ def sample_preproc_pipeline_besa(sample_preproc_config_besa,
     """Creates and runs a PreprocPipeline for the sample data using BESA
     and manual bad channel selection."""
 
-    preproc_pipeline = \
-        PreprocPipeline(sample_preproc_config_besa)
+    preproc_pipeline = PreprocPipeline(sample_preproc_config_besa)
     raw = sample_input_pipeline_besa.raw
     besa = sample_input_pipeline_besa.besa
     preproc_pipeline.run(raw, besa)
