@@ -1,21 +1,29 @@
+from dataclasses import dataclass
+
 from .epoching import EpochingConfig, EpochingPipeline
 from .input import InputConfig, InputPipeline
 from .preprocessing import PreprocessingConfig, PreprocessingPipeline
+
+
+@dataclass
+class ParticipantConfig:
+    """The configuration for the participant pipeline."""
+
+    input_config: InputConfig = None
+    preprocessing_config: PreprocessingConfig = None
+    epoching_config: EpochingConfig = None
 
 
 class ParticipantPipeline:
     """The participant pipeline for processing the EEG data of a single
     participant."""
 
-    def __init__(self,
-                 input_config: InputConfig,
-                 preprocessing_config: PreprocessingConfig,
-                 epoching_config: EpochingConfig):
+    def __init__(self, config: ParticipantConfig):
 
-        self.input_pipeline = InputPipeline(input_config)
+        self.input_pipeline = InputPipeline(config.input_config)
         self.preprocessing_pipeline = \
-            PreprocessingPipeline(preprocessing_config)
-        self.epoching_pipeline = EpochingPipeline(epoching_config)
+            PreprocessingPipeline(config.preprocessing_config)
+        self.epoching_pipeline = EpochingPipeline(config.epoching_config)
 
     def run(self):
 

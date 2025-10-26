@@ -4,7 +4,7 @@ import pytest
 from ..datasets.ucap import get_ucap
 from ..epoching import EpochingConfig, EpochingPipeline
 from ..input import InputConfig, InputPipeline
-from ..participant import ParticipantPipeline
+from ..participant import ParticipantConfig, ParticipantPipeline
 from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
 
 
@@ -168,13 +168,21 @@ def sample_epoching_pipeline_match(sample_epoching_config_match,
 
 
 @pytest.fixture(scope='session')
-def sample_participant_pipeline(sample_input_config,
-                                sample_preprocessing_config,
-                                sample_epoching_config):
+def sample_participant_config(sample_input_config,
+                              sample_preprocessing_config,
+                              sample_epoching_config):
+    """Creates a ParticipantConfig for the sample data."""
 
-    participant_pipeline = ParticipantPipeline(sample_input_config,
-                                               sample_preprocessing_config,
-                                               sample_epoching_config)
+    return ParticipantConfig(input_config=sample_input_config,
+                             preprocessing_config=sample_preprocessing_config,
+                             epoching_config=sample_epoching_config)
+
+
+@pytest.fixture(scope='session')
+def sample_participant_pipeline(sample_participant_config):
+    """Creates and runs a ParticipantPipeline for the sample data."""
+
+    participant_pipeline = ParticipantPipeline(sample_participant_config)
     participant_pipeline.run()
 
     return participant_pipeline
