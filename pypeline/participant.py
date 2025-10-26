@@ -1,16 +1,23 @@
+from os import PathLike
+from typing import Optional, Union
+
+import pandas as pd
+
 from .epoching import EpochingConfig, EpochingPipeline
-from .input import InputConfig, InputPipeline
+from .input import InputPipeline
 from .preprocessing import PreprocessingConfig, PreprocessingPipeline
 
 
 class ParticipantPipeline:
 
     def __init__(self,
-                 input_config: InputConfig,
-                 preprocessing_config: PreprocessingConfig,
-                 epoching_config: EpochingConfig):
+                 raw_file: Union[str, PathLike, list[Union[str, PathLike]]],
+                 log_file: Optional[Union[str, PathLike, pd.DataFrame]] = None,
+                 besa_file: Optional[Union[str, PathLike]] = None,
+                 preprocessing_config: PreprocessingConfig = None,
+                 epoching_config: EpochingConfig = None):
 
-        self.input_pipeline = InputPipeline(input_config)
+        self.input_pipeline = InputPipeline(raw_file, log_file, besa_file)
         self.preprocessing_pipeline = \
             PreprocessingPipeline(preprocessing_config)
         self.epoching_pipeline = EpochingPipeline(epoching_config)

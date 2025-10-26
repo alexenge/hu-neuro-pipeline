@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
 from warnings import warn
@@ -11,28 +10,32 @@ from mne.io import BaseRaw
 from mne.preprocessing import ICA
 
 
-@dataclass
-class PreprocessingConfig:
-    downsample_sfreq: float = None
-    heog_channels: list[str] | str = 'auto'
-    veog_channels: list[str] | str = 'auto'
-    montage: str | PathLike = 'easycap-M1'
-    bad_channels: list[str] | str = 'auto'
-    ref_channels: list[str] | str = 'average'
-    ica_method: str = 'fastica'
-    ica_n_components: int | float = None
-    ica_eog_channels: list[str] | str = 'auto'
-    highpass_freq: float = 0.1
-    lowpass_freq: float = 40.0
-
-
 class PreprocessingPipeline:
 
-    def __init__(self, config):
+    def __init__(self,
+                 downsample_sfreq: float = None,
+                 heog_channels: list[str] | str = 'auto',
+                 veog_channels: list[str] | str = 'auto',
+                 montage: str | PathLike | DigMontage = 'easycap-M1',
+                 bad_channels: list[str] | str = 'auto',
+                 ref_channels: list[str] | str = 'average',
+                 ica_method: str = 'fastica',
+                 ica_n_components: int | float = None,
+                 ica_eog_channels: list[str] | str = 'auto',
+                 highpass_freq: float = 0.1,
+                 lowpass_freq: float = 40.0) -> None:
 
-        assert isinstance(config, PreprocessingConfig), \
-            "`config` must be an instance of the `PreprocessingConfig` class"
-        self.config = config
+        self.downsample_sfreq = downsample_sfreq
+        self.heog_channels = heog_channels
+        self.veog_channels = veog_channels
+        self.montage = montage
+        self.bad_channels = bad_channels
+        self.ref_channels = ref_channels
+        self.ica_method = ica_method
+        self.ica_n_components = ica_n_components
+        self.ica_eog_channels = ica_eog_channels
+        self.highpass_freq = highpass_freq
+        self.lowpass_freq = lowpass_freq
 
     def run(self, raw, besa=None):
 
@@ -40,20 +43,20 @@ class PreprocessingPipeline:
             "`raw` must be an instance of the `mne.io.BaseRaw` class"
         self.raw = raw.copy()
 
-        if self.config.downsample_sfreq is not None:
+        if self.downsample_sfreq is not None:
             self._resample()
 
-        if self.config.heog_channels is not None:
+        if self.heog_channels is not None:
             self._add_heog()
 
-        if self.config.veog_channels is not None:
+        if self.veog_channels is not None:
             self._add_veog()
 
         self._adjust_channel_types()
         self._apply_montage()
 
-        if self.config.bad_channels is not None:
-            if self.config.bad_channels != 'auto':
+        if self.bad_channels is not None:
+            if self.bad_channels != 'auto':
                 self._interpolate_bad_channels()
 
         self._set_eeg_reference()
@@ -64,39 +67,39 @@ class PreprocessingPipeline:
             self.besa = besa
             self._correct_besa()
 
-        if self.config.ica_method is not None:
-            if self.config.ica_eog_channels == 'auto':
+        if self.ica_method is not None:
+            if self.ica_eog_channels == 'auto':
                 self.ica_eog_channels = ['HEOG', 'VEOG']
             else:
-                self.ica_eog_channels = self.config.ica_eog_channels
+                self.ica_eog_channels = self.ica_eog_channels
             self._correct_ica()
 
-        if self.config.lowpass_freq is not None \
-                or self.config.highpass_freq is not None:
+        if self.lowpass_freq is not None \
+                or self.highpass_freq is not None:
             self._filter()
 
     def _resample(self):
         """Resample the raw data to the specified sampling frequency."""
 
-        self.raw.resample(self.config.downsample_sfreq)
+        self.raw.resample(self.downsample_sfreq)
 
     def _add_heog(self):
         """Add a bipolar HEOG channel to the raw data."""
 
-        if self.config.heog_channels == 'auto':
+        if self.heog_channels == 'auto':
             self.heog_channels = AUTO_HEOG_CHANNELS
         else:
-            self.heog_channels = self.config.heog_channels
+            self.heog_channels = self.heog_channels
 
         self._add_eog(self.heog_channels, name='HEOG')
 
     def _add_veog(self):
         """Add a bipolar VEOG channel to the raw data."""
 
-        if self.config.veog_channels == 'auto':
+        if self.veog_channels == 'auto':
             self.veog_channels = AUTO_VEOG_CHANNELS
         else:
-            self.veog_channels = self.config.veog_channels
+            self.veog_channels = self.veog_channels
 
         self._add_eog(self.veog_channels, name='VEOG')
 
@@ -120,13 +123,13 @@ class PreprocessingPipeline:
     def _apply_montage(self):
         """Apply a standard or custom montage to the raw data."""
 
-        if not isinstance(self.config.montage, DigMontage):
+        if not isinstance(self.montage, DigMontage):
 
-            if Path(self.config.montage).exists():
-                montage = read_custom_montage(self.config.montage)
+            if Path(self.montage).exists():
+                montage = read_custom_montage(self.montage)
 
-            elif self.config.montage in get_builtin_montages():
-                montage = make_standard_montage(self.config.montage)
+            elif self.montage in get_builtin_montages():
+                montage = make_standard_montage(self.montage)
 
             else:
                 raise ValueError('`montage` must be a valid file path, the '
@@ -134,7 +137,7 @@ class PreprocessingPipeline:
                                  '`DigMontage` object')
 
         else:
-            montage = self.config.montage
+            montage = self.montage
 
         self.raw.set_montage(montage, match_case=False, on_missing='warn')
 
@@ -155,13 +158,13 @@ class PreprocessingPipeline:
     def _interpolate_bad_channels(self):
         """Interpolate bad channels in the raw data."""
 
-        self.raw.info['bads'] += self.config.bad_channels
+        self.raw.info['bads'] += self.bad_channels
         self.raw.interpolate_bads()
 
     def _set_eeg_reference(self):
         """Set the EEG reference to the specified channels."""
 
-        self.raw.set_eeg_reference(self.config.ref_channels)
+        self.raw.set_eeg_reference(self.ref_channels)
 
     def _correct_besa(self):
         """Correct the raw data using the BESA/MSEC procedure."""
@@ -183,8 +186,8 @@ class PreprocessingPipeline:
     def _correct_ica(self, random_seed=1234):
         """Correct the raw data using independent component analysis (ICA)."""
 
-        n_components = self.config.ica_n_components
-        method = self.config.ica_method
+        n_components = self.ica_n_components
+        method = self.ica_method
         eog_channels = self.ica_eog_channels
 
         if n_components is not None:
@@ -209,8 +212,8 @@ class PreprocessingPipeline:
     def _filter(self):
         """Filter the raw data using a bandpass filter."""
 
-        self.raw.filter(self.config.highpass_freq,
-                        self.config.lowpass_freq,
+        self.raw.filter(self.highpass_freq,
+                        self.lowpass_freq,
                         n_jobs=1, picks='eeg')
 
 
