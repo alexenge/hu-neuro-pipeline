@@ -12,7 +12,7 @@ from mne.preprocessing import ICA
 
 
 @dataclass
-class PreprocessingConfig:
+class PreprocConfig:
     """The configuration for the preprocessing pipeline."""
 
     downsample_sfreq: float = None
@@ -28,13 +28,13 @@ class PreprocessingConfig:
     lowpass_freq: float = 40.0
 
 
-class PreprocessingPipeline:
+class PreprocPipeline:
     """The preprocessing pipeline for cleaning the raw EEG data."""
 
     def __init__(self, config):
 
-        assert isinstance(config, PreprocessingConfig), \
-            "`config` must be an instance of the `PreprocessingConfig` class"
+        assert isinstance(config, PreprocConfig), \
+            "`config` must be an instance of the `PreprocConfig` class"
         self.config = config
 
     def run(self, raw, besa=None):

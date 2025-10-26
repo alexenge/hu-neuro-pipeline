@@ -5,7 +5,7 @@ from ..datasets.ucap import get_ucap
 from ..epoching import EpochingConfig, EpochingPipeline
 from ..input import InputConfig, InputPipeline
 from ..participant import ParticipantConfig, ParticipantPipeline
-from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
+from ..preproc import PreprocConfig, PreprocPipeline
 
 
 @pytest.fixture(scope='session')
@@ -72,49 +72,48 @@ def sample_input_pipeline_combine(sample_input_config_combine):
 
 
 @pytest.fixture(scope='session')
-def sample_preprocessing_config():
-    """Creates a PreprocessingConfig for the sample data using ICA and
+def sample_preproc_config():
+    """Creates a PreprocConfig for the sample data using ICA and
     automatic bad channel detection."""
 
-    return PreprocessingConfig(downsample_sfreq=100, bad_channels='auto')
+    return PreprocConfig(downsample_sfreq=100, bad_channels='auto')
 
 
 @pytest.fixture(scope='session')
-def sample_preprocessing_config_besa():
-    """Creates a PreprocessingConfig for the sample data using BESA
+def sample_preproc_config_besa():
+    """Creates a PreprocConfig for the sample data using BESA
     and manual bad channel selection."""
 
-    return PreprocessingConfig(downsample_sfreq=100,
-                               bad_channels=['Fp1', 'PO8'],
-                               ica_method=None)
+    return PreprocConfig(downsample_sfreq=100,
+                         bad_channels=['Fp1', 'PO8'],
+                         ica_method=None)
 
 
 @pytest.fixture(scope='session')
-def sample_preprocessing_pipeline(sample_preprocessing_config,
-                                  sample_input_pipeline):
-    """Creates and runs a PreprocessingPipeline for the sample data using
+def sample_preproc_pipeline(sample_preproc_config, sample_input_pipeline):
+    """Creates and runs a PreprocPipeline for the sample data using
     ICA."""
 
-    preprocessing_pipeline = PreprocessingPipeline(sample_preprocessing_config)
+    preproc_pipeline = PreprocPipeline(sample_preproc_config)
     raw = sample_input_pipeline.raw
-    preprocessing_pipeline.run(raw)
+    preproc_pipeline.run(raw)
 
-    return preprocessing_pipeline
+    return preproc_pipeline
 
 
 @pytest.fixture(scope='session')
-def sample_preprocessing_pipeline_besa(sample_preprocessing_config_besa,
-                                       sample_input_pipeline_besa):
-    """Creates and runs a PreprocessingPipeline for the sample data using BESA
+def sample_preproc_pipeline_besa(sample_preproc_config_besa,
+                                 sample_input_pipeline_besa):
+    """Creates and runs a PreprocPipeline for the sample data using BESA
     and manual bad channel selection."""
 
-    preprocessing_pipeline = \
-        PreprocessingPipeline(sample_preprocessing_config_besa)
+    preproc_pipeline = \
+        PreprocPipeline(sample_preproc_config_besa)
     raw = sample_input_pipeline_besa.raw
     besa = sample_input_pipeline_besa.besa
-    preprocessing_pipeline.run(raw, besa)
+    preproc_pipeline.run(raw, besa)
 
-    return preprocessing_pipeline
+    return preproc_pipeline
 
 
 @pytest.fixture(scope='session')
@@ -137,11 +136,11 @@ def sample_epoching_config_match():
 @pytest.fixture(scope='session')
 def sample_epoching_pipeline(sample_epoching_config,
                              sample_input_pipeline,
-                             sample_preprocessing_pipeline):
+                             sample_preproc_pipeline):
     """Creates and runs an EpochingPipeline for the sample data."""
 
     epoching_pipeline = EpochingPipeline(sample_epoching_config)
-    raw = sample_preprocessing_pipeline.raw
+    raw = sample_preproc_pipeline.raw
     log = sample_input_pipeline.log
     epoching_pipeline.run(raw, log)
 
@@ -151,12 +150,12 @@ def sample_epoching_pipeline(sample_epoching_config,
 @pytest.fixture(scope='session')
 def sample_epoching_pipeline_match(sample_epoching_config_match,
                                    sample_input_pipeline,
-                                   sample_preprocessing_pipeline):
+                                   sample_preproc_pipeline):
     """Creates and runs an EpochingPipeline for the sample data."""
 
     epoching_pipeline = EpochingPipeline(sample_epoching_config_match)
     # Let's pretend some trials/triggers are missing from the EEG recording
-    raw_to_match = sample_preprocessing_pipeline.raw.copy()
+    raw_to_match = sample_preproc_pipeline.raw.copy()
     ixs = np.concatenate([np.arange(0, 1001),
                           np.arange(5000, 6001),
                           np.arange(10000, len(raw_to_match.annotations))])
@@ -169,12 +168,12 @@ def sample_epoching_pipeline_match(sample_epoching_config_match,
 
 @pytest.fixture(scope='session')
 def sample_participant_config(sample_input_config,
-                              sample_preprocessing_config,
+                              sample_preproc_config,
                               sample_epoching_config):
     """Creates a ParticipantConfig for the sample data."""
 
     return ParticipantConfig(input_config=sample_input_config,
-                             preprocessing_config=sample_preprocessing_config,
+                             preproc_config=sample_preproc_config,
                              epoching_config=sample_epoching_config)
 
 

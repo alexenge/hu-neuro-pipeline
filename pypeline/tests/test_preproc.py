@@ -1,15 +1,15 @@
 import numpy as np
 from mne.io import BaseRaw
 
-from ..preprocessing import PreprocessingConfig, PreprocessingPipeline
+from ..preproc import PreprocConfig, PreprocPipeline
 
 
-def test_preprocessing_config(sample_preprocessing_config):
-    """Tests the PreprocessingConfig class."""
+def test_preproc_config(sample_preproc_config):
+    """Tests the PreprocConfig class."""
 
-    config = sample_preprocessing_config
+    config = sample_preproc_config
 
-    assert isinstance(config, PreprocessingConfig)
+    assert isinstance(config, PreprocConfig)
     assert config.downsample_sfreq == 100
     assert config.heog_channels == 'auto'
     assert config.veog_channels == 'auto'
@@ -21,13 +21,13 @@ def test_preprocessing_config(sample_preprocessing_config):
     assert config.ica_eog_channels == 'auto'
 
 
-def test_preprocessing_pipeline(sample_preprocessing_pipeline,
-                                sample_input_pipeline):
-    """Tests the PreprocessingPipeline class with ICA correction."""
+def test_preproc_pipeline(sample_preproc_pipeline,
+                          sample_input_pipeline):
+    """Tests the PreprocPipeline class with ICA correction."""
 
-    pipeline = sample_preprocessing_pipeline
+    pipeline = sample_preproc_pipeline
 
-    assert isinstance(pipeline, PreprocessingPipeline)
+    assert isinstance(pipeline, PreprocPipeline)
     assert isinstance(pipeline.raw, BaseRaw)
     assert pipeline.raw.info['sfreq'] == 100.0
     assert pipeline.raw.get_channel_types(['HEOG', 'VEOG']) == \
@@ -50,11 +50,11 @@ def test_preprocessing_pipeline(sample_preprocessing_pipeline,
     assert std_input / std_preprocessed > 2.0
 
 
-def test_preprocessing_pipeline_besa(sample_preprocessing_pipeline_besa,
-                                     sample_input_pipeline_besa):
-    """Tests the PreprocessingPipeline class with BESA correction."""
+def test_preproc_pipeline_besa(sample_preproc_pipeline_besa,
+                               sample_input_pipeline_besa):
+    """Tests the PreprocPipeline class with BESA correction."""
 
-    pipeline = sample_preprocessing_pipeline_besa
+    pipeline = sample_preproc_pipeline_besa
 
     # Preprocessing should reduce the average standard deviation of the data
     std_input = sample_input_pipeline_besa.raw.get_data().std(axis=1).mean()
